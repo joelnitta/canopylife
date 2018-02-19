@@ -7,6 +7,15 @@
 # this function is to be used as input to sanitize.colnames.function of print.xtable
 custom_cols <- function (cols) {
   
+  # phylo signal columns
+  cols <- gsub ("^lambda$", "$\\\\lambda$", cols)
+  cols <- gsub ("^lambda\\.pval$", "$\\\\pval_\\\\lambda$", cols)
+  cols <- gsub ("^K$", "\\\\K", cols)
+  cols <- gsub ("^k\\.pval$", "$\\\\pval_\\\\K$", cols)
+  cols <- gsub ("^D$", "\\\\D", cols)
+  cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{BM}", cols)
+  cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{rnd}", cols)
+  
   # binary pglmm columns
   cols <- gsub ("^sigmasq$", "$\\\\sigma^2$", cols)
   cols <- gsub ("^sigmap$", "$\\\\pval(\\\\sigma^2=0)$", cols)
@@ -38,6 +47,14 @@ custom_cols <- function (cols) {
 custom_rows <- function (rows) {
   
   # traits
+  rows <- gsub ("habit", "Growth habit", rows)
+  rows <- gsub ("stipe", "Stipe length", rows)
+  rows <- gsub ("^length$", "Frond length", rows)
+  rows <- gsub ("width", "Frond width", rows)
+  rows <- gsub ("dissection", "Frond dissection", rows)
+  rows <- gsub ("pinna", "Pinna number", rows)
+  rows <- gsub ("sla", "Specific leaf area", rows)
+  rows <- gsub ("rhizome", "Rhizome \\\\diameter", rows)
   rows <- gsub ("gemmae", "Gemmae", rows)
   rows <- gsub ("glands", "Glands", rows)
   rows <- gsub ("hairs", "Hairs", rows)
@@ -65,10 +82,12 @@ custom_rows <- function (rows) {
 embolden_p <- function (df, col.select="pvalue", num.digits=3, sigval = 0.05) {
   for (i in 1:nrow(df)) {
     for (j in 1:ncol(df)) {
-      if (df[i,j] == 0 && colnames(df)[j] %in% col.select) {
-        df[i,j] <- paste0("\\textbf{\\textless", 0.1^num.digits, "}")
-      } else if (df[i,j] < sigval && colnames(df)[j] %in% col.select) {
-        df[i,j] <- paste0("\\textbf{", df[i,j], "}")
+      if(!is.na(df[i,j])) {
+        if (df[i,j] == 0 && colnames(df)[j] %in% col.select) {
+          df[i,j] <- paste0("\\textbf{\\textless", 0.1^num.digits, "}")
+        } else if (df[i,j] < sigval && colnames(df)[j] %in% col.select) {
+          df[i,j] <- paste0("\\textbf{", df[i,j], "}")
+        }
       }
     }
   }
