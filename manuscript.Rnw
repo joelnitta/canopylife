@@ -1,0 +1,133 @@
+% run this from the command line to compile: Rscript -e "library(knitr); knit('./manuscript.Rnw')"
+\documentclass{article}
+
+\usepackage[margin=1in]{geometry}
+
+\input{newphyt_style}
+
+\begin{document}
+
+\title{Life in the canopy: Phylogenetic filtering and morphological canalization in epiphytic ferns}
+
+\author{Joel H. Nitta}
+%\author[2]{James E. Watkins, Jr.}
+%\author[3]{Ravahere Taputuarai}
+%\author[1]{Charles C. Davis}
+
+%\affil[1]{Department of Organismic and Evolutionary Biology and Harvard University Herbaria, Harvard University, Cambridge, MA 02138, U.S.A.}
+%\affil[2]{Department of Biology, Colgate University, 13 Oak Drive, Hamilton, New York 13346, U.S.A.}
+%\affil[3]{Association Te Rau Ati Ati a Tau a Hiti Noa Tu, B.P. 11553, Mahina, Tahiti, French Polynesia}
+
+\maketitle
+
+% setup knitr
+<<setup, echo=FALSE>>=
+library(knitr)
+# set global chunk options
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(message=FALSE)
+opts_chunk$set(warning=FALSE)
+# set working directory
+setwd(here::here())
+@
+
+% run analyses silently so results don't print to screen
+<<run_analyses, results="hide">>=
+source(file = "bin/phylosig.R")
+source(file = "bin/microclimate.R")
+source(file = "bin/binaryPGLMM.R")
+@ 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Summary %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\clearpage
+
+% Set left justification (better conversion to Word than default full justification)
+\raggedright
+
+% Set indent to about 3 characters throughout
+\setlength{\parindent}{3ex}
+
+\section*{Summary}
+
+\begin{itemize}
+\item The appearance of angiosperm-dominated forests in the Cretaceous and early Cenozoic had a profound effect on terrestrial biota by creating novel ecological niches. The diversity of modern fern lineages are thought to be a response to angiosperm dominance, radiating both in the canopy and on the forest floor. Despite the significance of epiphytic growth for fern evolution, however, few studies have investigated traits related to epiphytism in ferns while accounting for phylogeny.
+\item We investigated evolutionary patterns in traits related to epiphytic growth at the species and community level using a phylogeny including representatives of multiple epiphytic fern radiations on the island of Moorea, French Polynesia. 
+\item We observed phylogenetic conservatism in multiple traits related to epiphytic growth in fern sporophytes and gametophytes. Epiphytes had significantly shorter stipes, smaller rhizomes, and a higher frequency of non-cordate gametophytes while accounting for phylogeny. Epiphytic communities were clustered both phylogenetically and functionally, consistent with the hypothesis that the canopy acts as a filter due to its low humidity. 
+\item Our results provide an important phylogenetic perspective on the role of functional traits in ferns, and pave the way for more detailed studies examining how niche space is filled within terrestrial and epiphytic habitats.
+\end{itemize}
+
+\textbf{Key words:} community ecology, functional traits, gametophyte, Moorea, Society Islands, Tahiti.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+<<setup_tables>>=
+library(xtable)
+# load latex functions
+source("bin/latex_functions.R")
+@
+
+<<print_phylosig, results="asis">>=
+phylosig.results[sapply(phylosig.results, class) == "numeric" ] <- sapply(phylosig.results[sapply(phylosig.results, class) == "numeric" ], round, 3)
+phylosig.results <- embolden_p(phylosig.results, col.select=c("k.pval","lambda.pval", "prob_random", "prob_brownian"))
+  
+print(xtable(phylosig.results,
+             label="tab:phylosig",
+             caption="Results of phylogenetic signal analysis for growth habit and related traits. Values of $\\lambda$ or $\\K >= 1$ indicate that traits are evolving according to Brownian Motion (BM); values of $\\lambda$ or \\K near 0 indicate random distribution of traits. For the \\D statistic, values of 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution."),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Figures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+\begin{figure}[ht]
+  \includegraphics[scale=1]{microclimate.pdf}
+  \caption{Climate}
+  \label{fig:climate}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix Tables %%%%%%%%%%%%%%%%%%%%%%
+% Add S to table number and reset counter
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{table}{0}
+
+<<climate_ancova, results="asis">>=
+ancova.results[sapply(ancova.results, class) == "numeric" ] <- sapply(ancova.results[sapply(ancova.results, class) == "numeric" ], round, 3)
+ancova.results <- embolden_p(ancova.results, col.select=c("pval.intercept","pval.slope"))
+print(xtable(ancova.results,
+             label="apptab:climate_model",
+             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+
+<<climate_slopes, results="asis">>=
+slopes.results[sapply(slopes.results, class) == "numeric" ] <- sapply(slopes.results[sapply(slopes.results, class) == "numeric" ], round, 3)
+print(xtable(slopes.results,
+             caption=NULL),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      include.rownames=TRUE)
+@
+
+<<binaryPGLMM, results="asis">>=
+bpglmm.results <- as.data.frame(sapply(bpglmm.results, round, 3))
+bpglmm.results <- embolden_p(bpglmm.results, col.select=c("sigmap","pvalue"))
+print(xtable(bpglmm.results,
+             label="apptab:PGLMM_gameto",
+             caption="Phylogenetic generalized linear mixed models (PGLMMs) for binary (gametophyte) traits traits related to epiphytic growth. The response of each trait was modeled against growth habit using a PGLMM with phylogeny as a random effect. $\\sigma^2$ is a measure of phylogenetic signal calculated from the variance in the PGLMM. Significance of $\\sigma^2$ calculated using an approximate likelihood ratio test between a model with the observed value of $\\sigma^2$ against a null model with $\\sigma^2 = 0$. Traits significantly correlated with growth habit in bold."),
+      sanitize.text.function = function (x) {x},
+      sanitize.colnames.function = custom_cols,
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+
+\end{document}
