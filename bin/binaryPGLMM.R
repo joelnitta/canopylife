@@ -1,4 +1,4 @@
-# binaryPGLMM
+# binaryPGLMM.R
 # Construct binary phylogenetic generalized linear mixed models (PGLMMs) 
 # for binary (gametophyte) traits related to epiphytic growth
 

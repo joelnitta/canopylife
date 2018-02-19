@@ -1,3 +1,4 @@
+# microclimate.R
 # run ANCOVA comparing epiphytic and terrestrial RH, temp on Moorea
 # plot grand mean values with modeled fit
 

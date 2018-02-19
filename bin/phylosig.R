@@ -1,13 +1,19 @@
+# phylosig.R
 # Analyze phylogenetic signal in traits
 # Use Blomberg's K and Pagel's lambda for quantitative traits
 # and Fritz and Purvis' D for qualitative (binary) traits
 
+# load packages
 library(phytools) #phylosig
 library(caper) #phylo.d
 library(plyr) # relevel
 library(mooreaferns)
 
+# load packages
 setwd(here::here())
+
+# DON'T clear workspace using rm(list=ls())
+# this script needs to be run twice in manuscript.Rnw, preserving output
 
 ################################################
 ### load, clean data for quantitative traits ###
