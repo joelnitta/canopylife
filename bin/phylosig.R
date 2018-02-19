@@ -167,24 +167,25 @@ d.summary <- d.summary[,c("trait", "D")]
 ### combine the results ###
 ###########################
 
-phylosig.summary <- merge(l.summary, k.summary, by="trait")
-phylosig.summary <- merge(phylosig.summary, d.summary, by="trait", all=TRUE)
+phylosig.results <- merge(l.summary, k.summary, by="trait")
+phylosig.results <- merge(phylosig.results, d.summary, by="trait", all=TRUE)
 
 # adjust classes of columns, rename and reorder traits for manuscript
-phylosig.summary[c("lambda", "K", "D")] <- sapply(phylosig.summary[c("lambda", "K", "D")], as.character)
+phylosig.results[c("lambda", "K", "D")] <- sapply(phylosig.results[c("lambda", "K", "D")], as.character)
 
-phylosig.summary$trait <- factor(phylosig.summary$trait, levels = c("habit", "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome", "gemmae", "glands", "hairs", "morph_binary") )
+phylosig.results$trait <- factor(phylosig.results$trait, levels = c("habit", "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome", "gemmae", "glands", "hairs", "morph_binary") )
 
-phylosig.summary$trait <- mapvalues(phylosig.summary$trait, 
+phylosig.results$trait <- mapvalues(phylosig.results$trait, 
                                   c("dissection", "length", "pinna", "rhizome", "sla", "stipe", "width", "gemmae", "glands", "habit", "hairs", "morph_binary"),
                                   c("Frond Dissection", "Frond Length", "Pinna Number", "Rhizome Diam.", "SLA", "Stipe Length", "Frond Width", "Gemmae", "Glands", "Growth Habit", "Hairs", "Morphotype"))
 
-rownames(phylosig.summary) <- phylosig.summary$trait
-phylosig.summary <- phylosig.summary[levels(phylosig.summary$trait), ]
+rownames(phylosig.results) <- phylosig.results$trait
+phylosig.results <- phylosig.results[levels(phylosig.results$trait), ]
 
-phylosig.summary$trait <- NULL
+phylosig.results$trait <- NULL
 
-rm(l.summary, k.summary, d.summary, traits)
+# clean up workspace (reserve "result" in object name only for final results objects to keep)
+rm(list=ls()[grep("result", ls(), invert=TRUE)])
 
 # uncomment to write out results as csv
-# write.csv(phylosig.summary, "table2_phylogenetic_signal.csv")
+# write.csv(phylosig.results, "table2_phylogenetic_signal.csv")

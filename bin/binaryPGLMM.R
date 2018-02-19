@@ -10,9 +10,6 @@ library(mooreaferns)
 # set working directory
 setwd(here::here())
 
-# clear workspace
-rm(list=ls())
-
 ########################################################
 ### load, clean data for qualitative (binary) traits ###
 ########################################################
@@ -53,10 +50,10 @@ for (i in 1:length(traits.test)) {
 
 # run binary PGLMM as loop
 model <- list()
-results <- list()
+parameters <- list()
 for (i in 1:length(traits.test)) {
   model[[i]] <- binaryPGLMM(formula(paste(traits.test[i], "~ habit", sep="")), phy=phy.list[[i]], data=traits.df[[i]] )
-  results[[i]] <- list(sigmasq = model[[i]]$s2, 
+  parameters[[i]] <- list(sigmasq = model[[i]]$s2, 
                        sigmap = model[[i]]$P.H0.s2, 
                        coeff = model[[i]]$B[2,1], 
                        se=model[[i]]$B.se[2,1], 
@@ -64,19 +61,15 @@ for (i in 1:length(traits.test)) {
                        pvalue = model[[i]]$B.pvalue[2,1])
   }
 
-# compile results into single table
-bpglmm.summary <- do.call(rbind.data.frame, results)
-
-### format for manuscipt
-# round to 3 digits
-bpglmm.summary <- as.data.frame(sapply(bpglmm.summary, round, 3))
+# compile model parameters/results of interest into final results dataframe
+bpglmm.results <- do.call(rbind.data.frame, parameters)
+bpglmm.results$trait <- traits.test
 
 # rename rows as traits and reorder alphabetically
-bpglmm.summary$trait <- traits.test
-bpglmm.summary$trait <- factor(bpglmm.summary$trait, levels = sort(bpglmm.summary$trait))
-bpglmm.summary$trait <- mapvalues(bpglmm.summary$trait, 
-                                    c("glands", "hairs", "gemmae", "morph_binary"),
-                                    c("Glands", "Hairs", "Gemmae", "Morphotype"))
-rownames(bpglmm.summary) <- bpglmm.summary$trait
-bpglmm.summary <- bpglmm.summary[levels(bpglmm.summary$trait), ]
-bpglmm.summary$trait <- NULL
+bpglmm.results$trait <- factor(bpglmm.results$trait, levels = sort(bpglmm.results$trait))
+rownames(bpglmm.results) <- bpglmm.results$trait
+bpglmm.results <- bpglmm.results[levels(bpglmm.results$trait), ]
+bpglmm.results$trait <- NULL
+
+# clean up workspace (reserve "result" in object name only for final results objects to keep)
+rm(list=ls()[grep("result", ls(), invert=TRUE)])

@@ -12,9 +12,6 @@ library(plyr) #ddply
 # set working directory
 setwd(here::here())
 
-# clear workspace
-rm(list=ls())
-
 ################
 ### Get Data ###
 ################
@@ -92,34 +89,34 @@ df.intercept <- NULL
 pval.slope <- NULL
 f.slope  <- NULL
 df.slope <- NULL
-out1 <- NULL
-out2 <- NULL
-results <- NULL
+model1 <- NULL
+model2 <- NULL
+parameters <- NULL
 
 # run the ANCOVA for each response variable
 for (i in 1:length(resp_vars)) {
   # test for different intercepts (but constant slope)
-  out1 <- summary(lm(formula(paste(resp_vars[i], " ~ habit + el", sep="")), data=daily_values))
+  model1 <- summary(lm(formula(paste(resp_vars[i], " ~ habit + el", sep="")), data=daily_values))
   # pval for different intercepts between epi and ter (with same slope)
-  pval.intercept <- out1$coefficients[2,4]
-  f.intercept <- out1$fstatistic[1]
-  df.intercept <- paste(out1$fstatistic[2], out1$fstatistic[3], sep=", ")
+  pval.intercept <- model1$coefficients[2,4]
+  f.intercept <- model1$fstatistic[1]
+  df.intercept <- paste(model1$fstatistic[2], model1$fstatistic[3], sep=", ")
   
   # test for different slopes (and different intercepts)
-  out2 <- summary(lm(formula(paste(resp_vars[i], " ~ habit * el", sep="")), data=daily_values))
-  pval.slope <- out2$coefficients[4,4]
-  f.slope <- out2$fstatistic[1]
-  df.slope <- paste(out2$fstatistic[2], out2$fstatistic[3], sep=", ")
+  model2 <- summary(lm(formula(paste(resp_vars[i], " ~ habit * el", sep="")), data=daily_values))
+  pval.slope <- model2$coefficients[4,4]
+  f.slope <- model2$fstatistic[1]
+  df.slope <- paste(model2$fstatistic[2], model2$fstatistic[3], sep=", ")
   
-  results[[i]] <- list(df.intercept = df.intercept, f.intercept = f.intercept, pval.intercept = pval.intercept, 
+  parameters[[i]] <- list(df.intercept = df.intercept, f.intercept = f.intercept, pval.intercept = pval.intercept, 
                        df.slope = df.slope, f.slope = f.slope, pval.slope = pval.slope)
 }
 
 # combine results into single dataframe
-ancova_results <- do.call(rbind.data.frame, results)
-rownames(ancova_results) <- resp_vars
+ancova.results <- as.data.frame(dplyr::bind_rows(parameters))
+rownames(ancova.results) <- resp_vars
 
-# write.csv(results, file=make_filename("climate_ancova", ".csv", date=TRUE))
+# write.csv(ancova.results, file="climate_ancova.csv")
 
 ###############################################
 #### Get slopes and intercepts for plotting ###
@@ -128,9 +125,9 @@ rownames(ancova_results) <- resp_vars
 # Note that this calculates interaction effects for all variables
 # (even though min temp isn't significant)
 
-mod<- NULL
-mod2 <- NULL
-out <- NULL
+model1<- NULL
+model2 <- NULL
+parameters <- NULL
 slope.epi <- list()
 inter.epi <- list()
 slope.ter <- list()
@@ -138,19 +135,19 @@ inter.ter<- list()
 r.squared <- list()
 pval <- list ()
 for (i in 1:length(resp_vars)) {
-  mod <- lm(formula(paste(resp_vars[i], " ~ habit/el + 0", sep="")), data=daily_values)
-  mod2 <- lm(formula(paste(resp_vars[i], " ~ habit*el", sep="")), data=daily_values)
-  out <- coef(mod)
-  slope.epi[[i]] <- out[3]
-  inter.epi[[i]] <- out[1]
-  slope.ter[[i]] <- out[4]
-  inter.ter[[i]] <- out[2]
-  r.squared[[i]] <- summary(mod2)$r.squared
-  pval[[i]] <- summary(mod2)$coefficients[4,4]
+  model1 <- lm(formula(paste(resp_vars[i], " ~ habit/el + 0", sep="")), data=daily_values)
+  model2 <- lm(formula(paste(resp_vars[i], " ~ habit*el", sep="")), data=daily_values)
+  parameters <- coef(model1)
+  slope.epi[[i]] <- parameters[3]
+  inter.epi[[i]] <- parameters[1]
+  slope.ter[[i]] <- parameters[4]
+  inter.ter[[i]] <- parameters[2]
+  r.squared[[i]] <- summary(model2)$r.squared
+  pval[[i]] <- summary(model2)$coefficients[4,4]
 }
 
-slopes <- data.frame(r.squared = unlist(r.squared), slope.epi = unlist(slope.epi), inter.epi=unlist(inter.epi), slope.ter=unlist(slope.ter), inter.ter=unlist(inter.ter), pval = unlist(pval))
-rownames(slopes) <- resp_vars
+slopes.results <- data.frame(r.squared = unlist(r.squared), slope.epi = unlist(slope.epi), inter.epi=unlist(inter.epi), slope.ter=unlist(slope.ter), inter.ter=unlist(inter.ter), pval = unlist(pval))
+rownames(slopes.results) <- resp_vars
 
 ################
 ### Plotting ### 
@@ -180,18 +177,25 @@ grand_means$habit <- factor(grand_means$habit, levels =c("ter", "epi"))
 levels(grand_means$habit) <- c("terrestrial", "epiphytic")
 
 # make each figure part
-partA <- make_scatter_plot (grand_means, slopes, "el", "mean_temp", "Mean Temp. (C)")
+partA <- make_scatter_plot (grand_means, slopes.results, "el", "mean_temp", "Mean Temp. (C)")
 partA <- partA + blank_x.theme
 
-partB <- make_scatter_plot (grand_means, slopes, "el", "sd_temp", "SD Temp. (C)")
+partB <- make_scatter_plot (grand_means, slopes.results, "el", "sd_temp", "SD Temp. (C)")
 partB <- partB + blank_x.theme
 
-partC <- make_scatter_plot (grand_means, slopes, "el", "min_RH", "Minimum RH (%)")
+partC <- make_scatter_plot (grand_means, slopes.results, "el", "min_RH", "Minimum RH (%)")
 
-partD <- make_scatter_plot (grand_means, slopes, "el", "sd_RH", "SD RH (%)")
+partD <- make_scatter_plot (grand_means, slopes.results, "el", "sd_RH", "SD RH (%)")
 
 # assemble the figure parts together
 climate_plot <- plot_grid(partA, partB, partC, partD, nrow=2, ncol=2, labels = NULL, align = "hv")
 
 # write out pdf
 save_plot("microclimate.pdf", climate_plot, base_height = 4, base_width = 6)
+
+# don't need pvalue and rsquared in slopes.results anymore (already in ancova.results or plot)
+slopes.results$pval <- NULL
+slopes.results$r.squared <- NULL
+
+# clean up workspace (reserve "result" in object name only for final results objects to keep)
+rm(list=ls()[grep("result", ls(), invert=TRUE)])
