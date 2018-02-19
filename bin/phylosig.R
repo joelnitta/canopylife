@@ -12,9 +12,6 @@ library(mooreaferns)
 # load packages
 setwd(here::here())
 
-# DON'T clear workspace using rm(list=ls())
-# this script needs to be run twice in manuscript.Rnw, preserving output
-
 ################################################
 ### load, clean data for quantitative traits ###
 ################################################
@@ -41,65 +38,46 @@ traits <- traits[phy$tip.label,]
 ###########################################
 
 # use phytools phylosig function to calculate K, lambda for each trait and summarize in result table
+# phylosig will automatically drop species missing trait data
 
-# k
+# Blomberg's K
 trait.test <- NULL
-result <- NULL
-k.row.result <- NULL
+trait.name <- NULL
+phylosig.out <- NULL
+kval <- NULL
 pval <- NULL
-asterisk <- NULL
+parameters <- NULL
 for (i in 1:ncol(traits)) {
   trait.test <- traits[,i]
   names(trait.test) <- rownames(traits)
-  result[[i]] <- phylosig(phy, trait.test, method = "K", test = TRUE)
-  pval[i] <- result[[i]]$P
-  
-  if (is.na(pval[i])) {
-    asterisk[i] <- ""
-  } else if (pval[i] > 0 & pval[i] < 0.0005) {
-    asterisk[i] <- "***"
-  } else if (pval[i] >= 0.0005 & pval[i] < 0.005) {
-    asterisk[i] <- "**"
-  } else if (pval[i] >= 0.005 & pval[i] < 0.05) { 
-    asterisk[i] <- "*"
-  } else if (pval[i] >= 0.05) { 
-    asterisk[i] <- " (NS)"
-  }
-  
-  k.row.result[[i]] <- c(colnames(traits)[i], paste (round(result[[i]]$K, digits = 2), asterisk[i], sep=""))
+  phylosig.out <- phylosig(phy, trait.test, method = "K", test = TRUE)
+  kval <- phylosig.out$K
+  pval <- phylosig.out$P
+  trait.name <- colnames(traits)[i]
+  parameters[[i]] <- list(trait=trait.name, K = kval, k.pval = pval)
 }
 
-k.summary <-as.data.frame(t(as.data.frame(k.row.result)), row.names = NULL)
-rownames(k.summary) <- NULL
-colnames(k.summary) <- c("trait", "K")
+k.summary <- as.data.frame(dplyr::bind_rows(parameters))
 
-# lambda
+
+# Pagel's lambda
 trait.test <- NULL
-result <- NULL
-l.row.result <- NULL
+trait.name <- NULL
+phylosig.out <- NULL
+lambda <- NULL
 pval <- NULL
-asterisk <- NULL
+parameters <- NULL
 for (i in 1:ncol(traits)) {
   trait.test <- traits[,i]
   names(trait.test) <- rownames(traits)
-  result[[i]] <- phylosig(phy, trait.test, method = "lambda", test = TRUE)
-  pval[i] <- result[[i]]$P
-  if (is.na(pval[i])) {
-    asterisk[i] <- ""
-  } else if (pval[i] > 0 & pval[i] < 0.0005) {
-    asterisk[i] <- "***"
-  } else if (pval[i] >= 0.0005 & pval[i] < 0.005) {
-    asterisk[i] <- "**"
-  } else if (pval[i] >= 0.005 & pval[i] < 0.05) { 
-    asterisk[i] <- "*"
-  } else if (pval[i] >= 0.05) { 
-    asterisk[i] <- " (NS)"
-  }
-  l.row.result[[i]] <- c(colnames(traits)[i], paste (round(result[[i]]$lambda, digits = 2), asterisk[i], sep=""))
+  phylosig.out <- phylosig(phy, trait.test, method = "lambda", test = TRUE)
+  lambda <- phylosig.out$lambda
+  pval <- phylosig.out$P
+  trait.name <- colnames(traits)[i]
+  parameters[[i]] <- list(trait=trait.name, lambda = lambda, lambda.pval = pval)
 }
-l.summary <-as.data.frame(t(as.data.frame(l.row.result)))
-rownames(l.summary) <- NULL
-colnames(l.summary) <- c("trait", "lambda")
+
+lambda.summary <- as.data.frame(dplyr::bind_rows(parameters))
 
 ########################################################
 ### load, clean data for qualitative (binary) traits ###
@@ -135,57 +113,42 @@ gameto.comp <- comparative.data(phy, traits, "species")
 
 # run phylo.d
 # would rather do this as a loop but can't figure out how to specify variable
-result.list <- list()
+parameters <- list()
 
-result <- phylo.d(gameto.comp, binvar=habit)
-result.list[[1]] <- c(result$binvar, result$DEstimate, result$Pval1, result$Pval0)
-names(result.list[[1]]) <- c("trait", "Estimated_D", "prob_random", "prob_brownian")
+phylo.d.out <- phylo.d(gameto.comp, binvar=habit)
+parameters[[1]] <- list(phylo.d.out$binvar, phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+names(parameters[[1]]) <- c("trait", "D", "prob_random", "prob_brownian")
 
-result <- phylo.d(gameto.comp, binvar=glands)
-result.list[[2]] <- c(result$binvar, result$DEstimate, result$Pval1, result$Pval0)
-names(result.list[[2]]) <- c("trait", "Estimated_D", "prob_random", "prob_brownian")
+phylo.d.out <- phylo.d(gameto.comp, binvar=glands)
+parameters[[2]] <- list(phylo.d.out$binvar, phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+names(parameters[[2]]) <- c("trait", "D", "prob_random", "prob_brownian")
 
-result <- phylo.d(gameto.comp, binvar=hairs)
-result.list[[3]] <- c(result$binvar, result$DEstimate, result$Pval1, result$Pval0)
-names(result.list[[3]]) <- c("trait", "Estimated_D", "prob_random", "prob_brownian")
+phylo.d.out <- phylo.d(gameto.comp, binvar=hairs)
+parameters[[3]] <- list(phylo.d.out$binvar, phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+names(parameters[[3]]) <- c("trait", "D", "prob_random", "prob_brownian")
 
-result <- phylo.d(gameto.comp, binvar=gemmae)
-result.list[[4]] <- c(result$binvar, result$DEstimate, result$Pval1, result$Pval0)
-names(result.list[[4]]) <- c("trait", "Estimated_D", "prob_random", "prob_brownian")
+phylo.d.out <- phylo.d(gameto.comp, binvar=gemmae)
+parameters[[4]] <- list(phylo.d.out$binvar, phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+names(parameters[[4]]) <- c("trait", "D", "prob_random", "prob_brownian")
 
-result <- phylo.d(gameto.comp, binvar=morph_binary)
-result.list[[5]] <- c(result$binvar, result$DEstimate, result$Pval1, result$Pval0)
-names(result.list[[5]]) <- c("trait", "Estimated_D", "prob_random", "prob_brownian")
+phylo.d.out <- phylo.d(gameto.comp, binvar=morph_binary)
+parameters[[5]] <- list(phylo.d.out$binvar, phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+names(parameters[[5]]) <- c("trait", "D", "prob_random", "prob_brownian")
 
-d.summary <- as.data.frame(t(as.data.frame(result.list)))
-rownames(d.summary) <- NULL
-
-d.summary$D <- paste(round(as.numeric(as.character(d.summary$Estimated_D)), 2), " (Prnd = ", d.summary$prob_random, ", Pbm = ", d.summary$prob_brownian, ")", sep="")
-d.summary <- d.summary[,c("trait", "D")]
+d.summary <- as.data.frame(dplyr::bind_rows(parameters))
 
 ###########################
 ### combine the results ###
 ###########################
 
-phylosig.results <- merge(l.summary, k.summary, by="trait")
+phylosig.results <- merge(lambda.summary, k.summary, by="trait")
 phylosig.results <- merge(phylosig.results, d.summary, by="trait", all=TRUE)
 
-# adjust classes of columns, rename and reorder traits for manuscript
-phylosig.results[c("lambda", "K", "D")] <- sapply(phylosig.results[c("lambda", "K", "D")], as.character)
-
+# rename rows as traits and reorder
 phylosig.results$trait <- factor(phylosig.results$trait, levels = c("habit", "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome", "gemmae", "glands", "hairs", "morph_binary") )
-
-phylosig.results$trait <- mapvalues(phylosig.results$trait, 
-                                  c("dissection", "length", "pinna", "rhizome", "sla", "stipe", "width", "gemmae", "glands", "habit", "hairs", "morph_binary"),
-                                  c("Frond Dissection", "Frond Length", "Pinna Number", "Rhizome Diam.", "SLA", "Stipe Length", "Frond Width", "Gemmae", "Glands", "Growth Habit", "Hairs", "Morphotype"))
-
 rownames(phylosig.results) <- phylosig.results$trait
 phylosig.results <- phylosig.results[levels(phylosig.results$trait), ]
-
 phylosig.results$trait <- NULL
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)
 rm(list=ls()[grep("result", ls(), invert=TRUE)])
-
-# uncomment to write out results as csv
-# write.csv(phylosig.results, "table2_phylogenetic_signal.csv")
