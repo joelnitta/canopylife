@@ -26,14 +26,14 @@ traits$cordate_morph[which(traits$morphotype == "cordate")] <- 1
 
 # make growth habit into a binary category: 0 is not epiphtyic (ie, terrestrial), 1 is epiphytic
 # growth habit is already a 2-level factor, so just convert to numeric and adjust
-traits$habit <- as.numeric(traits$habit)
-traits$habit <- traits$habit-1
+traits$epiphytic <- as.numeric(traits$habit)
+traits$epiphytic <- traits$epiphytic-1
 
 ### make caper tree/trait datasets silently dropping missing data
 # some of the traits include NAs.
 # for phylo.d, need to have matching tree and trait data with all NAs removed
 # don't do comparative.data on all the traits together, or species missing data for ANY trait will get dropped
-habit.comp  <- comparative.data(phy, traits[,c("species", "habit")], "species", na.omit=TRUE)
+epi.comp  <- comparative.data(phy, traits[,c("species", "epiphytic")], "species", na.omit=TRUE)
 gemmae.comp <- comparative.data(phy, traits[,c("species", "gemmae")], "species", na.omit=TRUE)
 glands.comp <- comparative.data(phy, traits[,c("species", "glands")], "species", na.omit=TRUE)
 hairs.comp  <- comparative.data(phy, traits[,c("species", "hairs")], "species", na.omit=TRUE)
@@ -49,7 +49,7 @@ morph.comp  <- comparative.data(phy, traits[,c("species", "cordate_morph")], "sp
 parameters <- list()
 
 # run phylo.d on a single trait, store output as first item in list
-phylo.d.out <- phylo.d(habit.comp, binvar=habit)
+phylo.d.out <- phylo.d(epi.comp, binvar=epiphytic)
 parameters[[1]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
 
 # repeat for other traits
@@ -72,7 +72,7 @@ binary_phylosig.results <- as.data.frame(dplyr::bind_rows(parameters))
 # name rows by trait and reorder
 rownames(binary_phylosig.results) <- binary_phylosig.results$trait
 binary_phylosig.results$trait <- NULL
-binary_phylosig.results <- binary_phylosig.results[c("habit", "gemmae", "glands", "hairs"), ]
+binary_phylosig.results <- binary_phylosig.results[c("epiphytic", "gemmae", "glands", "hairs", "cordate_morph"), ]
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)
 rm(list=ls()[grep("result", ls(), invert=TRUE)])
