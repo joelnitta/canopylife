@@ -26,8 +26,8 @@ custom_cols <- function (cols) {
   cols <- gsub ("^num_present$", "Number of presences", cols)
   cols <- gsub ("^num_absent$", "Number of absences", cols)
   cols <- gsub ("^D$", "\\\\D", cols)
-  cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{BM}", cols)
-  cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{rnd}", cols)
+  cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{rnd}", cols)
+  cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{BM}", cols)
   
   # binary pglmm columns
   cols <- gsub ("^sigmasq$", "$\\\\sigma^2$", cols)
