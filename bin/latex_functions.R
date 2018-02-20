@@ -2,16 +2,29 @@
 # various functions to assist with latex formatting when compiling 
 # manuscript.tex and manuscript.pdf from manuscript.Rnw
 
+# round_df
+# round the numbers in a dataframe to the specified number of digits
+round_df <- function (df, digits=3) {
+
+  df[sapply(df, class) == "numeric" ] <- sapply(df[sapply(df, class) == "numeric" ], round, digits)
+
+  return(df)
+}
+
 # custom_cols
 # add latex formatting / rename column names used in this manuscript
 # this function is to be used as input to sanitize.colnames.function of print.xtable
 custom_cols <- function (cols) {
   
-  # phylo signal columns
+  # continuous phylogenetic signal
   cols <- gsub ("^lambda$", "$\\\\lambda$", cols)
   cols <- gsub ("^lambda\\.pval$", "$\\\\pval_\\\\lambda$", cols)
   cols <- gsub ("^K$", "\\\\K", cols)
   cols <- gsub ("^k\\.pval$", "$\\\\pval_\\\\K$", cols)
+  
+  # binary phylogenetic signal
+  cols <- gsub ("^num_present$", "Number of presences", cols)
+  cols <- gsub ("^num_absent$", "Number of absences", cols)
   cols <- gsub ("^D$", "\\\\D", cols)
   cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{BM}", cols)
   cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{rnd}", cols)
