@@ -201,7 +201,7 @@ part_label <- add_part_label(ancova.results , "(a)")
 
 print(xtable(ancova.results,
              label="supp_table:climate_model",
-             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. (a) Model statistics and (b) coefficients. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
+             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. (a) Model statistics and (b) estimates. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
       sanitize.colnames.function = custom_cols,
       sanitize.rownames.function = custom_rows,
       sanitize.text.function = function (x) {x},
