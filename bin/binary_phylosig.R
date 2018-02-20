@@ -66,7 +66,7 @@ phylo.d.out <- phylo.d(morph.comp, binvar=cordate_morph)
 parameters[[5]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
 
 # combine results into single dataframe
-parameters <- lapply(parameters, setNames, c("trait", "numb_present", "num_absent", "D", "prob_random", "prob_brownian"))
+parameters <- lapply(parameters, setNames, c("trait", "num_present", "num_absent", "D", "prob_random", "prob_brownian"))
 binary_phylosig.results <- as.data.frame(dplyr::bind_rows(parameters))
 
 # name rows by trait and reorder
