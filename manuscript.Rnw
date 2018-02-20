@@ -1,8 +1,17 @@
 % run this from the command line to compile: Rscript -e "library(knitr); knit('./manuscript.Rnw')"
 \documentclass{article}
 
+% Set margins
 \usepackage[margin=1in]{geometry}
 
+% Set line spacing to 1.5
+\usepackage{setspace}
+\onehalfspace
+
+% Enable bibliography
+\usepackage{natbib} 
+
+% Set unit and abbreviations formatting
 \input{newphyt_style}
 
 \begin{document}
@@ -20,20 +29,19 @@
 
 \maketitle
 
-% setup knitr
 <<setup, echo=FALSE>>=
+# setup knitr
 library(knitr)
-# set global chunk options
 opts_chunk$set(echo=FALSE)
 opts_chunk$set(message=FALSE)
 opts_chunk$set(warning=FALSE)
-# set working directory
-setwd(here::here())
 @
 
-% run analyses silently so results don't print to screen
 <<run_analyses, results="hide">>=
-source(file = "bin/phylosig.R")
+# set working directory, run all analyses
+setwd(here::here())
+source(file = "bin/cont_phylosig.R")
+source(file = "bin/binary_phylosig.R")
 source(file = "bin/microclimate.R")
 source(file = "bin/binaryPGLMM.R")
 @ 
@@ -59,27 +67,115 @@ source(file = "bin/binaryPGLMM.R")
 
 \textbf{Key words:} community ecology, functional traits, gametophyte, Moorea, Society Islands, Tahiti.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Introduction %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
+
+\section*{Introduction}
+
+The widespread appearance of angiosperm-dominated forests in the late Cretaceous and early Cenozoic had an immense effect on terrestrial ecosystems \citep{Niklas1983, Kenrick1997a,Lloyd2008}. The heterogeneous niche space of the angiosperm canopy comprising stratified light and humidity levels and a range of substrates for growth became rapidly filled by a variety of epiphytic plants, including mosses \citep{Fiz-Palacios2011}, leafy liverworts \citep{Feldberg2014}, orchids \citep{Givnish2015b}, bromeliads \citep{Givnish2014a}, and ferns \citep{Schneider2004d}. Diversification rates in some of these groups may have further increased during the Paleocene / Eocene thermal maximum, a period of globally warmer and wetter climates that may have enabled movement into the canopy \citep{Schuettpelz2009,Testo2016a}. The transition to epiphytic growth has been particularly important for fern diversity, with ca. 29\% of all species exhibiting this growth form relative to ca. 10\% across all vascular plants \citep{Kress1986}. Major transitions to epiphytism occurred at least five times during the evolution of ferns, each followed by diversification during the late Cretaceous or early Cenozoic \citep{Schuettpelz2009,WatkinsJr.2012}. Recent studies \citep{Sundue2015,Testo2016a,Lehtonen2017} have failed to find evidence of rapid diversification characteristic of adaptive radiations associated with epiphytic growth in ferns, but have confirmed gradually increasing rates of diversification in Polypodiaceae \citep{Sundue2015} and generally support the significance of epiphytic growth as a key innovation for extant fern diversity (\citealt{Testo2016a,WatkinsJr.2012}; but see \citealt{Lehtonen2017}).
+
+Despite the ecological opportunities afforded by life in the canopy, including escape from disturbance \citep{Page2002} and abundant light for photosynthesis \citep{Benzing2000}, epiphytes must contend with greater abiotic stress in the form of increased evaporation and more extreme oscillations in temperature relative to terrestrial plants \citep{Zotz2001,Lowman2012}. Associated with this change, epiphytic ferns have evolved various morphological adaptations that minimize water loss from their leaves, including shorter stipes \citep{WatkinsJr.2010}, thicker leaves \citep{Kluge2007,WatkinsJr.2007b}, and protection with scales or hairs \citep{WatkinsJr.2006b}. Some lineages have specialized adaptations to epiphytic growth, such as humus-collection (\eg, \textit{Asplenium}; \citealt{Benzing1990}, \textit{Drynaria}; \citealt{Janssen2005}), vegetative desiccation tolerance (\eg, Hymenophyllaceae; \citealt{Shreve1911}, \textit{Pleopeltis}; \citealt{Pessin1925}), CAM photosynthesis \citep[\eg, \textit{Pyrrosia},][]{Wong1976}, and symbiotic relationships with ants (\eg, \textit{Antrophyum}; \citealt{WatkinsJr.2008}, \textit{Lecanopteris}; \citealt{Gay1993a}). Many of these same adaptations are found in epiphytic seed plants. However, the evolution of epiphytisim in ferns was much more complex given that ferns rely on a free-living gametophyte. The fern gametophyte is anatomically simple, and differs from the sporophyte markedly in anatomy, morphology, and physiology. Such differences create a system of “dual ecology” where selective pressures acting on one stage are very different than those acting on another. For example, desiccation tolerance, a key trait for non-vascular plants living in water-limited environments, is prevalent in gametophytes of multiple lineages of epiphytic ferns, but is quite rare in sporophytes \citep{WatkinsJr.2007}. Despite the evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no studies to our knowledge have analyzed the evolution of such traits across the fern evolutionary tree including both life stages and representatives of all five Cretaceous epiphytic radiations \sensu \cite{Schuettpelz2009}.
+
+The majority of studies investigating adaptations to epiphytism have utilized a univariate, cross-species approach, analyzing traits individually between terrestrial and epiphytic species \citep[\eg,][]{WatkinsJr.2007b,WatkinsJr.2010}. However, given the evolutionary history of ferns with multiple radiations within the epiphytic niche \citep{Schuettpelz2009}, it is likely that traits related to epiphytism carry at least some degree of phylogenetic signal (\ie, the tendency for closely related species to resemble each other). Therefore, a comparative approach incorporating phylogenetic relationships (and if possible, branch lengths) is appropriate \citep{Felsenstein1985}. However, such approaches have only recently been applied to studies of epiphytism in ferns, and at relatively limited phylogenetic scales \citep[\eg][]{Zhang2014b,Sundue2015}. 
+
+Furthermore, it should be possible to gain greater insight into the selective strength exerted by the epiphytic habitat by utilizing a community-based approach. If the relatively harsh abiotic conditions of the canopy act as a filter, we would expect to find lower functional richness at a community level, which should also result in decreased phylogenetic diversity under a scenario of phylogenetic trait conservatism \citep{Webb2002}. However, the relative strength of this environmental filter may also depend on overall abiotic conditions; for example, relative humidity and temperature are expected to vary not only between epiphytic and terrestrial environments, but also with elevation \citep{Cardelus2006}. Elevation is a strong predictor of fern species richness, with maximal richness tending to occur at mid-elevations, especially in the tropics \citep{Kessler2011a}. Functional diversity is also correlated with species richness (as few species tend to have exactly the same functional traits; \citealt{Schleuter2010}). Thus, environmental variation along elevational gradients is expected to impact the functional, phylogenetic, and species diversity of epiphytic and terrestrial fern communities.
+
+Here, we investigate the evolution and role in community assembly of functional traits related to epiphytic growth in fern gametophytes and sporophytes on Moorea, French Polynesia. Moorea is an isolated tropical oceanic island with a high phylogenetic diversity of ferns distributed over a steep elevational gradient, making it ideal for a community phylogenetic analysis of functional traits. Specifically, we test the following hypotheses related to epiphytic growth in ferns:
+
+\begin{enumerate}
+\item The epiphytic environment experiences greater extremes in temperature and humidity than the terrestrial environment, thus acting as a filter on the traits of plants that grow there.
+\item Epiphytic ferns have converged upon similar morphologies multiple times in both sporophyte and gametophyte phases.
+\item Epiphytic fern communities have lower functional and phylogenetic diversity relative to terrestrial communities due to environmental filtering, and the strength of this filtering varies with changes in environment.
+\end{enumerate}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Acknowledgements %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section*{Acknowledgements}
+
+We thank members of the Davis Lab, N. Michele Holbrook, and Jonathan Losos for helpful discussion and comments on drafts. Suzanne Vinette, Saad Amer, Tristan Wang, and Tohei Theophilus helped with community surveys and measurement of traits. Staff at the University of California, Berkeley Richard B. Gump South Pacific Research Station, Moorea, French Polynesia, in particular Valentine Brotherson, Hinano Teavai-Murphy, Frank Murphy, and Neil Davies, provided support with obtaining research and collection permits, laboratory space, and logistics. Funding provided in part by National Science Foundation (Doctoral Dissertation Improvement Grant DEB-1311169 to JHN and CCD), Setup Funds from Harvard University to CCD, the American Society of Plant Taxonomists (Research Grant for Graduate Students to JHN), the Garden Club of America (Award in Tropical Botany to JHN), the Harvard University Herbaria (Fernald Fieldwork Fellowship to JHN), the Society of Systematic Biologists (Graduate Student Research Award to JHN), and the Systematics Association (Systematics Research Fund to JHN). 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Author Contribution Statement %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section*{Author Contributions}
+
+J.H.N. conceived and carried out the study. R.T. collected data. J.H.N. performed the analyses. J.H.N., J.E.W., and C.C.D. wrote the manuscript.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% set style
+\bibliographystyle{newphyt}
+
+% change the bibliography title
+\renewcommand\refname{References}
+
+% insert bibliography
+\bibliography{references}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 <<setup_tables>>=
 library(xtable)
-# load latex functions
 source("bin/latex_functions.R")
 @
 
-<<print_phylosig, results="asis">>=
-phylosig.results[sapply(phylosig.results, class) == "numeric" ] <- sapply(phylosig.results[sapply(phylosig.results, class) == "numeric" ], round, 3)
-phylosig.results <- embolden_p(phylosig.results, col.select=c("k.pval","lambda.pval", "prob_random", "prob_brownian"))
+% Table 1
+\clearpage
+
+\begin{table}[ht]
+\centering
+\caption{Traits used in this study. Noncordate gametophyte morphotypes include ribbon, strap and filamentous.}
+\begin{tabular}{ p{0.3\textwidth} p{0.2\textwidth} p{0.4\textwidth} }
+\hline
+ & Data type (unit) & Ecological Significance \\
+\hline
+Sporophyte Traits & & \\
+\hspace{3ex}Stipe Length  & Continuous (\si{\centi\meter})  & Shorter stipes compensate for low conductivity \citep{WatkinsJr.2010} \\
+\hspace{3ex}Frond Length  & Continuous (\si{\centi\meter})  & Smaller leaf size reduces evapotranspiration \citep{Vogel1968} \\
+\hspace{3ex}Frond Width  & Continuous (\si{\centi\meter})  & Smaller leaf size reduces evapotranspiration \citep{Vogel1968} \\
+\hspace{3ex}Rhizome Diameter  & Continuous (\si{\centi\meter})  & Scales with overall plant size (Creese et al. 2011) \\
+\hspace{3ex}Frond Dissection  & Ordinal  & Simple laminae reduce evapotranspiration (Kluge and Kessler 2007) \\
+\hspace{3ex}Pinna number & Integer & Scales with overall plant size (Creese et al. 2011) \\
+\hspace{3ex}Specific Leaf Area & Continuous (\si{\square\meter\per\kilo\gram}) & Species in more stressful environments invest in thicker leaves \citep{Wright2004a} \\
+Gametophyte Traits & & \\
+\hspace{3ex}Morphotype & Binary (cordate vs. noncordate) & Noncordate morphology reduces drying rates by holding external water in crevices and folds \citep{WatkinsJr.2007,Pittermann2013} \\
+\hspace{3ex}Gemmae & Binary (present/absent) & Enable asexual reproduction, thereby overcoming local extinction due to drying \citep{Farrar2008} \\
+\hspace{3ex}Glands & Binary (present/absent) & Lipophilic exudates produced by glands may reduce transpiration rates \citep{Wollenweber2000} \\
+\hspace{3ex}Hairs & Binary (present/absent) & Hairs reduce drying rates by holding external water and increasing boundary layer thickness \citep{WatkinsJr.2007} \\
+\hline
+\end{tabular}
+\label{table:traits}
+\end{table}
+
+% Table 2
+\clearpage
+
+<<cont_phylosig, results="asis">>=
+cont_phylosig.results <- round_df(cont_phylosig.results)
+cont_phylosig.results <- embolden_p(cont_phylosig.results, col.select=c("k.pval","lambda.pval"))
+part_label <- add_part_label(cont_phylosig.results, "(a)")
   
-print(xtable(phylosig.results,
-             label="tab:phylosig",
-             caption="Results of phylogenetic signal analysis for growth habit and related traits. Values of $\\lambda$ or $\\K >= 1$ indicate that traits are evolving according to Brownian Motion (BM); values of $\\lambda$ or \\K near 0 indicate random distribution of traits. For the \\D statistic, values of 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution."),
+print(xtable(cont_phylosig.results,
+             label="table:phylosig",
+             caption="Phylogenetic signal in traits. (a) Continuous traits and (b) binary traits. Values of $\\lambda$ or $\\K >= 1$ indicate that traits are evolving according to Brownian Motion (BM); values of $\\lambda$ or \\K near 0 indicate random distribution of traits. For the \\D statistic, values of 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution."),
       sanitize.colnames.function = custom_cols,
       sanitize.rownames.function = custom_rows,
       sanitize.text.function = function (x) {x},
       include.rownames=TRUE,
+      add.to.row = part_label,
       caption.placement="top")
+@
+
+<<binary_phylosig, results="asis">>=
+binary_phylosig.results <- round_df(binary_phylosig.results)
+binary_phylosig.results <- embolden_p(binary_phylosig.results, col.select=c("prob_random","prob_browian"))
+part_label <- add_part_label(binary_phylosig.results, "(b)")
+  
+print(xtable(binary_phylosig.results,
+             caption=NULL),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,      
+      add.to.row = part_label)
 @
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Figures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -96,33 +192,43 @@ print(xtable(phylosig.results,
 \renewcommand{\thetable}{S\arabic{table}}
 \setcounter{table}{0}
 
+% Table S1
+\clearpage
 <<climate_ancova, results="asis">>=
-ancova.results[sapply(ancova.results, class) == "numeric" ] <- sapply(ancova.results[sapply(ancova.results, class) == "numeric" ], round, 3)
+ancova.results <- round_df(ancova.results)
 ancova.results <- embolden_p(ancova.results, col.select=c("pval.intercept","pval.slope"))
+part_label <- add_part_label(ancova.results , "(a)")
+
 print(xtable(ancova.results,
-             label="apptab:climate_model",
-             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
+             label="supp_table:climate_model",
+             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. (a) Model statistics and (b) coefficients. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
       sanitize.colnames.function = custom_cols,
       sanitize.rownames.function = custom_rows,
       sanitize.text.function = function (x) {x},
       include.rownames=TRUE,
+      add.to.row = part_label,
       caption.placement="top")
 @
 
 <<climate_slopes, results="asis">>=
-slopes.results[sapply(slopes.results, class) == "numeric" ] <- sapply(slopes.results[sapply(slopes.results, class) == "numeric" ], round, 3)
+slopes.results <- round_df(slopes.results)
+part_label <- add_part_label(slopes.results , "(b)")
+
 print(xtable(slopes.results,
              caption=NULL),
       sanitize.colnames.function = custom_cols,
       sanitize.rownames.function = custom_rows,
+      add.to.row = part_label,
       include.rownames=TRUE)
 @
 
+% Table S2
+\clearpage
 <<binaryPGLMM, results="asis">>=
-bpglmm.results <- as.data.frame(sapply(bpglmm.results, round, 3))
+bpglmm.results <- round_df(bpglmm.results)
 bpglmm.results <- embolden_p(bpglmm.results, col.select=c("sigmap","pvalue"))
 print(xtable(bpglmm.results,
-             label="apptab:PGLMM_gameto",
+             label="supp_table:PGLMM_gameto",
              caption="Phylogenetic generalized linear mixed models (PGLMMs) for binary (gametophyte) traits traits related to epiphytic growth. The response of each trait was modeled against growth habit using a PGLMM with phylogeny as a random effect. $\\sigma^2$ is a measure of phylogenetic signal calculated from the variance in the PGLMM. Significance of $\\sigma^2$ calculated using an approximate likelihood ratio test between a model with the observed value of $\\sigma^2$ against a null model with $\\sigma^2 = 0$. Traits significantly correlated with growth habit in bold."),
       sanitize.text.function = function (x) {x},
       sanitize.colnames.function = custom_cols,

@@ -2,6 +2,21 @@
 # various functions to assist with latex formatting when compiling 
 # manuscript.tex and manuscript.pdf from manuscript.Rnw
 
+# add_part_label
+# add a table part label on top of a table (as an extra row)
+# df is dataframe to be printed using xtable
+# labeltext is text to be printed
+add_part_label <- function (df, labeltext) {
+
+  part_label <- list ()
+  part_label$pos <- list()
+  part_label$pos[[1]] <- c(-1) # position label at top of table
+  part_label$command <- c(paste0("\\multicolumn{", ncol(df)+1, "}{l}{", labeltext, "} \\\\ \n"))
+  
+  return(part_label)
+  
+}
+
 # round_df
 # round the numbers in a dataframe to the specified number of digits
 round_df <- function (df, digits=3) {
@@ -60,7 +75,7 @@ custom_cols <- function (cols) {
 custom_rows <- function (rows) {
   
   # traits
-  rows <- gsub ("habit", "Growth habit", rows)
+  # continuous
   rows <- gsub ("stipe", "Stipe length", rows)
   rows <- gsub ("^length$", "Frond length", rows)
   rows <- gsub ("width", "Frond width", rows)
@@ -68,10 +83,13 @@ custom_rows <- function (rows) {
   rows <- gsub ("pinna", "Pinna number", rows)
   rows <- gsub ("sla", "Specific leaf area", rows)
   rows <- gsub ("rhizome", "Rhizome \\\\diameter", rows)
+  # binary
+  rows <- gsub ("habit", "Growth habit", rows)
+  rows <- gsub ("epiphytic", "Epiphytic growth", rows)
   rows <- gsub ("gemmae", "Gemmae", rows)
   rows <- gsub ("glands", "Glands", rows)
   rows <- gsub ("hairs", "Hairs", rows)
-  rows <- gsub ("morph_binary", "Morphotype", rows)
+  rows <- gsub ("cordate_morph", "Cordate morphotype", rows)
   
   # microclimate
   rows <- gsub ("max_temp", "Max. temperature", rows)
@@ -85,7 +103,6 @@ custom_rows <- function (rows) {
   
   return(rows)
 }
-
 
 # embolden_p
 # makes p-values less than chosen significance level bold in results table
