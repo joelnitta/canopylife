@@ -46,7 +46,7 @@ custom_cols <- function (cols) {
   
   # binary pglmm columns
   cols <- gsub ("^sigmasq$", "$\\\\sigma^2$", cols)
-  cols <- gsub ("^sigmap$", "$\\\\pval(\\\\sigma^2=0)$", cols)
+  cols <- gsub ("^sigmap$", "\\\\pval($\\\\sigma^2=0$)", cols)
   cols <- gsub ("^coeff$", "Coefficient", cols)
   cols <- gsub ("^se$", "\\\\stderr", cols)
   cols <- gsub ("^zscore$", "\\\\zval-score", cols)
@@ -90,6 +90,7 @@ custom_rows <- function (rows) {
   rows <- gsub ("glands", "Glands", rows)
   rows <- gsub ("hairs", "Hairs", rows)
   rows <- gsub ("cordate_morph", "Cordate morphotype", rows)
+  rows <- gsub ("morph_binary", "Morphotype", rows)
   
   # microclimate
   rows <- gsub ("max_temp", "Max. temperature", rows)
