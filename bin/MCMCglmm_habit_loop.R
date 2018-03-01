@@ -1,13 +1,24 @@
-# run general linear mixed model including phylogeny to test quant traits vs. growth habit
+# MCMCglmm_habit_loop
 
+# Runs general linear mixed model including phylogeny to test for effect of growth habit 
+# on quantitative trait values. Does this in a loop, one trait at a time. 
+
+# However, for 5 million generations (the number used in the MS), that takes ca. 14 hrs and
+# may crash if run on a personal PC. So this script is not run here but provided only for 
+# reference. The results presented in the MS are from running the analyses of each trait in 
+# parallel on a cluster.
+
+# load packages
 library(ape)
 library(MCMCglmm)
 library(phytools)
 library(phangorn)
+library(mooreaferns)
 
+# set working directory
 setwd(here::here())
 
-# define function to extract p value table from summary as dataframe, append model name
+# define function to extract p value table from model summary as dataframe, and append model name
 summary_to_csv <- function (model) {
   results.df <- as.data.frame(summary(model)$solutions)
   results.df$model <- paste(model$Fixed$formula[2], model$Fixed$formula[1], model$Fixed$formula[3], sep = " ")
@@ -17,9 +28,9 @@ summary_to_csv <- function (model) {
   return(results.df)
 }
 
-#######################
-### set input files ###
-#######################
+#################
+### load data ###
+#################
 
 # load tree
 phy <- mooreaferns::fern_tree
@@ -35,9 +46,9 @@ phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
 # get traits in same order as tips
 traits <- traits[phy$tip.label,]
 
-###################
-### set up data for MCMCglmm 
-##################
+################################
+### set up data for MCMCglmm ###  
+################################
 
 # define traits to test
 sporo_traits <-c("stipe", "length", "width", "rhizome", "dissection", "pinna", "sla")
@@ -56,7 +67,7 @@ cor(as.vector(cophenetic(phy)[tips,tips]),
 phy <- phy.nnls
 
 # MCMCglmm can't take NA values
-# make list of trait dataframes and phylogenies which only include species with no NA values for the traits I'm going to test
+# make list of trait dataframes and phylogenies which only include species with no NA values for the traits that will be tested
 traits.list <- list()
 phy.list <- list()
 inv.phy <- list()
@@ -68,25 +79,31 @@ for (i in 1:length(traits.test)) {
   traits.list[[i]]$species <- rownames(traits.list[[i]])
 }
 
-# run MCMCglmm
+####################
+### run MCMCglmm ###
+####################
+# see http://www.mpcm-evolution.org/practice/online-practical-material-chapter-11/chapter-11-1-simple-model-mcmcglmm
 
 # set number of generations
-# 10,000 thousand takes about 13 sec
-# 5,000,000 takes about 2 hr? (recommended number in tutorial)
-# http://www.mpcm-evolution.org/practice/online-practical-material-chapter-11/chapter-11-1-simple-model-mcmcglmm
-# set to 600,000 (about 1 hr) to test on cluster
-# num <- 600000
-num <- 10000
+# 10,000 takes about 13 sec per trait
+# 600,000 takes about 10-12 min per trait, so about 1 hr total
+# 5,000,000 takes about 2 hr per trait (and may crash if runs out of memory)
+
+# 600,000 finishes relatively quickly and provides similar results as final MS
+num <- 600000
 
 # define new prior list. Need one G for each random effect, one R for each fixed effect
 my.prior<-list(G=list(G1=list(V=1,nu=0.02)),
                R=list(R1=list(V=1,nu=0.02)))
 
+# set up loop
 model <- list()
 ptm <- NULL
 results <- list()
 time <- list()
 summary <- list()
+
+# run loop (not including growth habit, the last of the traits in traits.test)
 for (i in 1:(length(traits.test)-1) ) {
   ptm <- proc.time()
   model[[i]] <-MCMCglmm(formula(paste(traits.test[i], "~ habit"), sep=""), 
@@ -96,11 +113,11 @@ for (i in 1:(length(traits.test)-1) ) {
                         prior=my.prior, 
                         data=traits.list[[i]], 
                         nitt=num,burnin=1000,thin=500)
-  # print processing time
+  # print processing time for this trait
   time[[i]] <- (proc.time() - ptm)[3]
-  # print summary
+  # print summary for this trait
   summary[[i]] <- summary(model[[i]])
-  # print traces
+  # print traces for this trait
   pdf(file=paste("mcmcglmm_trace_", traits.test[i], ".pdf",sep=""))
     plot(model[[i]]$Sol, auto.layout=F)
   dev.off()
@@ -118,4 +135,4 @@ time
 summary
 
 # save final results df to CSV
-# write.csv (final.df, file=paste("bin/",Sys.Date(),"/","mcmcglmm_habit_results.csv",sep=""))
+write.csv (final.df, file=paste("mcmcglmm_habit_all_results_",Sys.Date(),".csv",sep=""))
