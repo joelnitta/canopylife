@@ -1,0 +1,148 @@
+\documentclass{article}
+\date{}
+
+% Set margins
+\usepackage[margin=1in]{geometry}
+
+% Set line spacing to 1.5
+\usepackage{setspace}
+\onehalfspace
+
+% Enable bibliography
+\usepackage{natbib} 
+
+% Set unit and abbreviations formatting
+\input{newphyt_style}
+
+\begin{document}
+
+<<setup, echo=FALSE>>=
+# setup knitr
+library(knitr)
+opts_chunk$set(echo=FALSE)
+opts_chunk$set(message=FALSE)
+opts_chunk$set(warning=FALSE)
+@
+
+<<setup_tables>>=
+library(xtable)
+source("bin/latex_functions.R")
+# load results objects produced by running manuscript.Rnw
+load("results.RData")
+@
+
+\noindent \textbf{\textit{New Phytologist} Supporting Information} \\
+\\
+\noindent Article title: Life in the canopy: phylogenetic filtering and morphological canalization in epiphytic ferns \\
+\noindent Authors: Joel H. Nitta, James E. Watkins, Jr., Ravahere Taputuarai and Charles C. Davis \\
+\noindent Article acceptance date: someday soon \\
+\\
+\noindent The following Supporting Information is available for this article: \\
+
+\noindent \textbf{Methods S1} We performed alternative tests for correlation of growth habit with functional traits using phylogenetic generalized linear mixed models (PGLMMs). Models were constructed with each trait as the response variable in turn dependent on growth habit, with phylogeny as a random effect. For binary (gametophyte) traits we used the \function{binaryGLMM} function in the \package{ape} package \citep{Paradis2004}. For quantitative (sporophyte) traits, we used the \function{MCMCglmm} function in the R package of the same name \citep{Hadfield2010}. Priors were set to an inverse-Gamma distribution with shape and scale parameters equal to \num{0.01} \citep{Hadfield2010a}. The MCMC algorithm was run for \num{5000000} iterations with a burnin of \num{1000} and thinning every \num{500} iterations.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Tables %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% Add S to table number and reset counter
+\renewcommand{\thetable}{S\arabic{table}}
+\setcounter{table}{0}
+
+% Table S1 (supp_table:PGLMM_sporo)
+<<PGLMM, results="asis">>=
+# read in results from running PGLMM on cluster, clean up dataframe
+pglmm.results <- read.csv("data/mcmcglmm_habit_all_results.csv")
+pglmm.results <- pglmm.results[pglmm.results$Effect == "habit", ]
+pglmm.results$Effect <- NULL
+pglmm.results$Model <- gsub(" ~ habit", "", pglmm.results$Model)
+pglmm.results$Model <- tolower(pglmm.results$Model)
+rownames(pglmm.results) <- pglmm.results$Model
+pglmm.results$Model <- NULL
+
+# add latex formatting
+pglmm.results <- round_df(pglmm.results)
+pglmm.results <- embolden_p(pglmm.results, col.select="P.value")
+
+print(xtable(pglmm.results,
+             label="supp_table:PGLMM_sporo",
+             caption="Phylogenetic generalized linear mixed models (PGLMMs) for quantitative (sporophyte) traits related to epiphytic growth. The response of each trait was modeled against growth habit using a PGLMM with phylogeny as a random effect. \\pval for traits significantly correlated with growth habit in bold."),
+      sanitize.text.function = function (x) {x},
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      include.rownames=TRUE,
+      caption.placement="top")
+
+@
+
+% Table S2
+\clearpage
+<<binaryPGLMM, results="asis">>=
+bpglmm.results <- round_df(bpglmm.results)
+bpglmm.results <- embolden_p(bpglmm.results, col.select=c("sigmap","pvalue"))
+
+print(xtable(bpglmm.results,
+             label="supp_table:PGLMM_gameto",
+             caption="Phylogenetic generalized linear mixed models (PGLMMs) for binary (gametophyte) traits traits related to epiphytic growth. The response of each trait was modeled against growth habit using a PGLMM with phylogeny as a random effect. $\\sigma^2$ is a measure of phylogenetic signal calculated from the variance in the PGLMM. Significance of $\\sigma^2$ calculated using an approximate likelihood ratio test between a model with the observed value of $\\sigma^2$ against a null model with $\\sigma^2 = 0$. Statistically significant values in bold."),
+      sanitize.text.function = function (x) {x},
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+
+% Table S3
+\clearpage
+<<climate_ancova, results="asis">>=
+ancova.results <- round_df(ancova.results)
+ancova.results <- embolden_p(ancova.results, col.select=c("pval.intercept","pval.slope"))
+part_label <- add_part_label(ancova.results , "(a)")
+
+print(xtable(ancova.results,
+             label="supp_table:climate_model",
+             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. (a) Model statistics and (b) estimates. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,
+      add.to.row = part_label,
+      caption.placement="top")
+@
+
+<<climate_slopes, results="asis">>=
+slopes.results <- round_df(slopes.results)
+part_label <- add_part_label(slopes.results , "(b)")
+
+print(xtable(slopes.results,
+             caption=NULL),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      add.to.row = part_label,
+      include.rownames=TRUE)
+@
+
+% Table S4
+\clearpage
+<<trait_pca, results="asis">>=
+PCA.results <- round_df(PCA.results)
+PCA.results <- embolden_top_values(PCA.results, row.select = c("dissection", "length", "pinna", "rhizome", "sla", "stipe", "width"))
+
+print(xtable(PCA.results,
+             label="supp_table:PCA",
+             caption="PC loadings for principal components analyses (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. For each PC, values of the three traits with the greatest loadings (absolute values) shown in bold."),
+      sanitize.text.function = function (x) {x},
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+%%%%%%%%%%%%%%%%%%%%%%%%%%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% set style
+\bibliographystyle{newphyt}
+
+% change the bibliography title
+\renewcommand\refname{References}
+
+% insert bibliography
+\bibliography{references}
+
+\end{document}

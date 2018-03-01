@@ -38,12 +38,14 @@ opts_chunk$set(warning=FALSE)
 @
 
 <<run_analyses, results="hide">>=
-# set working directory, run all analyses
+# set working directory, run all analyses, save results objects
 setwd(here::here())
 source(file = "bin/cont_phylosig.R")
 source(file = "bin/binary_phylosig.R")
 source(file = "bin/microclimate.R")
 source(file = "bin/binaryPGLMM.R")
+source(file = "bin/trait_PCA.R")
+save(list = ls(all = TRUE), file= "results.RData")
 @ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Summary %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -155,7 +157,7 @@ part_label <- add_part_label(cont_phylosig.results, "(a)")
   
 print(xtable(cont_phylosig.results,
              label="table:phylosig",
-             caption="Phylogenetic signal in traits. (a) Continuous traits and (b) binary traits. Values of $\\lambda$ or $\\K >= 1$ indicate that traits are evolving according to Brownian Motion (BM); values of $\\lambda$ or \\K near 0 indicate random distribution of traits. For the \\D statistic, values of 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution."),
+             caption="Phylogenetic signal in traits. (a) Continuous traits and (b) binary traits. Values of $\\lambda$ or $\\K >= 1$ indicate that traits are evolving according to Brownian Motion (BM); values of $\\lambda$ or \\K near 0 indicate random distribution of traits. For \\D, values of 0 (or less) indicate evolution according to (or more conserved than) BM; values near 1 indicate random trait distribution. \\pval\\textsubscript{Rnd}, result of testing that observed \\D is significantly different from 1; \\pval\\textsubscript{BM}, result of testing that observed \\D is significantly different from 0."),
       sanitize.colnames.function = custom_cols,
       sanitize.rownames.function = custom_rows,
       sanitize.text.function = function (x) {x},
@@ -186,54 +188,5 @@ print(xtable(binary_phylosig.results,
   \caption{Climate}
   \label{fig:climate}
 \end{figure}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%% Appendix Tables %%%%%%%%%%%%%%%%%%%%%%
-% Add S to table number and reset counter
-\renewcommand{\thetable}{S\arabic{table}}
-\setcounter{table}{0}
-
-% Table S1
-\clearpage
-<<climate_ancova, results="asis">>=
-ancova.results <- round_df(ancova.results)
-ancova.results <- embolden_p(ancova.results, col.select=c("pval.intercept","pval.slope"))
-part_label <- add_part_label(ancova.results , "(a)")
-
-print(xtable(ancova.results,
-             label="supp_table:climate_model",
-             caption="Results of analysis of covariance (ANCOVA) for microclimatic variables between epiphytic and terrestrial plots along an elevational gradient on Moorea, French Polynesia. (a) Model statistics and (b) estimates. Linear models were constructed for each response variable with growth habit as a fixed effect and elevation as a co-factor. Differences in intercept between growth habits was tested with models of the form $y \\sim growth habit + elevation$. Differences in slope between growth habits were tested with models of the form $y \\sim growth habit \\times elevation$. Models were compared using the `aov' function in R."),
-      sanitize.colnames.function = custom_cols,
-      sanitize.rownames.function = custom_rows,
-      sanitize.text.function = function (x) {x},
-      include.rownames=TRUE,
-      add.to.row = part_label,
-      caption.placement="top")
-@
-
-<<climate_slopes, results="asis">>=
-slopes.results <- round_df(slopes.results)
-part_label <- add_part_label(slopes.results , "(b)")
-
-print(xtable(slopes.results,
-             caption=NULL),
-      sanitize.colnames.function = custom_cols,
-      sanitize.rownames.function = custom_rows,
-      add.to.row = part_label,
-      include.rownames=TRUE)
-@
-
-% Table S2
-\clearpage
-<<binaryPGLMM, results="asis">>=
-bpglmm.results <- round_df(bpglmm.results)
-bpglmm.results <- embolden_p(bpglmm.results, col.select=c("sigmap","pvalue"))
-print(xtable(bpglmm.results,
-             label="supp_table:PGLMM_gameto",
-             caption="Phylogenetic generalized linear mixed models (PGLMMs) for binary (gametophyte) traits traits related to epiphytic growth. The response of each trait was modeled against growth habit using a PGLMM with phylogeny as a random effect. $\\sigma^2$ is a measure of phylogenetic signal calculated from the variance in the PGLMM. Significance of $\\sigma^2$ calculated using an approximate likelihood ratio test between a model with the observed value of $\\sigma^2$ against a null model with $\\sigma^2 = 0$. Traits significantly correlated with growth habit in bold."),
-      sanitize.text.function = function (x) {x},
-      sanitize.colnames.function = custom_cols,
-      include.rownames=TRUE,
-      caption.placement="top")
-@
 
 \end{document}
