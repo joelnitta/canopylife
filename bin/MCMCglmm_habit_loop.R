@@ -1,16 +1,11 @@
 # run general linear mixed model including phylogeny to test quant traits vs. growth habit
 
-# to install new package on cluster:
-# install.packages("MCMCglmm", lib="~/apps/R", repos="http://cran.us.r-project.org")
-
 library(ape)
 library(MCMCglmm)
+library(phytools)
+library(phangorn)
 
-# working directory on laptop
-# setwd("/Users/joelnitta/R/moorea/")
-
-# workign directory on cluster
-setwd("/n/home04/jnitta/Analysis/moorea")
+setwd(here::here())
 
 # define function to extract p value table from summary as dataframe, append model name
 summary_to_csv <- function (model) {
@@ -22,18 +17,17 @@ summary_to_csv <- function (model) {
   return(results.df)
 }
 
-# set tree file
-# tree_file <- set_input_files()[[2]]
-tree_file <- "data/treepl_Moorea_Tahiti_2016-01-03.tre"
+#######################
+### set input files ###
+#######################
 
 # load tree
-phy <- read.tree(tree_file)
+phy <- mooreaferns::fern_tree
 
-# run script to calculate trait means, combine with qualitative traits
-# traits <- get.my.traits()
-# to run on cluster, use pre-processed trait data
-trait_file <- "data/traits_glmm.csv"
-traits <- read.csv(trait_file, row.names=1)
+# load traits
+traits <- mooreaferns::fern_traits
+rownames(traits) <- traits$species
+traits$species <- NULL
 
 # trim to only species with trait data
 phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
@@ -46,8 +40,20 @@ traits <- traits[phy$tip.label,]
 ##################
 
 # define traits to test
-sporo_traits <-c("stipe", "length", "width", "rhizome", "dissection", "pinna", "SLA")
+sporo_traits <-c("stipe", "length", "width", "rhizome", "dissection", "pinna", "sla")
 traits.test <- c(sporo_traits, "habit")
+
+# in next step, need to use inverseA, which requires an ultrametric tree
+# my tree is time-calibrated and supposed to be ultrametric, but is.ultrametric(phy) returns FALSE
+# follow http://blog.phytools.org/2016/08/fixing-ultrametric-tree-whose-edges-are.html to fix
+phy.nnls <-nnls.tree(cophenetic(phy),phy,rooted=TRUE)
+# check
+is.ultrametric(phy.nnls)
+tips<-phy$tip.label
+cor(as.vector(cophenetic(phy)[tips,tips]),
+    as.vector(cophenetic(phy.nnls)[tips,tips]))
+# check looks good
+phy <- phy.nnls
 
 # MCMCglmm can't take NA values
 # make list of trait dataframes and phylogenies which only include species with no NA values for the traits I'm going to test
@@ -95,7 +101,7 @@ for (i in 1:(length(traits.test)-1) ) {
   # print summary
   summary[[i]] <- summary(model[[i]])
   # print traces
-  pdf(file=paste("bin/",Sys.Date(),"/","mcmcglmm_trace_", traits.test[i], ".pdf",sep=""))
+  pdf(file=paste("mcmcglmm_trace_", traits.test[i], ".pdf",sep=""))
     plot(model[[i]]$Sol, auto.layout=F)
   dev.off()
   # save output as df
@@ -112,4 +118,4 @@ time
 summary
 
 # save final results df to CSV
-write.csv (final.df, file=paste("bin/",Sys.Date(),"/","mcmcglmm_habit_results.csv",sep=""))
+# write.csv (final.df, file=paste("bin/",Sys.Date(),"/","mcmcglmm_habit_results.csv",sep=""))
