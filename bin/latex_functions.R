@@ -19,10 +19,14 @@ add_part_label <- function (df, labeltext) {
 
 # round_df
 # round the numbers in a dataframe to the specified number of digits
-round_df <- function (df, digits=3) {
+round_df <- function (df, digits=3, col.select = NULL) {
 
-  df[sapply(df, class) == "numeric" ] <- sapply(df[sapply(df, class) == "numeric" ], round, digits)
-
+  if (length(col.select) == 0) {
+    df[sapply(df, class) == "numeric" ] <- sapply(df[sapply(df, class) == "numeric" ], round, digits)
+  }
+  
+  df[,col.select] <- sapply(df[,col.select], round, digits)
+    
   return(df)
 }
 
@@ -43,6 +47,13 @@ custom_cols <- function (cols) {
   cols <- gsub ("^D$", "\\\\D", cols)
   cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{rnd}", cols)
   cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{BM}", cols)
+  
+  # continuous pglmmm columns
+  cols <- gsub ("^Parameter.estimate$", "Estimate", cols)
+  cols <- gsub ("^Lower.95..CI$", "Lower 95\\\\% CI", cols)
+  cols <- gsub ("^Upper.95..CI$", "Upper 95\\\\% CI", cols)
+  cols <- gsub ("^Effective.sample.size$", "Effective sample size", cols)
+  cols <- gsub ("^P.value$", "\\\\pval", cols)
   
   # binary pglmm columns
   cols <- gsub ("^sigmasq$", "$\\\\sigma^2$", cols)
@@ -65,6 +76,18 @@ custom_cols <- function (cols) {
   cols <- gsub ("inter\\.epi", "Intercept (epiphytic)", cols)
   cols <- gsub ("slope\\.ter", "Slope (terrestrial)", cols)
   cols <- gsub ("inter\\.ter", "Intercept (terrestrial)", cols)
+  
+  # trait PCA
+  cols <- gsub ("Std_PCA_Dim\\.1", "Standard PC1", cols)
+  cols <- gsub ("Std_PCA_Dim\\.2", "Standard PC2", cols)
+  cols <- gsub ("Phy_PCA_Dim\\.1", "Phylogenetic PC1", cols)
+  cols <- gsub ("Phy_PCA_Dim\\.2", "Phylogenetic PC2", cols)
+  
+  # quantitative PICs
+  cols <- gsub ("^num_contrasts$", "Number of contrasts", cols)
+  cols <- gsub ("^num_pos_con$", "Positive contrasts", cols)
+  cols <- gsub ("^tval$", "\\\\tval", cols)
+  cols <- gsub ("^pval$", "\\\\pval", cols)
   
   return(cols)
 }
@@ -102,6 +125,10 @@ custom_rows <- function (rows) {
   rows <- gsub ("min_RH", "Min. Rel. Hum.", rows)
   rows <- gsub ("sd_RH", "\\\\stdev Rel. Hum.", rows)
   
+  # trait PCA
+  rows <- gsub ("total_variance", "Total Variance (\\\\%)", rows)
+  rows <- gsub ("cumulative_variance", "Cumulative Variance (\\\\%)", rows)
+  
   return(rows)
 }
 
@@ -122,5 +149,47 @@ embolden_p <- function (df, col.select="pvalue", num.digits=3, sigval = 0.05) {
       }
     }
   }
+  return(df)
+}
+
+# embolden_top_values
+# makes biggest (absolute) values in a column bold
+# col.select are names of columns to be made bold, looks for all numeric columns by default
+# row.select are names of columns to be made bold, uses all rows by default
+# keep_top is number of top values to keep
+# not run:
+# bold_df <- embolden_top_values(PCA.result, row.select = c("dissection", "length", "pinna", "rhizome", "sla", "stipe", "width"))
+
+embolden_top_values <- function (df, col.select = NULL, row.select = NULL, keep_top = 3) {
+  # choose all columns of class numeric by default
+  if (length(col.select) == 0) {
+    col.select <- colnames(df)[which(apply(df, 2, class) == "numeric")]
+  } 
+  
+  # choose all rows if not specified
+  if (length(row.select) == 0) {
+    row.select <- rownames(df)
+  } 
+  
+  # first make list equal to length of selected cols, each with a vector indexing the top values
+  col_list <- list()
+  for (i in 1:length(col.select)) {
+    col_list[[i]] <- order(abs(df[rownames(df) %in% row.select, col.select[i]]), decreasing=TRUE)[1:keep_top]
+  }
+  names(col_list) <- col.select
+  
+  # now loop through df and make these values bold
+  for (i in 1:nrow(df)) {
+    for (j in 1:ncol(df)) {
+      if (colnames(df)[j] %in% col.select) {
+        if (!is.na(df[i,j])) {
+          if (i %in% col_list[[colnames(df)[j]]] ) {
+            df[i,j] <- paste0("\\textbf{", df[i,j], "}")
+          }
+        }
+      }
+    }
+  }
+  
   return(df)
 }

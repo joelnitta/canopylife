@@ -40,11 +40,12 @@ opts_chunk$set(warning=FALSE)
 <<run_analyses, results="hide">>=
 # set working directory, run all analyses, save results objects
 setwd(here::here())
+source(file = "bin/microclimate.R")
+source(file = "bin/trait_PCA.R")
 source(file = "bin/cont_phylosig.R")
 source(file = "bin/binary_phylosig.R")
-source(file = "bin/microclimate.R")
+source(file = "bin/sporo_PIC.R")
 source(file = "bin/binaryPGLMM.R")
-source(file = "bin/trait_PCA.R")
 save(list = ls(all = TRUE), file= "results.RData")
 @ 
 
@@ -180,6 +181,22 @@ print(xtable(binary_phylosig.results,
       add.to.row = part_label)
 @
 
+% Table 3
+\clearpage
+
+<<sporo_PIC, results="asis">>=
+PIC.results <- round_df(PIC.results)
+PIC.results <- embolden_p(PIC.results, col.select=c("pval"))
+
+print(xtable(PIC.results,
+             label="table:PIC_sporo",
+             caption="Results of phylogenetically independent contrasts analysis of quantitative (sporophyte) traits related to epiphytic growth. All trait contrasts were made by subtracting epiphytic values from terrestrial values; thus, a positive contrast indicates greater values for terrestrial clades. Significant differences between epiphytes and terrestrial clades in bold."),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,
+      caption.placement="top")
+@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Figures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 

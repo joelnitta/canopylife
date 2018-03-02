@@ -1,34 +1,33 @@
-# library(vegan)
-# library(picante)
-#library(ade4)
+# sporoPIC
+
+# Calculate phylogenetically independent contrasts for quantitative (sporophyte) traits 
+# between terrestrial and epiphytic species using brunch function in caper
+
+# load packages
+library(tidyverse)
 library(caper)
-library(xlsx)
-library(phytools)
+library(mooreaferns)
 
-setwd("/Users/joelnitta/R/moorea/")
-source("bin/my_funcs.R")
+# set working directory
+setwd(here::here())
 
-# Use brunch to run PIC against binary state (epiphytic or not)
-
-# set input files
-tree_file <- set_input_files()[[2]]
+####################
+### prepare data ###
+####################
 
 # load tree
-phy <- read.tree(tree_file)
+phy <- mooreaferns::fern_tree
 
 # load traits
-source("bin/traits/get_traits.R")
+traits <- mooreaferns::fern_traits
 
-# keep only quantitative traits with decent sampling
-sporo_traits <-c("habit", "stipe", "length", "width", "rhizome", "dissection", "pinna", "SLA")
+# reset levels for growth habit so epiphytic trait values are subtracted from terrestrial
+traits$habit <- factor(traits$habit, levels = c("terrestrial", "epiphytic"))
 
-# keep only quantitative traits with decent sampling
-traits <- traits[,sporo_traits]
-
-# make habit a factor
-traits$habit[traits$habit == 0] <- "terrestrial"
-traits$habit[traits$habit == 1] <- "epiphytic"
-traits$habit <- as.factor(traits$habit)
+# keep only species, habit, and quantitative traits to test
+traits.test <- c("stipe", "length", "width", "rhizome", "dissection", "pinna", "sla")
+traits <- traits[,c("species", "habit", traits.test)]
+rownames(traits) <- traits$species
 
 # trim to only species with trait data
 phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
@@ -36,55 +35,19 @@ phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
 # get traits in same order as tips
 traits <- traits[phy$tip.label,]
 
-########################################################
-### phylogenetic ANOVA using phylANOVA from phytools ###
-########################################################
+##############################
+### run PICs using brunch  ###
+##############################
 
-# only runs one trait at a time, can't handle NAs
-# make loop to trim each trait and run phylANOVA
-out <- NULL
-groups <- NULL
-trait.select <- NULL
-habit <- NULL
-my.tree <- NULL
-result <- list()
-for (i in 2:ncol(traits)) {
-  trait.select <- traits[,i]
-  habit <- traits[,1]
-  names(trait.select) <- rownames(traits)
-  names(habit) <- rownames(traits)
-  trait.select <- trait.select[!(is.na(trait.select))]
-  habit <- habit[names(trait.select)]
-  my.tree <- phy
-  my.tree <- drop.tip(my.tree, my.tree$tip.label[!(my.tree$tip.label %in% names(trait.select))])
-  trait.select <- trait.select[my.tree$tip.label]
-  habit <- habit[my.tree$tip.label]
-  out <- phylANOVA(my.tree, habit, trait.select)
-  result[[i-1]] <- c(out$F, out$Pf, colnames(traits)[i])
-  names(result[[i-1]]) <- c("F", "p", "trait")
+### brunch requires caper comparative data objects (combining tree/trait datasets) as input 
+# I'm not sure how NA values affect brunch calculation of PICs, so make list of caper comparative 
+# data objects, each one with NAs in traits removed
+fern_data_list <- list()
+for (i in 1:length(traits.test)) {
+  fern_data_list[[i]] <- comparative.data(phy, traits[,c("species", "habit", traits.test[i])], "species", na.omit=TRUE)
 }
 
-summary.panova <- as.data.frame(t(as.data.frame(result)))
-rownames(summary.panova) <- NULL
-
-write.csv(summary.panova, make_filename("sporo_phylANOVA", ".csv", date=TRUE))
-
-
-#######################
-### brunch in caper ###
-#######################
-
-# caper comparative data command combines tree and data
-# but, need column of species names
-traits$species <- rownames(traits)
-fern<-comparative.data(phy = phy, data = traits, names.col = species, vcv = TRUE, na.omit = FALSE, warn.dropped = TRUE)
-traits$species <- NULL
-
-# make list of traits to test (drop habit)
-trait.list <- colnames(traits)
-trait.list <- trait.list[2:ncol(traits)]
-
-# set up loop to run brunch on all traits of interest
+# set up loop to run brunch on each trait of interest, one at a time
 result <- list()
 model <- NULL
 table <- NULL
@@ -94,23 +57,37 @@ num_pos_con <- NULL
 tval <- NULL
 pval <- NULL
 
-for (i in 1:length(trait.list)) {
-  model <- brunch(formula=as.formula(paste(trait.list[i], " ~ habit", sep="")), data=fern)
+# run loop
+for (i in 1:length(fern_data_list)) {
+  model <- brunch(formula=as.formula(paste(traits.test[i], " ~ habit", sep="")), data=fern_data_list[[i]])
   table <- caic.table(model)
   contrasts <- table[,1]
   num_contrasts <- length(contrasts)
   num_pos_con <- length(contrasts[contrasts > 0])
-  tval <- round(as.vector(summary(model)$coefficients[,3]), digits = 4)
-  pval <- round(as.vector(summary(model)$coefficients[,4]), digits = 4)
-  result[[i]] <- c(trait.list[i], num_contrasts, num_pos_con, tval, pval)
-  names(result[[i]]) <- c("trait", "num_contrasts", "positive_contrasts", "t-value", "p-value")
+  tval <- as.vector(summary(model)$coefficients[,3])
+  pval <- as.vector(summary(model)$coefficients[,4])
+  result[[i]] <- c(num_contrasts, num_pos_con, tval, pval)
+  names(result[[i]]) <- c("num_contrasts", "num_pos_con", "tval", "pval")
 }
+names(result) <- traits.test
 
-summary.PIC <- as.data.frame(t(as.data.frame(result)))
-rownames(summary.PIC) <- NULL
+# combine results
+PIC.results <- bind_rows(result)
 
-write.csv(summary.PIC, make_filename("sporo_PIC", ".csv", date=TRUE))
+# transpose
+PIC.results %>%
+  rownames_to_column %>% 
+  gather(var, value, -rowname) %>% 
+  spread(rowname, value) ->
+  PIC.results
 
-# optional: plot the contrasts
-# brunchTab <- caic.table(model)
-# plot(SLA ~ habit, brunchTab)
+# store as dataframe (need rownames for xtable)
+PIC.results <- as.data.frame(PIC.results)
+
+# format results dataframe
+rownames(PIC.results) <- PIC.results$var
+PIC.results$var <- NULL
+colnames(PIC.results) <- c("num_contrasts", "num_pos_con", "tval", "pval")
+PIC.results <- PIC.results[c("stipe", "length", "width", "dissection", "pinna", "sla", "rhizome"), ]
+PIC.results$num_contrasts <- as.integer(PIC.results$num_contrasts)
+PIC.results$num_pos_con <- as.integer(PIC.results$num_pos_con)
