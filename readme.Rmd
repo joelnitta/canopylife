@@ -13,9 +13,10 @@ This repository contains code needed to run the analyses and generate the manusc
 Nitta, J.H., Watkins, J.E., Taputuarai, R., and Davis, C.C. Life in the canopy: Phylogenetic filtering and morphological canalization in epiphytic ferns. Submitted.
 
 ### Dependencies
+
 - R (including knitr and various packages called by scripts)  
-- LaTeX (optional, see below)  
 - RStudio (optional, see below)
+- LaTeX (optional, see below)  
 - latex2rtf (optional, see below)
 
 Data (and a few functions) are contained in a separate package. This needs to be installed as follows:
@@ -24,14 +25,18 @@ Data (and a few functions) are contained in a separate package. This needs to be
 devtools::install_github("joelnitta/mooreaferns", dependencies=TRUE)
 ```
 
-### Instructions
+### Getting started
+
 Clone or [download](https://github.com/joelnitta/canopylife/archive/master.zip) and unzip this repository, and navigate to it.
 
-Analyses were conducted in R, and each can be run separately from `bin/`.
+All analyses were conducted in R, and each can be run separately from `bin/`.
+
+### Compiling the manuscript
 
 To run all analyses, output figures, and compile the manuscript as a pdf, the following options are availble depending on whether/how extensively LaTeX is installed on your machine:
 
 #### - From the terminal
+
 This method should work with a full LaTeX distribution.
 
 1. Open the terminal and execute this command to run all analyses and output (i.e., "knit") the tex file:
@@ -49,29 +54,41 @@ xelatex manuscript.tex
 The second step may fail depending on how Latex has been installed. In this case, try one of the methods below.
 
 #### - Overleaf
+
 This method does not require LaTeX to be installed at all.
 
 1. Execute the first command in "From the terminal" above.
 2. Upload all the files in this directory to an account on <https://www.overleaf.com> and typeset the pdf there. XeLaTex should be specified as the LaTeX Engine under Settings.
 
 #### - RStudio
+
 This method should work with a minimal LaTeX distribution if the packages used in the tex file are installed.
 
 1. In RStudio Preferences:Sweve, set "Typeset LaTeX into PDF" to XeLaTex, if it isn't already.
 2. Open `manuscript.Rnw` in RStudio and press "Compile PDF".
 
-#### - Tables only
-To convert the pdf to MS Word for submission of the manuscript, the [copy-and-paste method](https://joelnitta.com/blog/getting-latex-into-word) was used. This works Pretty Darn Well, except for tables, which get garbled during pasting. To convert tables to MS Word (i.e., rich text) format, latex2rtf works better. However, latex2rtf is limited in the LaTeX packages it can use. A simple knitr file using only bare-bones LaTeX packages is available to output a tex file containing only tables, which can then be processed by latex2rtf. After knitting manuscript.Rnw, run the following:
+### Compiling Supporting Information
+
+After compiling the manuscript using one of the methods above and before running `cleanup.sh` (so that `results.Rdata` is still present), compile the SI in the same way but replace `manuscript` with `supporting_information`.
+
+### Compiling tables only
+
+To convert the pdf to MS Word for submission of the manuscript, the [copy-and-paste method](https://joelnitta.com/blog/getting-latex-into-word) was used. This works Pretty Darn Well, except for tables, which get garbled during pasting. To convert tables to MS Word (i.e., rich text) format, latex2rtf works better. However, latex2rtf is limited in the LaTeX packages it can use. A simple knitr file using only bare-bones LaTeX packages is available to output a tex file containing only tables, which can then be processed by latex2rtf. 
+
+After knitting manuscript.Rnw and before running `cleanup.sh`, run the following:
 
 ```
 Rscript -e "library(knitr); knit('./tables.Rnw')"
+latex tables.tex
+bibtex tables.aux
+latex tables.tex
 latex2rtf tables.tex
 ```
+
 ### Cleanup
+
 Run this script from the terminal to remove intermediate files generated during compiling the pdf. This can't be undone, so use with care!
 
 ```
 bash cleanup.sh
 ```
-
-
