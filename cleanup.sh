@@ -16,4 +16,4 @@ rm -f PCA.pdf
 rm -f microclimate.pdf
 
 # etc
-rm -r readme.html
+rm -f readme.html
