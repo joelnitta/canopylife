@@ -119,14 +119,14 @@ phy_PCA_loadings <-  (phy_PCA_output[[2]])
 colnames(phy_PCA_loadings) <- paste("Phy_PCA", colnames(phy_PCA_loadings), sep="_")
 phy_PCA_variance <- (phy_PCA_output[[5]])
 
-PCA.result <- merge(std_PCA_loadings, phy_PCA_loadings, by="row.names")
-rownames(PCA.result) <- PCA.result$Row.names
-PCA.result$Row.names <- NULL
+PCA.results <- merge(std_PCA_loadings, phy_PCA_loadings, by="row.names")
+rownames(PCA.results) <- PCA.results$Row.names
+PCA.results$Row.names <- NULL
 
 PCA_variance <- cbind(std_PCA_variance, phy_PCA_variance)
-colnames(PCA_variance) <- colnames(PCA.result)
+colnames(PCA_variance) <- colnames(PCA.results)
 
-PCA.result <- rbind(PCA.result, PCA_variance)
+PCA.results <- rbind(PCA.results, PCA_variance)
 
 ###########################
 ### plotting functions  ###
