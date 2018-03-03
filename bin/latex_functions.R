@@ -35,6 +35,7 @@ round_df <- function (df, digits=3, col.select = NULL) {
 # this function is to be used as input to sanitize.colnames.function of print.xtable
 custom_cols <- function (cols) {
   
+  # Table 2
   # continuous phylogenetic signal
   cols <- gsub ("^lambda$", "$\\\\lambda$", cols)
   cols <- gsub ("^lambda\\.pval$", "$\\\\pval_\\\\lambda$", cols)
@@ -48,6 +49,20 @@ custom_cols <- function (cols) {
   cols <- gsub ("^prob_random$", "\\\\pval\\\\textsubscript{rnd}", cols)
   cols <- gsub ("^prob_brownian$", "\\\\pval\\\\textsubscript{BM}", cols)
   
+  # Table 3
+  # quantitative PICs
+  cols <- gsub ("^num_contrasts$", "Number of contrasts", cols)
+  cols <- gsub ("^num_pos_con$", "Positive contrasts", cols)
+  cols <- gsub ("^tval$", "\\\\tval", cols)
+  cols <- gsub ("^pval$", "\\\\pval", cols)
+  
+  # Table 4
+  # Pagel's correlated evolution
+  cols <- gsub ("^logL_indep$", "LL (independent model)", cols)
+  cols <- gsub ("^logL_dep$", "LL (dependent model)", cols)
+  cols <- gsub ("^likelihood_ratio$", "Likelihood ratio", cols)
+  
+  # Table S1
   # continuous pglmmm columns
   cols <- gsub ("^Parameter.estimate$", "Estimate", cols)
   cols <- gsub ("^Lower.95..CI$", "Lower 95\\\\% CI", cols)
@@ -55,6 +70,7 @@ custom_cols <- function (cols) {
   cols <- gsub ("^Effective.sample.size$", "Effective sample size", cols)
   cols <- gsub ("^P.value$", "\\\\pval", cols)
   
+  # Table S2
   # binary pglmm columns
   cols <- gsub ("^sigmasq$", "$\\\\sigma^2$", cols)
   cols <- gsub ("^sigmap$", "\\\\pval($\\\\sigma^2=0$)", cols)
@@ -63,6 +79,7 @@ custom_cols <- function (cols) {
   cols <- gsub ("^zscore$", "\\\\zval-score", cols)
   cols <- gsub ("^pvalue$", "\\\\pval", cols)
   
+  # Table S3
   # microclimate ancova columns
   cols <- gsub ("df\\.intercept", "\\\\df(intercept)", cols)
   cols <- gsub ("f\\.intercept", "\\\\fval(intercept)", cols)
@@ -77,17 +94,12 @@ custom_cols <- function (cols) {
   cols <- gsub ("slope\\.ter", "Slope (terrestrial)", cols)
   cols <- gsub ("inter\\.ter", "Intercept (terrestrial)", cols)
   
+  # Table S4
   # trait PCA
   cols <- gsub ("Std_PCA_Dim\\.1", "Standard PC1", cols)
   cols <- gsub ("Std_PCA_Dim\\.2", "Standard PC2", cols)
   cols <- gsub ("Phy_PCA_Dim\\.1", "Phylogenetic PC1", cols)
   cols <- gsub ("Phy_PCA_Dim\\.2", "Phylogenetic PC2", cols)
-  
-  # quantitative PICs
-  cols <- gsub ("^num_contrasts$", "Number of contrasts", cols)
-  cols <- gsub ("^num_pos_con$", "Positive contrasts", cols)
-  cols <- gsub ("^tval$", "\\\\tval", cols)
-  cols <- gsub ("^pval$", "\\\\pval", cols)
   
   return(cols)
 }
@@ -97,8 +109,7 @@ custom_cols <- function (cols) {
 # this function is to be used as input to sanitize.rownames.function of print.xtable
 custom_rows <- function (rows) {
   
-  # traits
-  # continuous
+  # continuous traits
   rows <- gsub ("stipe", "Stipe length", rows)
   rows <- gsub ("^length$", "Frond length", rows)
   rows <- gsub ("width", "Frond width", rows)
@@ -106,7 +117,8 @@ custom_rows <- function (rows) {
   rows <- gsub ("pinna", "Pinna number", rows)
   rows <- gsub ("sla", "Specific leaf area", rows)
   rows <- gsub ("rhizome", "Rhizome \\\\diameter", rows)
-  # binary
+  
+  # binary traits
   rows <- gsub ("habit", "Growth habit", rows)
   rows <- gsub ("epiphytic", "Epiphytic growth", rows)
   rows <- gsub ("gemmae", "Gemmae", rows)

@@ -1,37 +1,50 @@
+# correlated_evo
+
 # run Pagel's (1994) test of correlated evolution on two binary traits using fitPagel in phytools
 
-library(xlsx)
+# load packages
 library(phytools)
+library(mooreaferns)
 
-setwd("/Users/joelnitta/R/moorea/")
-source("bin/my_funcs.R")
-
-######################
-### data wranglin' ###
-######################
-
-### get raw data
-# set input files
-tree_file <- set_input_files()[[2]]
+#####################
+### prepare data  ###
+#####################
 
 # load tree
-phy <- read.tree(tree_file)
+phy <- mooreaferns::fern_tree
 
-# load untransformed traits
-traits <- get.my.traits(log.trans = FALSE, scale.traits = FALSE)
+# load un-transformed species traits
+traits <- mooreaferns::fern_traits
+rownames(traits) <- traits$species
 
-# load distribution data (widespread or not)
-# distribution data is in "results.df"
-source("bin/alpha_diversity/elevational range table.R")
+# ### get raw data
+# # set input files
+# tree_file <- set_input_files()[[2]]
+# 
+# # load tree
+# phy <- read.tree(tree_file)
+# 
+# # load untransformed traits
+# traits <- get.my.traits(log.trans = FALSE, scale.traits = FALSE)
 
-### merge distribution data with traits
-# first make all not widespread
-traits$distribution <- "notwidespread"
-# get list of widespread species
-widespread_species <- rownames(results.df[results.df$widespread == 1,])
-# make those in list widespread
-traits$distribution[rownames(traits) %in% widespread_species] <- "widespread"
-rm(results.df)
+
+# #***** add widespread observations to data folder
+# 
+# # load distribution data (widespread or not)
+# # distribution data is in "results.df"
+# source("bin/alpha_diversity/elevational range table.R")
+# 
+# ### merge distribution data with traits
+# # first make all not widespread
+# traits$distribution <- "notwidespread"
+# # get list of widespread species
+# widespread_species <- rownames(results.df[results.df$widespread == 1,])
+# # make those in list widespread
+# traits$distribution[rownames(traits) %in% widespread_species] <- "widespread"
+# rm(results.df)
+
+
+
 
 ### match up traits and tree
 # trim tree to only species with trait data
@@ -44,12 +57,12 @@ traits <- traits[phy$tip.label,]
 ##################################
 
 # each trait we want to test needs to be a binary, named character vector
-traits$habit[traits$habit == 1] <- "epi"
-traits$habit[traits$habit == 0] <- "terr"
+#traits$habit[traits$habit == 1] <- "epi"
+#traits$habit[traits$habit == 0] <- "terr"
 
 # make binary morph category: 0 is noncordate, 1 is cordate
-traits$morph <- "noncordate"
-traits$morph[which(traits$morphotype == "cordate")] <- "cordate"
+traits$morph_binary <- "noncordate"
+traits$morph_binary[which(traits$morphotype == "cordate")] <- "cordate"
 traits$morphotype <- NULL
 
 traits$glands[traits$glands == 1] <- "glands"
@@ -62,8 +75,9 @@ traits$gemmae[traits$gemmae == 1] <- "gemmae"
 traits$gemmae[traits$gemmae == 0] <- "nogemmae"
 
 # keep only traits of interest
-traits.habit <- traits[,c("habit", "morph", "glands", "hairs", "gemmae")]
-traits.dist <- traits[,c("distribution", "morph", "glands", "hairs", "gemmae")]
+traits.habit <- traits[,c("habit", "morph_binary", "glands", "hairs", "gemmae")]
+
+#* traits.dist <- traits[,c("distribution", "morph_binary", "glands", "hairs", "gemmae")]
 
 # fitPagel crashes if there are NAs
 # so need to make list of trees and traits with NAs trimmed out
@@ -86,7 +100,7 @@ make_data_list <- function (traits) {
 
 # make two lists, one for habit and one for distribution type
 data.list.habit <- make_data_list (traits.habit)
-data.list.dist <- make_data_list (traits.dist)
+#* data.list.dist <- make_data_list (traits.dist)
 
 ####################
 ### run fitPagel ###
@@ -94,30 +108,47 @@ data.list.dist <- make_data_list (traits.dist)
 
 # wrapper to loop through data.list with fitPagel
 run_fitPagel <- function (data.list) {
-result.list <- list()
-for (i in 1:length(data.list)) {
-  result <- fitPagel(tree=data.list[[i]]$tree, x=data.list[[i]]$trait, y=data.list[[i]]$indep_var)
-  result.list[[i]] <- c(data.list[[i]]$trait.name, signif(result$independent.logL, digits=3), signif(result$dependent.logL, digits=3), signif(result$lik.ratio, digits=3), signif(result$P, digits=3))
-}
-return (result.list)
+  model.list <- list()
+  for (i in 1:length(data.list)) {
+    model <- fitPagel(tree=data.list[[i]]$tree, x=data.list[[i]]$trait, y=data.list[[i]]$indep_var)
+    model.list[[i]] <- list(trait = data.list[[i]]$trait.name, 
+                            logL_indep = model$independent.logL, 
+                            logL_dep = model$dependent.logL, 
+                            likelihood_ratio = model$lik.ratio, 
+                            pval = model$P)
+  }
+  return (model.list)
 }
 
 # run with growth habit as independent var
 results <- run_fitPagel (data.list.habit)
-summary <-as.data.frame(t(as.data.frame(results)))
-rownames(summary) <- NULL
-colnames(summary) <- c("trait", "logL_indep", "logL_dep", "likelihood_ratio", "pval")
-summary$indep_var <- "habit"
 
-# run with distribution type as independent var
-results.dist <- run_fitPagel (data.list.dist)
-summary.dist <-as.data.frame(t(as.data.frame(results.dist)))
-rownames(summary.dist) <- NULL
-colnames(summary.dist) <- c("trait", "logL_indep", "logL_dep", "likelihood_ratio", "pval")
-summary.dist$indep_var <- "distribution"
+# combine results
+pagel.results <- dplyr::bind_rows(results)
+
+# store as dataframe (need rownames for xtable)
+pagel.results <- as.data.frame(pagel.results)
+
+# add rownames
+rownames(pagel.results) <- pagel.results$trait
+pagel.results$trait <- NULL
+
+
+
+
+
+
+
+
+# # ****** run with distribution type as independent var
+# results.dist <- run_fitPagel (data.list.dist)
+# summary.dist <-as.data.frame(t(as.data.frame(results.dist)))
+# rownames(summary.dist) <- NULL
+# colnames(summary.dist) <- c("trait", "logL_indep", "logL_dep", "likelihood_ratio", "pval")
+# summary.dist$indep_var <- "distribution"
 
 # combine the two
-summary <- rbind(summary, summary.dist)
+# summary <- rbind(summary, summary.dist)
 
 # write out results
-write.csv(summary, file = make_filename("correlated_evo_gameto", ".csv", date=TRUE))
+# write.csv(summary, file = make_filename("correlated_evo_gameto", ".csv", date=TRUE))

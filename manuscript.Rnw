@@ -1,8 +1,11 @@
-% run this from the command line to compile: Rscript -e "library(knitr); knit('./manuscript.Rnw')"
 \documentclass{article}
 
 % Set margins
 \usepackage[margin=1in]{geometry}
+
+% Use Times New Roman font (better conversion of special characters in Word)
+\usepackage{fontspec}
+\setmainfont{Times New Roman} 
 
 % Set line spacing to 1.5
 \usepackage{setspace}
@@ -14,8 +17,6 @@
 % Set unit and abbreviations formatting
 \input{newphyt_style}
 
-\begin{document}
-
 \title{Life in the canopy: Phylogenetic filtering and morphological canalization in epiphytic ferns}
 
 \author{Joel H. Nitta}
@@ -26,6 +27,10 @@
 %\affil[1]{Department of Organismic and Evolutionary Biology and Harvard University Herbaria, Harvard University, Cambridge, MA 02138, U.S.A.}
 %\affil[2]{Department of Biology, Colgate University, 13 Oak Drive, Hamilton, New York 13346, U.S.A.}
 %\affil[3]{Association Te Rau Ati Ati a Tau a Hiti Noa Tu, B.P. 11553, Mahina, Tahiti, French Polynesia}
+
+\begin{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Title Page %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \maketitle
 
@@ -45,12 +50,12 @@ source(file = "bin/trait_PCA.R")
 source(file = "bin/cont_phylosig.R")
 source(file = "bin/binary_phylosig.R")
 source(file = "bin/sporo_PIC.R")
+source(file = "bin/correlated_evo.R")
 source(file = "bin/binaryPGLMM.R")
 save(list = ls(all = TRUE), file= "results.RData")
 @ 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Summary %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
 \clearpage
 
 % Set left justification (better conversion to Word than default full justification)
@@ -197,6 +202,25 @@ print(xtable(PIC.results,
       include.rownames=TRUE,
       caption.placement="top")
 @
+
+
+% Table 4
+\clearpage
+
+<<pagel_test, results="asis">>=
+pagel.results <- round_df(pagel.results)
+pagel.results <- embolden_p(pagel.results, col.select=c("pval"))
+
+print(xtable(pagel.results,
+             label="table:pagel_gameto",
+             caption="Pagel's \\citeyearpar{Pagel1994} test of correlated evolution between binary traits. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Models with significantly different log likelihoods (LL) in bold; lower LL for the dependent model indicates correlation with growth habit."),
+      sanitize.colnames.function = custom_cols,
+      sanitize.rownames.function = custom_rows,
+      sanitize.text.function = function (x) {x},
+      include.rownames=TRUE,
+      caption.placement="top")
+@
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Figures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 
