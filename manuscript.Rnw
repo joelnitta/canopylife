@@ -52,6 +52,7 @@ source(file = "bin/binary_phylosig.R")
 source(file = "bin/sporo_PIC.R")
 source(file = "bin/correlated_evo.R")
 source(file = "bin/binaryPGLMM.R")
+source(file = "bin/functional_diversity.R")
 save(list = ls(all = TRUE), file= "results.RData")
 @ 
 
@@ -221,13 +222,108 @@ print(xtable(pagel.results,
       caption.placement="top")
 @
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%% Figure Captions %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\clearpage
+
+\noindent\fig \ref{fig:traits}. A) Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinna pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. B) Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
+% include blank line between each caption
+\vspace{\baselineskip}
+
+\noindent\fig \ref{fig:climate}. Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from July 7, 2013 to July 5, 2014, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). `Epiphytic' dataloggers were placed at ca. 2 m on trees, and `terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
+\vspace{\baselineskip}
+
+\noindent\fig \ref{fig:PCA}. Principal components analysis (PCA) of traits related to epiphytic growth
+in ferns from Moorea, French Polynesia. A–B) PC loadings. C–D) species scores. A
+and C are standard PCA, B and \D are phylogenetic PCA. Epiphytes in green, terrestrial
+species in brown. Quantitative traits only, including only species with no missing
+observations for any traits ($\n = 104$ \si{\species}). Abbreviations for traits as follows: Di, degree
+of frond dissection; Le, frond length; Pi, number of pinna pairs; Rh, rhizome diameter;
+SL, specific leaf area; St, stipe length; Wi, frond width.
+\vspace{\baselineskip}
+
+\noindent\fig \ref{fig:traits_tree}. Time-calibrated phylogenetic tree of ferns from Moorea, French
+Polynesia with growth habit and associated traits mapped on the tips. Relative value
+of quantitative (sporophyte) traits in greyscale: low values are lighter, high values are
+darker. States of qualitative (gametophyte) states and growth habit indicated by colors in
+key. Slashes indicate missing data or non-applicable trait states. Trends for three leaf size
+traits (stipe length, frond length, and frond with) were quantitatively very similar, so of
+these, we only present stipe length. Species missing data for six or more traits not shown.
+For a summary of traits, see Table 3.1. Abbreviations for clades of interest are as follows.
+Major Cretaceous epiphytic radiations \sensu \cite{Schuettpelz2009} in green: H,
+hymenophylloids; T, trichomanoids, V, vittarioids; A, asplenioids; E, elaphoglossoids; P,
+polygrammoids (trichomanoids diversified prior to the Cretaceous but are included as an
+important extant epiphytic clade). Other major clades: EI, eupolypods I; EII, eupolypods
+II.
+\vspace{\baselineskip}
+
+\noindent\fig \ref{fig:CWM}. Mean values of selected functional morphological traits of epiphytic and
+terrestrial ferns on Moorea, French Polynesia. Epiphytic values in green, terrestrial
+values in brown. A) Community-weighted mean (CWM) values for each trait plotted
+against either minimum relative humidity ($\n = 13$ communities each for epiphytes and
+terrestrial species) or elevation ($\n = 17$ communities each). Trendlines indicate
+significant relationships determined by a linear model at $\pval<0.05$. B) Mean values for all
+species by growth habit for each trait. Numbers of species with observations available
+differed for each trait and are shown at bottom of each barplot. Asterisks indicate
+statistical significance of one-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
+Trends for three leaf size traits (stipe length, frond length, and frond with) were
+quantitatively very similar, so of these we only present stipe length.
+\vspace{\baselineskip}
+
+\noindent\fig \ref{fig:FDIV}. Functional and phylogenetic diversity of epiphytic and terrestrial fern
+communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial
+communities in brown. Response variable abbreviations as follows: MPD, standard effect
+size (SES) of mean phylogenetic distance; MNTD, SES of mean nearest taxon distance;
+FRic, functional richness; FEve, functional evenness; FDiv, functional diversity. A)
+Response variables plotted against either minimum relative humidity ($\n = 13$
+communities each for epiphytes and terrestrial species) or elevation ($\n = 17$ communities
+each). Trendlines indicate significant relationships determined by a linear model at $\pval<0.05$. B) Median values (box plots) of response variables by growth habit (epiphytic or
+terrestrial) across all communities (epiphytic communities, $\n = 17$; terrestrial
+communities, $\n = 17$). Medians shown with bold lines, lower and upper hinges
+correspond to first and third quartiles, and whiskers extend to values within 1.5 $\times$ the
+interquartile range. Asterisks indicate statistical significance of one-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Figures %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 
 \begin{figure}[ht]
+  \includegraphics[scale=1]{traits_examples.pdf}
+  \caption{Traits}
+  \label{fig:traits}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
   \includegraphics[scale=1]{microclimate.pdf}
   \caption{Climate}
   \label{fig:climate}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
+  \includegraphics[scale=1]{PCA.pdf}
+  \caption{Principal Components Analysis}
+  \label{fig:PCA}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
+  \includegraphics[scale=1]{traits_on_tree.pdf}
+  \caption{Traits on tree}
+  \label{fig:traits_tree}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
+  \includegraphics[scale=.75]{cwm_plots.pdf}
+  \caption{Community-weighted means}
+  \label{fig:CWM}
+\end{figure}
+
+\clearpage
+\begin{figure}[ht]
+  \includegraphics[scale=.75]{fdiv_plots.pdf}
+  \caption{Functional Diversity}
+  \label{fig:FDIV}
 \end{figure}
 
 \end{document}
