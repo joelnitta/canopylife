@@ -21,6 +21,9 @@ source("bin/microclimate_means.R")
 ### run ANCOVA ###
 ##################
 
+# use only sites on Moorea
+moorea_sites <- mooreaferns::sites[grep("Aorai", mooreaferns::sites$site, invert=TRUE), ]
+
 # add latitude, longitude, and elevation to microclimate means
 daily_values <- merge(daily_values, moorea_sites, by="site", all.x=TRUE)
 grand_means <- merge(grand_means, moorea_sites, by="site", all.x=TRUE)
@@ -29,9 +32,9 @@ grand_means <- merge(grand_means, moorea_sites, by="site", all.x=TRUE)
 #anyNA(daily_values)
 #anyNA(grand_means)
 
-# make sure growth habit is factor
-daily_values$habit <- as.factor(daily_values$habit)
-grand_means$habit <- as.factor(grand_means$habit)
+# convert growth habit to factor
+daily_values$habit <- factor(daily_values$habit, levels=c("terrestrial", "epiphytic"))
+grand_means$habit <- factor(grand_means$habit, levels=c("terrestrial", "epiphytic"))
 
 # set response variables
 resp_vars <- c("max_temp", "mean_temp", "min_temp", "sd_temp", "max_RH", "mean_RH", "min_RH", "sd_RH")
@@ -70,8 +73,6 @@ for (i in 1:length(resp_vars)) {
 ancova.results <- as.data.frame(dplyr::bind_rows(parameters))
 rownames(ancova.results) <- resp_vars
 
-# write.csv(ancova.results, file="climate_ancova.csv")
-
 ###############################################
 #### Get slopes and intercepts for plotting ###
 ###############################################
@@ -109,26 +110,34 @@ rownames(slopes.results) <- resp_vars
 
 # function to make scatterplot with lines and R2 values from linear model
 make_scatter_plot <- function (input.plot.data, model_data, indep_var, dep_var, ylabel) {
+  
+  # extract formatted r squared value for this plot
+  r.squared <- paste("italic(R)^2 ==", round(model_data[dep_var,"r.squared"], 2), sep=" " )    
+  
   p <- ggplot (data = input.plot.data, aes_string(x = indep_var, y = dep_var, color = "habit")) +
     geom_abline(intercept = model_data[dep_var,"inter.ter"], slope = model_data[dep_var,"slope.ter"], color=cols[1]) +
     geom_abline(intercept = model_data[dep_var,"inter.epi"], slope = model_data[dep_var,"slope.epi"], color=cols[2]) +
-    annotate("text", x=Inf, y=Inf, hjust=1, vjust=1, label = paste("R2 = ", round(model_data[dep_var,"r.squared"], 2), sep="")) +
+    annotate("text",
+             x=Inf,
+             y=Inf,
+             label=r.squared,
+             parse=TRUE,
+             hjust=1,
+             vjust=1) +
     geom_point(size = 2) +
     standard_theme +
     theme(legend.position = "none") +
     xlab("Elevation (m)") +
     ylab(ylabel) +
-    scale_colour_manual(values = cols)
+    scale_colour_manual(values = cols) +
+    scale_x_continuous(breaks=c(0,250,500,750,1000))
   return(p)
 }
+
 
 # set colors for manual line plotting: green for epiphytes, brown for terrestrial
 qualcols <- brewer.pal(9, "Set1")
 cols <- qualcols[c(7,3)]
-
-# reset growth habit levels
-grand_means$habit <- factor(grand_means$habit, levels =c("ter", "epi"))
-levels(grand_means$habit) <- c("terrestrial", "epiphytic")
 
 # make each figure part
 partA <- make_scatter_plot (grand_means, slopes.results, "el", "mean_temp", "Mean Temp. (C)")

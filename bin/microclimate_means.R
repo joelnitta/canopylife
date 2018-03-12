@@ -8,7 +8,7 @@ library(mooreaferns) # moorea_climate
 setwd(here::here())
 
 # calculate daily maximum, mean, minimum, and SD of temperature and RH by site
-daily_values <- plyr::ddply(moorea_climate, plyr::.(site, date), summarize,
+daily_values <- plyr::ddply(moorea_climate, plyr::.(site, date), plyr::summarize,
                             max_temp = max(temp),
                             mean_temp = mean(temp),
                             min_temp = min(temp),
@@ -19,7 +19,7 @@ daily_values <- plyr::ddply(moorea_climate, plyr::.(site, date), summarize,
                             sd_RH = sd(RH))
 
 # calculate grand means of daily values for temperature and RH by site
-grand_means <- plyr::ddply(daily_values, "site", summarize,
+grand_means <- plyr::ddply(daily_values, "site", plyr::summarize,
                            max_temp = mean(max_temp),
                            mean_temp = mean(mean_temp),
                            min_temp = mean(min_temp),
