@@ -7,61 +7,21 @@ library(ggplot2) # plotting functions
 library(cowplot) # plot_grid
 library(RColorBrewer) # brewer.pal
 library(mooreaferns) # datasets and custom functions
-library(plyr) #ddply
 
 # set working directory
 setwd(here::here())
 
-################
-### Get Data ###
-################
+##########################################
+### calculate mean microclimate values ###
+##########################################
 
-# load site data, using only sites on Moorea
-moorea_sites <- mooreaferns::sites[grep("Aorai", sites$site, invert=TRUE), ]
+source("bin/microclimate_means.R")
 
-# reset row names
-rownames(moorea_sites) <- NULL
+##################
+### run ANCOVA ###
+##################
 
-# load raw microclimate data for Moorea (temperature and RH every 15 minutes)
-climate.data <- (mooreaferns::moorea_climate)
-
-# calculate daily maximum, mean, minimum, and SD of temperature and RH by site
-daily_values <- ddply(climate.data, .(site, date), summarize,
-                     max_temp = max(temp),
-                     mean_temp = mean(temp),
-                     min_temp = min(temp),
-                     sd_temp = sd(temp),
-                     max_RH = max(RH),
-                     mean_RH = mean(RH),
-                     min_RH = min(RH),
-                     sd_RH = sd(RH))
-
-# calculate grand means of daily values for temperature and RH by site
-grand_means <- ddply(daily_values, "site", summarize,
-                     max_temp = mean(max_temp),
-                     mean_temp = mean(mean_temp),
-                     min_temp = mean(min_temp),
-                     sd_temp = mean(sd_temp),
-                     max_RH = mean(max_RH),
-                     mean_RH = mean(mean_RH),
-                     min_RH = mean(min_RH),
-                     sd_RH = mean(sd_RH))
-
-### reformat data to be in site x variable format
-# add a column for growth habit: daily means
-daily_values$habit <- ""
-daily_values$habit[grep("epi", daily_values$site)] <- "epi"
-daily_values$habit[grep("ter", daily_values$site)] <- "ter"
-daily_values$site <- gsub("_epi", "", daily_values$site)
-daily_values$site <- gsub("_ter", "", daily_values$site)
-# grand means
-grand_means$habit <- ""
-grand_means$habit[grep("epi", grand_means$site)] <- "epi"
-grand_means$habit[grep("ter", grand_means$site)] <- "ter"
-grand_means$site <- gsub("_epi", "", grand_means$site)
-grand_means$site <- gsub("_ter", "", grand_means$site)
-
-# add latitude, longitude, and elevation
+# add latitude, longitude, and elevation to microclimate means
 daily_values <- merge(daily_values, moorea_sites, by="site", all.x=TRUE)
 grand_means <- merge(grand_means, moorea_sites, by="site", all.x=TRUE)
 
@@ -72,12 +32,6 @@ grand_means <- merge(grand_means, moorea_sites, by="site", all.x=TRUE)
 # make sure growth habit is factor
 daily_values$habit <- as.factor(daily_values$habit)
 grand_means$habit <- as.factor(grand_means$habit)
-
-rm(climate.data)
-
-##################
-### run ANCOVA ###
-##################
 
 # set response variables
 resp_vars <- c("max_temp", "mean_temp", "min_temp", "sd_temp", "max_RH", "mean_RH", "min_RH", "sd_RH")
