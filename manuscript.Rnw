@@ -256,15 +256,14 @@ important extant epiphytic clade). Other major clades: EI, eupolypods I; EII, eu
 II.
 \vspace{\baselineskip}
 
-\noindent\fig \ref{fig:CWM}. Mean values of selected functional morphological traits of epiphytic and
-terrestrial ferns on Moorea, French Polynesia. Epiphytic values in green, terrestrial
-values in brown. A) Community-weighted mean (CWM) values for each trait plotted
+\noindent\fig \ref{fig:CWM}. Change in selected functional traits of ferns on Moorea, French Polynesia across environmental gradients and between growth habit types (epiphytic or terrestrial). Epiphytic values in green, terrestrial
+values in brown. Scatterplots show community-weighted mean (CWM) values for each trait plotted
 against either minimum relative humidity ($\n = 13$ communities each for epiphytes and
 terrestrial species) or elevation ($\n = 17$ communities each). Trendlines indicate
-significant relationships determined by a linear model at $\pval<0.05$. B) Mean values for all
-species by growth habit for each trait. Numbers of species with observations available
-differed for each trait and are shown at bottom of each barplot. Asterisks indicate
-statistical significance of one-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
+significant relationships determined by a linear model at $\pval<0.05$. Barplots show mean values for all
+species by growth habit (epiphytic or
+terrestrial) for each trait. Error bars show standard error. Asterisks indicate
+statistical significance of two-sided \tval-test for differences between epiphytic and terrestrial species; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
 Trends for three leaf size traits (stipe length, frond length, and frond with) were
 quantitatively very similar, so of these we only present stipe length.
 \vspace{\baselineskip}
@@ -273,12 +272,12 @@ quantitatively very similar, so of these we only present stipe length.
 communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial
 communities in brown. Response variable abbreviations as follows: MPD, standard effect
 size (SES) of mean phylogenetic distance; MNTD, SES of mean nearest taxon distance;
-FRic, functional richness; FEve, functional evenness; FDiv, functional diversity. A)
-Response variables plotted against either minimum relative humidity ($\n = 13$
+FRic, functional richness; FEve, functional evenness; FDiv, functional diversity. Scatterplots show
+response variables plotted against either minimum relative humidity ($\n = 13$
 communities each for epiphytes and terrestrial species) or elevation ($\n = 17$ communities
-each). Trendlines indicate significant relationships determined by a linear model at $\pval<0.05$. B) Median values (box plots) of response variables by growth habit (epiphytic or
+each). Trendlines indicate significant relationships determined by a linear model at $\pval<0.05$. Boxplots show median values (bold lines) of response variables by growth habit (epiphytic or
 terrestrial) across all communities (epiphytic communities, $\n = 17$; terrestrial
-communities, $\n = 17$). Medians shown with bold lines, lower and upper hinges
+communities, $\n = 17$). Lower and upper hinges
 correspond to first and third quartiles, and whiskers extend to values within 1.5 $\times$ the
 interquartile range. Asterisks indicate statistical significance of one-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
 
