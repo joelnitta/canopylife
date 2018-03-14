@@ -1,23 +1,53 @@
-library(xlsx)
+# traits_on_tree
+
+# Plot sporophyte and gametophyte traits on phylogenetic tree
+
+# load packages
 library(ape)
 library(scales)
 library(RColorBrewer)
+library(mooreaferns)
 
-setwd("/Users/joelnitta/R/moorea/")
-source("bin/my_funcs.R")
-source("bin/traits/get_traits.R")
+# axisGeo from phyloch is used to make geological time scale
+# phyloch must be installed from source from the developer's website
+# http://www.christophheibl.de/Rpackages.html
+# download "package source", unzip, then run: install.packages("path_to_package", repos = NULL, type="source")
+library(phyloch)
 
+# set working directory
+setwd(here::here())
+
+# helper functions --------------------------------------------------------
+
+# function to bin traits and assign colors for quant. traits
+make_cols <- function(trait, palette) {
+  colors <- as.character(cut(trait, breaks = 5, include.lowest = TRUE, labels=brewer.pal(5, palette)))
+  return(colors)
+}
+
+# function to make vector of 1s and 0s for missing data
+make_na <- function(trait) {
+  colors.na <- rep(0, length(trait))
+  colors.na[which(is.na(trait))] <- 1
+  return(colors.na)
+}
+
+# load data ---------------------------------------------------------------
+
+### traits
 # load untransformed traits
-traits <- get.my.traits(log.trans = FALSE, scale.traits = FALSE)
+traits <- mooreaferns::fern_traits
+
+# add rownames to traits, drop species
+rownames(traits) <- traits$species
+traits$species <- NULL
 
 # drop species with NAs for more than half of traits
 trait_cutoff <- ncol(traits)*0.5
 traits <- traits[rowSums(is.na(traits)) < trait_cutoff, ]
-# traits <- traits[complete.cases(traits),]
 
-# load tree
-tree_file <- set_input_files()[[2]]
-phy <- read.tree(tree_file)
+### tree
+phy <- mooreaferns::fern_tree
 
 # trim to only species with trait data
 phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
@@ -37,7 +67,7 @@ traits$stipe <- log(traits$stipe + 1)
 traits$length <- log(traits$length + 1)
 traits$width <- log(traits$width + 1)
 traits$rhizome <- log(traits$rhizome + 1)
-traits$SLA <- log(traits$SLA + 1)
+traits$sla <- log(traits$sla + 1)
 traits$pinna <- log(traits$pinna + 1)
 
 # then rescale (log-transform got most to range of 0-6, so standardize to 0.5-5)
@@ -46,32 +76,15 @@ traits$length <- rescale(traits$length, c(0.5,5))
 traits$width <- rescale(traits$width, c(0.5,5))
 traits$rhizome <- rescale(traits$rhizome, c(0.5,5))
 traits$dissection <- rescale(traits$dissection, c(0.5,5))
-traits$SLA <- rescale(traits$SLA, c(0.5,5))
+traits$sla <- rescale(traits$sla, c(0.5,5))
 traits$pinna <- rescale(traits$pinna, c(0.5,5))
 
-# make colorblind-friendly palette
-# my.cols <- c("#000000", "#E69F00", "#56B4E9", "#009E73", "#F0E442", "#0072B2", "#D55E00", "#CC79A7")
-
-# function to bin traits and assign colors for quant. traits
-make_cols <- function(trait, palette) {
-  colors <- as.character(cut(trait, breaks = 5, include.lowest = TRUE, labels=brewer.pal(5, palette)))
-  return(colors)
-}
-
-# function to make vector of 1s and 0s for missing data
-make_na <- function(trait) {
-  colors.na <- rep(0, length(trait))
-  colors.na[which(is.na(trait))] <- 1
-  return(colors.na)
-}
-#############################################
-### set up colors for quantitative traits ###
-#############################################
+# set up colors for quantitative traits -----------------------------------
 
 # we're going to fill this list with colors for each trait
 colors.list <- list()
 #quant.traits <- c("stipe", "length", "width", "rhizome", "dissection", "pinna", "SLA")
-quant.traits <- c("stipe", "rhizome", "dissection", "pinna", "SLA")
+quant.traits <- c("stipe", "rhizome", "dissection", "pinna", "sla")
 
 # palettes <- c("Blues", "Oranges", "Greens", "Purples", "BuGn", "YlGn", "Reds")
 
@@ -88,11 +101,9 @@ for (i in 1:length(quant.traits)) {
 }
 names(na.list) <- quant.traits
 
-#############################################
-### set up colors for qualitative traits
-#############################################
+# set up colors for qualitative traits ------------------------------------
 
-# list of actual colors that will go on the tips
+# make empty list of colors that will go on the tips
 colors.qual <- list()
 
 # define my palette of colors to choose from
@@ -103,27 +114,21 @@ qualcols <- brewer.pal(9, "Set1")
 pairedcols <- brewer.pal(8, "Paired")
 
 # sample plot to choose colors
-plot (1:length(pairedcols), 1:length(pairedcols), pch = 16, col = pairedcols)
+# plot (1:length(pairedcols), 1:length(pairedcols), pch = 16, col = pairedcols)
+
 # list of qualitative traits
 qual.traits <- c("habit", "morph_binary", "gemmae", "glands", "hairs")
-# old version
-# palette.qual <- c(qualcols, pairedcols)
-# choose colors for each trait pair. First color is present, second is absent
-# palette.qual <- c(palette.qual[c(3,7, #habit
-#                                 1,2, #glands
-#                                 4,5, #hairs
-#                                 6,9, #gemmae
-#                                 12,14)]) #morph_binary
 
-# try shades for present / absent
+# use shades for present / absent
 palette.qual <- c(qualcols[c(3,7)], #habit: green, brown
                   pairedcols[c(1,2)], #morph: dark and light blue
-                  pairedcols[c(4,3)], #gemmae
-                  pairedcols[c(6,5)], #glands
-                  pairedcols[c(8,7)]) #hairs
+                  pairedcols[c(4,3)], #gemmae: dark and light green
+                  pairedcols[c(6,5)], #glands: red and pink
+                  pairedcols[c(8,7)]) #hairs: dark and light orange
 
+# fill in list of tip colors for each trait
 colors.qual$habit <- rep(palette.qual[1], length(traits$habit))
-colors.qual$habit[traits$habit == 0] <- palette.qual[2]
+colors.qual$habit[traits$habit == "terrestrial"] <- palette.qual[2]
 colors.qual$habit[is.na(traits$habit)] <- NA
 
 colors.qual$morph_binary <- rep(palette.qual[3], length(traits$morph_binary))
@@ -142,15 +147,15 @@ colors.qual$hairs <- rep(palette.qual[9], length(traits$hairs))
 colors.qual$hairs[traits$hairs == 0] <- palette.qual[10]
 colors.qual$hairs[is.na(traits$hairs)] <- NA
 
-
-# list of NAs for each trait
+# make list of NAs for each trait
 na.list.qual <- list()
 for (i in 1:length(qual.traits)) {
   na.list.qual[[i]] <- make_na(traits[,colnames(traits) %in% qual.traits[i]])
 }
 names(na.list.qual) <- qual.traits
 
-### setting for plot
+# set up plot -------------------------------------------------------------
+
 # set transparent outline
 outline <- rgb(0,0,0,alpha=0)
 # space between squares
@@ -165,26 +170,33 @@ leg.spacer <- 10
 n.traits <- length(qual.traits) + length(quant.traits)
 n.quant <- length(quant.traits)
 
-# turn off plotting for now
-# pdf(file=make_filename("traits_on_tree", ".pdf", date=TRUE), width=6.5, height = 9)
+# output plot -------------------------------------------------------------
 
+pdf(file="traits_on_tree.pdf", width=6.5, height=9)
+
+# base plot
 plot(phy, no.margin=FALSE, cex=0.35, show.tip.label = TRUE, label.offset=(n.traits + 1)*spacer)
+
 # first trait: add green/brown squares for epis
 tiplabels(pch=22,cex=0.8, col = outline, bg = colors.qual$habit, adj = 1*spacer)
+
 # add squares with grey heat-map for quant. traits
 for (i in 1:length(colors.list)) {
   tiplabels(pch=22,cex=0.8,col = outline, bg = colors.list[[i]], adj = (i+1)*spacer)
   tiplabels(pch="\\", cex=0.5*na.list[[i]],  col = "black", adj = (i+1)*spacer)
 }
+
 # add colored squares for qual. traits
 for (i in 2:length(colors.qual)) {
   tiplabels(pch=22,cex=0.8,col = outline, bg = colors.qual[[i]], adj = (i+n.quant)*spacer)
   tiplabels(pch="\\", cex=0.5*na.list.qual[[i]],  col = "black", adj = (i+n.quant)*spacer)
 }
+
 # add titles for traits
 for (i in 1:length(trait.names)) {
-mtext(trait.names[i], side = 3, at = 392 + i*spacer,srt=60, las=2, cex=0.5, padj=0, adj = 0, line=-1)
+  mtext(trait.names[i], side = 3, at = 392 + i*spacer,srt=60, las=2, cex=0.5, padj=0, adj = 0, line=-1)
 }
+
 # add node labels
 # epiphytic clades
 nodelabels ("H", getMRCA(phy, c("Hymenophyllum_multifidum", "Hymenophyllum_flabellatum")), cex=.8, bg=palette.qual[1], col="black", frame="circle")
@@ -197,10 +209,15 @@ nodelabels ("P", getMRCA(phy, c("Selliguea_plantaginea", "Oreogrammitis_raiateen
 nodelabels ("EI ", getMRCA(phy, c("Leucostegia_pallida", "Oreogrammitis_raiateensis")), cex=.8, col="black", bg="grey")
 nodelabels ("EII ", getMRCA(phy, c("Diplazium_ellipticum", "Asplenium_affine")), cex=.8, col="black", bg="grey")
 
-legend(c(12,leg.ymax), legend = c("Epiphytic", "Terrestrial"), title = qual.traits[1], pch = 22, col = outline, fill = c(palette.qual[1], palette.qual[2]), cex = 0.7, pt.cex = 1, bty = "n")
-legend(c(12,leg.ymax-(1*leg.spacer)), legend = c("Cordate", "Non-cordate"), title = qual.traits[2], pch = 22, col = outline, fill = c(palette.qual[3], palette.qual[4]), cex = 0.7, pt.cex = 1, bty = "n")
-legend(c(12,leg.ymax-(2*leg.spacer)), legend = c("Gemmae", "No gemmae"), title = qual.traits[3], pch = 22, col = outline, fill = c(palette.qual[5], palette.qual[6]), cex = 0.7, pt.cex = 1, bty = "n")
-legend(c(12,leg.ymax-(3*leg.spacer)), legend = c("Glands", "No glands"), title = qual.traits[4], pch = 22, col = outline, fill = c(palette.qual[7], palette.qual[8]), cex = 0.7, pt.cex = 1, bty = "n")
-legend(c(12,leg.ymax-(4*leg.spacer)), legend = c("Hairs", "No hairs"), title = qual.traits[5], pch = 22, col = outline, fill = c(palette.qual[9], palette.qual[10]), cex = 0.7, pt.cex = 1, bty = "n")
+# add legend
+legend(c(12,leg.ymax), legend = c("Epiphytic", "Terrestrial"), title = qual.traits[1], pch = 22, col = outline, fill = c(palette.qual[1], palette.qual[2]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(1*leg.spacer)), legend = c("Cordate", "Non-cordate"), title = qual.traits[2], pch = 22, col = outline, fill = c(palette.qual[3], palette.qual[4]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(2*leg.spacer)), legend = c("Gemmae", "No gemmae"), title = qual.traits[3], pch = 22, col = outline, fill = c(palette.qual[5], palette.qual[6]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(3*leg.spacer)), legend = c("Glands", "No glands"), title = qual.traits[4], pch = 22, col = outline, fill = c(palette.qual[7], palette.qual[8]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(4*leg.spacer)), legend = c("Hairs", "No hairs"), title = qual.traits[5], pch = 22, col = outline, fill = c(palette.qual[9], palette.qual[10]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
 
-# dev.off()
+# add geologic scale bar using axisGeo from phyloch
+data(strat2012)
+axisGeo(GTS = strat2012, unit="period", cex=0.8)
+
+dev.off()
