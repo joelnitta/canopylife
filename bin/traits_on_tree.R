@@ -57,9 +57,9 @@ traits <- traits[phy$tip.label,]
 
 # convert morphotype to binary trait
 # make binary morph category: 0 is noncordate, 1 is cordate
-traits$morph_binary <- 0
-traits$morph_binary[which(traits$morphotype == "cordate")] <- 1
-traits$morphotype <- NULL
+morph_binary <- rep(0, nrow(traits))
+morph_binary[which(traits$morphotype == "cordate")] <- 1
+traits$morphotype <- morph_binary
 
 # log-transform traits because they vary over a large range
 # (except for dissection)
@@ -81,12 +81,9 @@ traits$pinna <- rescale(traits$pinna, c(0.5,5))
 
 # set up colors for quantitative traits -----------------------------------
 
-# we're going to fill this list with colors for each trait
+# make empty list to store vectors of colors (greyscale) for plotting at tips, one for each trait
 colors.list <- list()
-#quant.traits <- c("stipe", "length", "width", "rhizome", "dissection", "pinna", "SLA")
 quant.traits <- c("stipe", "rhizome", "dissection", "pinna", "sla")
-
-# palettes <- c("Blues", "Oranges", "Greens", "Purples", "BuGn", "YlGn", "Reds")
 
 palettes <- rep("Greys", length(quant.traits))
 for (i in 1:length(quant.traits)) {
@@ -94,7 +91,7 @@ for (i in 1:length(quant.traits)) {
 }
 names(colors.list) <- quant.traits
 
-# list of NAs for each trait
+# make list of NAs for each trait
 na.list <- list()
 for (i in 1:length(quant.traits)) {
   na.list[[i]] <- make_na(traits[,colnames(traits) %in% quant.traits[i]])
@@ -103,13 +100,13 @@ names(na.list) <- quant.traits
 
 # set up colors for qualitative traits ------------------------------------
 
-# make empty list of colors that will go on the tips
+# make empty list to store vectors of colors that will go on the tips
 colors.qual <- list()
 
 # define my palette of colors to choose from
 # list of qualitative colors from color brewer
 qualcols <- brewer.pal(9, "Set1")
-# list of paired colors from color brewer
+
 # not enough colors in set1, so add paired set as well
 pairedcols <- brewer.pal(8, "Paired")
 
@@ -117,11 +114,11 @@ pairedcols <- brewer.pal(8, "Paired")
 # plot (1:length(pairedcols), 1:length(pairedcols), pch = 16, col = pairedcols)
 
 # list of qualitative traits
-qual.traits <- c("habit", "morph_binary", "gemmae", "glands", "hairs")
+qual.traits <- c("habit", "morphotype", "gemmae", "glands", "hairs")
 
 # use shades for present / absent
 palette.qual <- c(qualcols[c(3,7)], #habit: green, brown
-                  pairedcols[c(1,2)], #morph: dark and light blue
+                  pairedcols[c(1,2)], #morphotype: dark and light blue
                   pairedcols[c(4,3)], #gemmae: dark and light green
                   pairedcols[c(6,5)], #glands: red and pink
                   pairedcols[c(8,7)]) #hairs: dark and light orange
@@ -131,9 +128,9 @@ colors.qual$habit <- rep(palette.qual[1], length(traits$habit))
 colors.qual$habit[traits$habit == "terrestrial"] <- palette.qual[2]
 colors.qual$habit[is.na(traits$habit)] <- NA
 
-colors.qual$morph_binary <- rep(palette.qual[3], length(traits$morph_binary))
-colors.qual$morph_binary[traits$morph_binary == 0] <- palette.qual[4]
-colors.qual$morph_binary[is.na(traits$morph_binary)] <- NA
+colors.qual$morphotype <- rep(palette.qual[3], length(traits$morphotype))
+colors.qual$morphotype[traits$morphotype == 0] <- palette.qual[4]
+colors.qual$morphotype[is.na(traits$morphotype)] <- NA
 
 colors.qual$gemmae <- rep(palette.qual[5], length(traits$gemmae))
 colors.qual$gemmae[traits$gemmae == 0] <- palette.qual[6]
@@ -161,7 +158,7 @@ outline <- rgb(0,0,0,alpha=0)
 # space between squares
 spacer <- 7
 # list of trait names to plot on top
-trait.names <- c(names(colors.qual)[1], names(colors.list), names(colors.qual)[2:4])
+trait.names <- c(names(colors.qual)[1], names(colors.list), names(colors.qual)[2:5])
 # ymax position of legend
 leg.ymax <- 120
 leg.spacer <- 10
@@ -193,8 +190,16 @@ for (i in 2:length(colors.qual)) {
 }
 
 # add titles for traits
+# one way: in margin, vertical (can't rotate mtext)
+#for (i in 1:length(trait.names)) {
+  #mtext(trait.names[i], side = 3, at = 392 + i*spacer, srt=60, las=2, cex=0.5, padj=0, adj = 0, line=-1)
+#}
+
+# another way: rotated
+corners = par("usr") #Gets the four corners of plot area (x1, x2, y1, y2)
+par(xpd = TRUE) #Draw outside plot area
 for (i in 1:length(trait.names)) {
-  mtext(trait.names[i], side = 3, at = 392 + i*spacer,srt=60, las=2, cex=0.5, padj=0, adj = 0, line=-1)
+  text(x = 392+ i*spacer, y = corners[4]-1, trait.names[i], srt = 70, cex=0.5, adj=0)
 }
 
 # add node labels
@@ -210,14 +215,15 @@ nodelabels ("EI ", getMRCA(phy, c("Leucostegia_pallida", "Oreogrammitis_raiateen
 nodelabels ("EII ", getMRCA(phy, c("Diplazium_ellipticum", "Asplenium_affine")), cex=.8, col="black", bg="grey")
 
 # add legend
-legend(c(12,leg.ymax), legend = c("Epiphytic", "Terrestrial"), title = qual.traits[1], pch = 22, col = outline, fill = c(palette.qual[1], palette.qual[2]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
-legend(c(12,leg.ymax-(1*leg.spacer)), legend = c("Cordate", "Non-cordate"), title = qual.traits[2], pch = 22, col = outline, fill = c(palette.qual[3], palette.qual[4]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
-legend(c(12,leg.ymax-(2*leg.spacer)), legend = c("Gemmae", "No gemmae"), title = qual.traits[3], pch = 22, col = outline, fill = c(palette.qual[5], palette.qual[6]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
-legend(c(12,leg.ymax-(3*leg.spacer)), legend = c("Glands", "No glands"), title = qual.traits[4], pch = 22, col = outline, fill = c(palette.qual[7], palette.qual[8]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
-legend(c(12,leg.ymax-(4*leg.spacer)), legend = c("Hairs", "No hairs"), title = qual.traits[5], pch = 22, col = outline, fill = c(palette.qual[9], palette.qual[10]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax), legend = c("Epiphytic", "Terrestrial"), title = "Growth Habit", pch = 22, col = outline, fill = c(palette.qual[1], palette.qual[2]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(1*leg.spacer)), legend = c("Cordate", "Non-cordate"), title = "Morphotype", pch = 22, col = outline, fill = c(palette.qual[3], palette.qual[4]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(2*leg.spacer)), legend = c("Present", "Absent"), title = "Gemmae", pch = 22, col = outline, fill = c(palette.qual[5], palette.qual[6]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(3*leg.spacer)), legend = c("Present", "Absent"), title = "Glands", pch = 22, col = outline, fill = c(palette.qual[7], palette.qual[8]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
+legend(c(12,leg.ymax-(4*leg.spacer)), legend = c("Present", "Absent"), title = "Hairs", pch = 22, col = outline, fill = c(palette.qual[9], palette.qual[10]), cex = 0.7, pt.cex = 1, bty = "n", title.adj=0)
 
 # add geologic scale bar using axisGeo from phyloch
 data(strat2012)
-axisGeo(GTS = strat2012, unit="period", cex=0.8)
+axisPhylo()
+axisGeo(GTS = strat2012, unit="period", cex=0.8, ages=FALSE)
 
 dev.off()
