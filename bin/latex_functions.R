@@ -93,6 +93,7 @@ custom_cols <- function (cols) {
   cols <- gsub ("inter\\.epi", "Intercept (epiphytic)", cols)
   cols <- gsub ("slope\\.ter", "Slope (terrestrial)", cols)
   cols <- gsub ("inter\\.ter", "Intercept (terrestrial)", cols)
+  cols <- gsub ("r\\.squared", "$\\\\rval^2$", cols)
   
   # Table S4
   # trait PCA

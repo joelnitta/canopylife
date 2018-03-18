@@ -93,10 +93,10 @@ for (i in 1:length(resp_vars)) {
   model1 <- lm(formula(paste(resp_vars[i], " ~ habit/el + 0", sep="")), data=daily_values)
   model2 <- lm(formula(paste(resp_vars[i], " ~ habit*el", sep="")), data=daily_values)
   parameters <- coef(model1)
-  slope.epi[[i]] <- parameters[3]
-  inter.epi[[i]] <- parameters[1]
-  slope.ter[[i]] <- parameters[4]
-  inter.ter[[i]] <- parameters[2]
+  slope.epi[[i]] <- parameters[4]
+  inter.epi[[i]] <- parameters[2]
+  slope.ter[[i]] <- parameters[3]
+  inter.ter[[i]] <- parameters[1]
   r.squared[[i]] <- summary(model2)$r.squared
   pval[[i]] <- summary(model2)$coefficients[4,4]
 }
@@ -155,10 +155,6 @@ climate_plot <- plot_grid(partA, partB, partC, partD, nrow=2, ncol=2, labels = N
 
 # write out pdf
 save_plot("microclimate.pdf", climate_plot, base_height = 4, base_width = 6)
-
-# don't need pvalue and rsquared in slopes.results anymore (already in ancova.results or plot)
-slopes.results$pval <- NULL
-slopes.results$r.squared <- NULL
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)
 rm(list=ls()[grep("result", ls(), invert=TRUE)])
