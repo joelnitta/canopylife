@@ -651,7 +651,7 @@ right_plots <- plot_scatter_dataset (resp_vars, compare.df, "el", xlabel="Elevat
 
 # also output linear model results in dataframe for MS
 univar.env.results <- plot_scatter_dataset (resp_vars, compare.env, "min_RH", xlabel="Minimum RH (%)", ylabels=my.ylabels)[[2]]
-univar.el.results <- plot_scatter_dataset (resp_vars, compare.env, "min_RH", xlabel="Minimum RH (%)", ylabels=my.ylabels)[[2]]
+univar.el.results <- plot_scatter_dataset (resp_vars, compare.df, "el", xlabel="Elevation (m)", ylabels=my.ylabels)[[2]]
 
 ### make various adjustments to plots
 
