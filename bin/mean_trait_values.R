@@ -1,5 +1,7 @@
-library(tidyverse)
+#library(tidyverse)
 library(mooreaferns)
+library(dplyr)
+library(tidyr)
 
 setwd(here::here())
 
@@ -10,9 +12,9 @@ setwd(here::here())
 # load raw measurements, including multiple measurements per individual
 sla.raw <- mooreaferns::sla.raw
 
-# Nitta 2543 Ptisana salicina is in ERROR, should be Nitta 2544.
+# Nitta 2543 Ptisana salicina is in error, it should be Nitta 2544.
 # Already have measurements for 2544 P. salicina, so it must have been measured twice.
-# Exclude 2544 P. salicina
+# So exclude 2544 P. salicina
 sla.raw <- sla.raw[!(sla.raw$specimen=="Nitta_2544" & sla.raw$species=="Ptisana_salicina"), ]
 
 # calculate mean SLA for each individual
@@ -23,12 +25,12 @@ sla.mean <-
   left_join(unique(select(sla.raw, species, specimen)))
 
 # calculate grand mean for each species based on individual means
-sla.grand.mean <- 
+sla.grand.mean.results <- 
   sla.mean %>%
   group_by(species) %>%
   summarize(mean = mean(sla) , sd = sd(sla), n = n())
   
-sla.grand.mean$trait <- "sla"
+sla.grand.mean.results$trait <- "sla"
 
 ####################
 ### other traits ###
@@ -51,13 +53,13 @@ morph.mean <-
 rm(morph.long)
 
 # merge with sla grand means
-morph.mean <- bind_rows(morph.mean, sla.grand.mean)
+morph.mean <- bind_rows(morph.mean, sla.grand.mean.results)
 
 # split means into numeric and integer (only number of pinna pairs) measurements
 morph.numeric <- filter(morph.mean, trait == "frond.length" | trait == "lamina.width" | trait == "rhizome.dia" | trait == "stipe.length" | trait == "sla") 
 morph.int <- filter(morph.mean, trait == "pinna.pairs")
 
-# set number of signif digits differently for each
+# set number of signif digits differently for numeric vs integer measurements
 # numeric measurements made with normal ruler in cm, so should have to 2 digits after 0
 # need to use formatC to keep trailing zeros
 # see https://kmyu.wordpress.com/2011/01/11/formatting-numbers-for-printing-in-r-rounding-and-trailing-zeroes/
@@ -86,17 +88,51 @@ morph.mean <-
 ###################################
 
 morph.results <- 
-  select(mooreaferns::fern_traits, species, habit, dissection, morphotype, glands, hairs, gemmae) %>%
+  select(mooreaferns::fern_traits, species, habit, dissection, morphotype, glands, hairs, gemmae, gameto_source) %>%
   left_join(morph.mean)
 
-# need to add lit sources, output as CSV
+# read in sources for measurements
+meas_sources <- morph.raw %>% 
+  select(species, source) %>% 
+  group_by(species, source) %>% 
+  summarize()
 
+# rename sources according to abbreviations
+meas_sources$source <- recode(meas_sources$source,
+  measurement = "M",
+  `Ferns & Fern-Allies of South Pacific Islands` = "1",
+  `Pteridophytes of the Society Islands` = "2",
+  `Hawaii's Ferns and Fern Allies` = "3",
+  `Flora of New South Wales` = "4",
+  `Brownsey 1987` = "5"
+  )
 
+meas_sources <- arrange(meas_sources, species, desc(source))
 
+# add sources to mean measurements
+morph.results$sporo_source <- NA
+for (i in 1:nrow(morph.results)) {
+  morph.results$sporo_source[i] <- paste(meas_sources$source[morph.results$species[i] == meas_sources$species], collapse=", ")
+}
 
-# need to decide what to do with Hymenophyllum braitwaitei (right now in SLA but not other traits)
-# morph.mean <- merge(morph.mean, sla.grand.mean, by = "species", all.x=TRUE, all.y=TRUE)
+### final formatting for column names
+# reorder columns
+morph.results <- select(morph.results, species, habit, morphotype, gemmae, glands, hairs, gameto_source, dissection, pinna.pairs, frond.length, lamina.width, stipe.length, rhizome.dia, sla, sporo_source)
 
-# format for supp. info table
-# rownames(morph.mean) <- morph.mean$species
-# morph.mean$species <- NULL
+# rename sources according to abbreviations
+colnames(morph.results) <- gsub("\\.", " ", colnames(morph.results))
+colnames(morph.results) <- recode(colnames(morph.results),
+                              `frond length` = "frond length (cm)",
+                              `lamina width` = "frond width (cm)",
+                              `rhizome dia` = "rhizome diam. (cm)",
+                              `stipe length` = "stipe length (cm)",
+                              sla = "SLA",
+                              gameto_source = "gametophyte data source",
+                              sporo_source = "sporophyte data source"
+)
+
+# write out csv
+write.csv(morph.results, file="Table_S5.csv", row.names=FALSE, fileEncoding= "UTF-8")
+
+# clean up workspace (reserve "result" in object name only for final results objects to keep)
+rm(list=ls()[grep("result", ls(), invert=TRUE)])

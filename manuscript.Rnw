@@ -49,6 +49,7 @@ opts_chunk$set(warning=FALSE)
 <<run_analyses, results="hide">>=
 # set working directory, run all analyses, save results objects
 setwd(here::here())
+source(file = "bin/mean_trait_values.R")
 source(file = "bin/microclimate.R")
 source(file = "bin/trait_PCA.R")
 source(file = "bin/cont_phylosig.R")
@@ -57,8 +58,23 @@ source(file = "bin/sporo_PIC.R")
 source(file = "bin/correlated_evo.R")
 source(file = "bin/binaryPGLMM.R")
 source(file = "bin/functional_diversity.R")
-source(file = "bin/mean_trait_values.R") # this must be last to keep sla.grand.mean
 save(list = ls(all = TRUE), file= "results.RData")
+@
+
+<<calculate_richness>>=
+### calculate number of species observed in plots total and by growth habit
+# use only sites on Moorea
+sites <- mooreaferns::sites[grep("Aorai", mooreaferns::sites$site, invert=TRUE), ]
+# load untransformed traits
+traits <- mooreaferns::fern_traits
+# load community data
+comm <- mooreaferns::sporocomm
+# trim community data to only moorea sites
+comm <- comm[rownames(comm) %in% sites$site, ]
+# keep only species with at least one observation
+comm <- comm[, colSums(comm) > 0]
+# trim trait data to only species with at least one observation
+traits <- traits[traits$species %in% colnames(comm), ]
 @
 
 <<get_result_func>>=
@@ -94,7 +110,7 @@ get_result <- function (results_table, col_name, row_name=1, signif=FALSE, digit
 \section*{Summary}
 
 \begin{itemize}
-\item The appearance of angiosperm-dominated forests in the Cretaceous and early Cenozoic had a profound effect on terrestrial biota by creating novel ecological niches. The diversity of modern fern lineages are thought to be a response to angiosperm dominance, radiating both in the canopy and on the forest floor. Despite the significance of epiphytic growth for fern evolution, however, few studies have investigated traits related to epiphytism in ferns while accounting for phylogeny.
+\item The appearance of angiosperm-dominated forests in the Cretaceous and early Cenozoic had a profound effect on terrestrial biota by creating novel ecological niches. The diversity of modern fern lineages is thought to be a response to angiosperm dominance, radiating both in the canopy and on the forest floor. Despite the significance of epiphytic growth for fern evolution, however, few studies have investigated traits related to epiphytism in ferns while accounting for phylogeny.
 \item We investigated evolutionary patterns in traits related to epiphytic growth at the species and community level using a phylogeny including representatives of multiple epiphytic fern radiations on the island of Moorea, French Polynesia. 
 \item We observed phylogenetic conservatism in multiple traits related to epiphytic growth in fern sporophytes and gametophytes. Epiphytes had significantly shorter stipes, smaller rhizomes, and a higher frequency of non-cordate gametophytes while accounting for phylogeny. Epiphytic communities were clustered both phylogenetically and functionally, consistent with the hypothesis that the canopy acts as a filter due to its low humidity. 
 \item Our results provide an important phylogenetic perspective on the role of functional traits in ferns, and pave the way for more detailed studies examining how niche space is filled within terrestrial and epiphytic habitats.
@@ -186,22 +202,6 @@ Most sporophyte traits, including all those related to plant size, are significa
 
 \subsection*{Functional and Phylogenetic Diversity}
 
-<<calculate_richness>>=
-### calculate number of species observed in plots total and by growth habit
-# use only sites on Moorea
-sites <- mooreaferns::sites[grep("Aorai", mooreaferns::sites$site, invert=TRUE), ]
-# load untransformed traits
-traits <- mooreaferns::fern_traits
-# load community data
-comm <- mooreaferns::sporocomm
-# trim community data to only moorea sites
-comm <- comm[rownames(comm) %in% sites$site, ]
-# keep only species with at least one observation
-comm <- comm[, colSums(comm) > 0]
-# trim trait data to only species with at least one observation
-traits <- traits[traits$species %in% colnames(comm), ]
-@
-
 On a single-trait basis, distribution of community-weighted mean values (CWMs) showed significant correlation with elevation for some traits, but no significant relationship was detected for any traits with minimum RH (\fig \ref{fig:CWM}A). SLA decreased with elevation for epiphytic (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="sla", habit=="epiphytic"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="sla", habit=="epiphytic"), "p", signif=TRUE)}$) and terrestrial (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="sla", habit=="terrestrial"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="sla", habit=="terrestrial"), "p", signif=TRUE)}$) communities. Degree of lamina dissection decreased with elevation in epiphytes (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="dissection", habit=="epiphytic"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="dissection", habit=="epiphytic"), "p", signif=TRUE)}$), but not terrestrial communities. Stipe length showed a small, but significant, increase with elevation for epiphytic communities (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="stipe", habit=="epiphytic"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="stipe", habit=="epiphytic"), "p", signif=TRUE)}$). Rhizome diameter decreased with elevation for terrestrial communities (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="rhizome", habit=="terrestrial"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="rhizome", habit=="terrestrial"), "p", signif=TRUE)}$), but increased slightly in epiphytes (linear model, $\rval^2 = \Sexpr{get_result(filter(univar.el.results, variable=="rhizome", habit=="epiphytic"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(univar.el.results, variable=="rhizome", habit=="epiphytic"), "p", signif=TRUE)}$).
 
 We observed a total of \Sexpr{ncol(comm)} species across all plots, including \Sexpr{length(traits$habit[traits$habit == "epiphytic"])} epiphytic and \Sexpr{length(traits$habit[traits$habit == "terrestrial"])} terrestrial species. Mean species richness was $\Sexpr{get_result(filter(multvar.t.results, resp_var=="ntaxa", habit=="epiphytic"), "mean", signif=TRUE)} \pm \stdev \Sexpr{get_result(filter(multvar.t.results, resp_var=="ntaxa", habit=="epiphytic"), "sd", signif=TRUE)}$ \si{\species} per plot for epiphytes and $\Sexpr{get_result(filter(multvar.t.results, resp_var=="ntaxa", habit=="terrestrial"), "mean", signif=TRUE)} \pm \stdev \Sexpr{get_result(filter(multvar.t.results, resp_var=="ntaxa", habit=="terrestrial"), "sd", signif=TRUE)}$ \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, $\pval = \Sexpr{get_result(filter(multvar.t.results, resp_var=="ntaxa", habit=="terrestrial"), "pval", signif=TRUE)}$; \fig \ref{fig:FDIV}A). Species richness increased linearly with elevation and minimum RH for epiphytes, but not terrestrial communities (\fig \ref{fig:FDIV}B). Trait richness (FRic) was lower in epiphytic vs. terrestrial communities (two-sided \tval-test, $\pval = \Sexpr{get_result(filter(multvar.t.results, resp_var=="FRic", habit=="terrestrial"), "pval", signif=TRUE)}$), whereas functional diversity (FDiv) was lower in terrestrial communities (two-sided \tval-test, $\pval = \Sexpr{get_result(filter(multvar.t.results, resp_var=="FDiv", habit=="terrestrial"), "pval", signif=TRUE)}$), and functional evenness (FEve) did not differ between the two. FEve decreased with elevation, but not minimum RH, in terrestrial communities (\fig \ref{fig:FDIV}A). Epiphytic communities showed a trend of increasing trait richness along the environmental gradient, with greater FRic at high elevations (linear model, $\rval^2 = \Sexpr{get_result(filter(multvar.el.results, habit=="epiphytic", variable=="FRic"), "r.squared.plain", signif=TRUE)}$, $\pval = \Sexpr{get_result(filter(multvar.el.results, habit=="epiphytic", variable=="FRic"), "p", signif=TRUE, digits=1)}$) and plots with greater minimum RH (linear model, $\rval^2 = \Sexpr{get_result(filter(multvar.env.results, habit=="epiphytic", variable=="FRic"), "r.squared.plain")}$, $\pval = \Sexpr{get_result(filter(multvar.env.results, habit=="epiphytic", variable=="FRic"), "p")}$). Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD (two-sided \tval-test, $\pval = \Sexpr{get_result(filter(multvar.t.results, habit=="terrestrial", resp_var=="mntd.obs.z"), "pval", signif=TRUE)}$) but not MPD ($\pval = \Sexpr{get_result(filter(multvar.t.results, habit=="terrestrial", resp_var=="mpd.obs.z"), "pval", signif=TRUE, digits=2)}$; \fig \ref{fig:FDIV}B). No significant trend was detected in phylogenetic community structure with environment in either terrestrial or epiphytic communities (\fig \ref{fig:FDIV}A). 
@@ -218,9 +218,9 @@ Although several other studies have addressed the relationship of functional tra
 
 \subsection*{Sporophyte Traits}
 
-The sporophyte traits that differed most strongly between epiphytic and terrestrial taxa were related to overall size, including stipe and frond length, frond width, and rhizome diameter. Stipe length in particular differed strongly between epiphytes and terrestrial species (\fig\ref{fig:CWM}B, \tab\ref{table:PIC_sporo}). Stipe length may be a critical trait controlling whole leaf hydraulic conductance; since ferns have resistive stipes in general, species growing in water-limited habitats are expected to decrease stipe length to minimize resistance \citep{WatkinsJr.2010}. Our results support previous non-phylogenetically controlled studies that found a prevalence of short stipes in epiphytic ferns \citep{WatkinsJr.2010,Creese2011}. However, given that many of these size-related traits scale together in ferns \citep{Arcand2008,Creese2011}, careful experimental manipulations are needed to distinguish the role (or lack thereof) of each in epiphytic growth.
+The sporophyte traits that differed most strongly between epiphytic and terrestrial taxa were related to plant size, including stipe and frond length, frond width, and rhizome diameter. Stipe length in particular differed strongly between epiphytes and terrestrial species (\fig\ref{fig:CWM}B, \tab\ref{table:PIC_sporo}). Stipe length may be a critical trait controlling whole leaf hydraulic conductance; since ferns have resistive stipes in general, species growing in water-limited habitats are expected to decrease stipe length to minimize resistance \citep{WatkinsJr.2010}. Our results support previous non-phylogenetically controlled studies that found a prevalence of short stipes in epiphytic ferns \citep{WatkinsJr.2010,Creese2011}. However, given that many of these size-related traits scale together in ferns \citep{Arcand2008,Creese2011}, careful experimental manipulations are needed to distinguish the role (or lack thereof) of each in epiphytic growth.
 
-Surprisingly, SLA was only slightly lower in epiphytes relative to terrestrial species (\tab\ref{table:PIC_sporo}, \fig\ref{fig:CWM}B). SLA is an important part of the leaf economic spectrum, which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans \citep{Wright2004a}. We hypothesized that epiphytes would have lower SLA, given their more extreme growing conditions. Indeed, the species with the lowest SLA values were epiphytes (\eg, \textit{Selliguea plantaginea} Brack., \SI{\Sexpr{as.numeric(get_result(filter(sla.grand.mean, species=="Selliguea_plantaginea"), "mean", signif=TRUE))}}{\square\meter\per\kilo\gram}; \textit{Ctenopterella blechnoides} (Grev.) Parris, \SI{\Sexpr{as.numeric(get_result(filter(sla.grand.mean, species=="Ctenopterella_blechnoides"), "mean", signif=TRUE))}}{\square\meter\per\kilo\gram}), but this relationship was not significant across the dataset (\tab\ref{table:PIC_sporo}, \fig\ref{fig:CWM}). The tradeoffs posited in the leaf economics spectrum have been most thoroughly documented in global studies including the widest possible range of taxa and environments, and do not always hold up in local studies \citep{Petter2016}. For example, \citet{Zhu2016} did not find a significant relationship between SLA and leaf life span in a survey of 16 ferns across a disturbance (light) gradient in China. It is possible that other small-scale effects (\eg, microclimate) obscure this pattern in local studies such as ours and that of \citet{Zhu2016}. This is supported by the strong, parallel relationship in CWM values of SLA with elevation in both epiphytes and terrestrial species (\fig\ref{fig:CWM}A).
+Surprisingly, SLA was only slightly lower in epiphytes relative to terrestrial species (\tab\ref{table:PIC_sporo}, \fig\ref{fig:CWM}B). SLA is an important part of the leaf economic spectrum, which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans \citep{Wright2004a}. We hypothesized that epiphytes would have lower SLA, given their more extreme growing conditions. Indeed, the species with the lowest SLA values were epiphytes (\eg, \textit{Ctenopterella blechnoides} (Grev.) Parris, \SI{\Sexpr{as.numeric(get_result(filter(sla.grand.mean.results, species=="Ctenopterella_blechnoides"), "mean", signif=TRUE))}} {\square\meter\per\kilo\gram}; \textit{Selliguea plantaginea} Brack., \SI{\Sexpr{as.numeric(get_result(filter(sla.grand.mean.results, species=="Selliguea_plantaginea"), "mean", signif=TRUE))}} {\square\meter\per\kilo\gram}), but this relationship was not significant across the dataset (\tab\ref{table:PIC_sporo}, \fig\ref{fig:CWM}). The tradeoffs posited in the leaf economics spectrum have been most thoroughly documented in global studies including the widest possible range of taxa and environments, and do not always hold up in local studies \citep{Petter2016}. For example, \citet{Zhu2016} did not find a significant relationship between SLA and leaf life span in a survey of 16 ferns across a disturbance (light) gradient in China. It is possible that other small-scale effects (\eg, microclimate) obscure this pattern in local studies such as ours and that of \citet{Zhu2016}. This is supported by the strong, parallel relationship in CWM values of SLA with elevation in both epiphytes and terrestrial species (\fig\ref{fig:CWM}A).
 
 \subsection*{Gametophyte Traits}
 
@@ -503,7 +503,7 @@ interquartile range. Asterisks indicate statistical significance of one-sided \t
 
 % Table S5 
 \begin{table}[ht]
-\caption{List of all ferns from Moorea, French Polynesia with observed trait values and growth habit. For continuous trait values, means $\pm$ \stdev shown. For growth habit, E = epiphytic, T = terrestrial. For frond dissection, 1 = simple, 2 = pinnatifid or pinnatisect, 3 = 1-pinnate, 4 = 1- pinnate-pinnatifid, 5 = 2-pinnate, 6 = 2-pinnate-pinnatifid, 7 = 3- pinnate, 8 = 3-pinnate-pinnatifid, 9 = \textgreater 3-pinnate-pinnatifid, 10 = binpinnatifid or tripinnatifid.}
+\caption{Trait values and growth habit of ferns from Moorea, French Polynesia. For continuous trait values, means $\pm$ \stdev shown. For growth habit, E = epiphytic, T = terrestrial. For frond dissection, 1 = simple, 2 = pinnatifid or pinnatisect, 3 = 1-pinnate, 4 = 1- pinnate-pinnatifid, 5 = 2-pinnate, 6 = 2-pinnate-pinnatifid, 7 = 3- pinnate, 8 = 3-pinnate-pinnatifid, 9 = \textgreater 3-pinnate-pinnatifid, 10 = binpinnatifid or tripinnatifid.}
 \label{supp_table:traitvals}
 \end{table}
 

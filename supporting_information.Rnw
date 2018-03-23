@@ -138,6 +138,12 @@ print(xtable(PCA.results,
       include.rownames=TRUE,
       caption.placement="top")
 @
+
+% Table S5 
+\begin{table}[ht]
+\caption{Trait values and growth habit of ferns from Moorea, French Polynesia. For continuous trait values, means $\pm$ \stdev shown. Growth habit was coded as a binary character (terrestrial or epiphytic). In case of intermediate growth habits, connection to the soil was used as the criterion for selecting the character state; \eg, epipetric plants were treated as epiphytic, and hemi-epiphytes and climbing plants were treated as terrestrial. For frond dissection, 1 = simple, 2 = pinnatifid or pinnatisect, 3 = 1-pinnate, 4 = 1- pinnate-pinnatifid, 5 = 2-pinnate, 6 = 2-pinnate-pinnatifid, 7 = 3-pinnate, 8 = 3-pinnate-pinnatifid, 9 = \textgreater 3-pinnate-pinnatifid, 10 = binpinnatifid or tripinnatifid. Morphotype and presence/absence of gemmae, glands, and hairs are traits of gametophytes; other traits are from sporophytes. For sporophyte data sources, "M" indicates measurements made on specimens collected for this study; 1 = \cite{NationalMuseumofNatureandScience2008}, 2= \cite{Copeland1932}, 3= \cite{Palmer2003}, 4 = \cite{RoyalBotanicGardensandDomainTrust}, 5 = \cite{Brownsey1987}}. For gametophyte data sources, "L" indicates observations of gametophytes cultured from spores in the lab; "F" indicates observations of gametophytes in the field and identified to species using DNA barcodes \citep{Nitta2017}; "T" indicates characters scored according to taxonomy (genus or family); 6 = \cite{Nayar1971}; 7 = \cite{Lloyd1980}; 8 = \cite{Zhang2008}; 9 = \cite{Bierhorst1967}; 10 = \cite{Martin2006}; 11 = \cite{Tigerschiold1989}; 12 = \cite{Tigerschiold1990}; 13 = \cite{Atkinson1975}.
+\label{supp_table:traitvals}
+\end{table}
 %%%%%%%%%%%%%%%%%%%%%%%%%%% References %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % set style
