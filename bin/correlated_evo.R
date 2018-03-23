@@ -17,35 +17,6 @@ phy <- mooreaferns::fern_tree
 traits <- mooreaferns::fern_traits
 rownames(traits) <- traits$species
 
-# ### get raw data
-# # set input files
-# tree_file <- set_input_files()[[2]]
-# 
-# # load tree
-# phy <- read.tree(tree_file)
-# 
-# # load untransformed traits
-# traits <- get.my.traits(log.trans = FALSE, scale.traits = FALSE)
-
-
-# #***** add widespread observations to data folder
-# 
-# # load distribution data (widespread or not)
-# # distribution data is in "results.df"
-# source("bin/alpha_diversity/elevational range table.R")
-# 
-# ### merge distribution data with traits
-# # first make all not widespread
-# traits$distribution <- "notwidespread"
-# # get list of widespread species
-# widespread_species <- rownames(results.df[results.df$widespread == 1,])
-# # make those in list widespread
-# traits$distribution[rownames(traits) %in% widespread_species] <- "widespread"
-# rm(results.df)
-
-
-
-
 ### match up traits and tree
 # trim tree to only species with trait data
 phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
@@ -55,10 +26,6 @@ traits <- traits[phy$tip.label,]
 ##################################
 ### format traits for fitPagel ###
 ##################################
-
-# each trait we want to test needs to be a binary, named character vector
-#traits$habit[traits$habit == 1] <- "epi"
-#traits$habit[traits$habit == 0] <- "terr"
 
 # make binary morph category: 0 is noncordate, 1 is cordate
 traits$morph_binary <- "noncordate"
@@ -76,8 +43,6 @@ traits$gemmae[traits$gemmae == 0] <- "nogemmae"
 
 # keep only traits of interest
 traits.habit <- traits[,c("habit", "morph_binary", "glands", "hairs", "gemmae")]
-
-#* traits.dist <- traits[,c("distribution", "morph_binary", "glands", "hairs", "gemmae")]
 
 # fitPagel crashes if there are NAs
 # so need to make list of trees and traits with NAs trimmed out
@@ -100,7 +65,6 @@ make_data_list <- function (traits) {
 
 # make two lists, one for habit and one for distribution type
 data.list.habit <- make_data_list (traits.habit)
-#* data.list.dist <- make_data_list (traits.dist)
 
 ####################
 ### run fitPagel ###
@@ -132,23 +96,3 @@ pagel.results <- as.data.frame(pagel.results)
 # add rownames
 rownames(pagel.results) <- pagel.results$trait
 pagel.results$trait <- NULL
-
-
-
-
-
-
-
-
-# # ****** run with distribution type as independent var
-# results.dist <- run_fitPagel (data.list.dist)
-# summary.dist <-as.data.frame(t(as.data.frame(results.dist)))
-# rownames(summary.dist) <- NULL
-# colnames(summary.dist) <- c("trait", "logL_indep", "logL_dep", "likelihood_ratio", "pval")
-# summary.dist$indep_var <- "distribution"
-
-# combine the two
-# summary <- rbind(summary, summary.dist)
-
-# write out results
-# write.csv(summary, file = make_filename("correlated_evo_gameto", ".csv", date=TRUE))
