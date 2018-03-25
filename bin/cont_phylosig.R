@@ -4,7 +4,8 @@
 # using Blomberg's K and Pagel's lambda
 
 # load packages
-library(phytools) # phylosig()
+library(dplyr) # bind_rows
+library(phytools) # phylosig
 library(mooreaferns)
 
 # set working directory
@@ -55,7 +56,7 @@ for (i in 1:ncol(traits)) {
   parameters[[i]] <- list(trait=trait.name, K = kval, k.pval = pval)
 }
 
-k.summary <- as.data.frame(dplyr::bind_rows(parameters))
+k.summary <- as.data.frame(bind_rows(parameters))
 
 
 # Pagel's lambda
@@ -75,7 +76,7 @@ for (i in 1:ncol(traits)) {
   parameters[[i]] <- list(trait=trait.name, lambda = lambda, lambda.pval = pval)
 }
 
-lambda.summary <- as.data.frame(dplyr::bind_rows(parameters))
+lambda.summary <- as.data.frame(bind_rows(parameters))
 
 ###########################
 ### combine the results ###

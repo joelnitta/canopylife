@@ -3,7 +3,8 @@
 # run Pagel's (1994) test of correlated evolution on two binary traits using fitPagel in phytools
 
 # load packages
-library(phytools)
+library(dplyr) # bind_rows
+library(phytools) # fitPagel
 library(mooreaferns)
 
 #####################
@@ -88,7 +89,7 @@ run_fitPagel <- function (data.list) {
 results <- run_fitPagel (data.list.habit)
 
 # combine results
-pagel.results <- dplyr::bind_rows(results)
+pagel.results <- bind_rows(results)
 
 # store as dataframe (need rownames for xtable)
 pagel.results <- as.data.frame(pagel.results)

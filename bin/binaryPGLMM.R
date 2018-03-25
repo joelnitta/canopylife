@@ -3,8 +3,8 @@
 # for binary (gametophyte) traits related to epiphytic growth
 
 # load packages
-library(plyr)
-library(ape)
+library(dplyr) # bind_rows
+library(ape) # binaryPGLMM
 library(mooreaferns)
 
 # set working directory
@@ -58,11 +58,11 @@ for (i in 1:length(traits.test)) {
                        coeff = model[[i]]$B[2,1], 
                        se=model[[i]]$B.se[2,1], 
                        zscore = model[[i]]$B.zscore[2,1], 
-                       pvalue = model[[i]]$B.pvalue[2,1])
+                       pval = model[[i]]$B.pvalue[2,1])
   }
 
 # compile model parameters/results of interest into final results dataframe
-bpglmm.results <- do.call(rbind.data.frame, parameters)
+bpglmm.results <- as.data.frame(bind_rows(parameters))
 bpglmm.results$trait <- traits.test
 
 # rename rows as traits and reorder alphabetically

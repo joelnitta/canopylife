@@ -3,31 +3,42 @@
 
 # load packages
 library(mooreaferns) # moorea_climate
+library(dplyr)
 
 # set working directory
 setwd(here::here())
 
 # calculate daily maximum, mean, minimum, and SD of temperature and RH by site
-daily_values <- plyr::ddply(moorea_climate, plyr::.(site, date), plyr::summarize,
-                            max_temp = max(temp),
-                            mean_temp = mean(temp),
-                            min_temp = min(temp),
-                            sd_temp = sd(temp),
-                            max_RH = max(RH),
-                            mean_RH = mean(RH),
-                            min_RH = min(RH),
-                            sd_RH = sd(RH))
+
+# calculate grand mean for each species based on individual means
+daily_values <- 
+  moorea_climate %>%
+  group_by(site, date) %>%
+  summarize(
+    max_temp = max(temp),
+    mean_temp = mean(temp),
+    min_temp = min(temp),
+    sd_temp = sd(temp),
+    max_RH = max(RH),
+    mean_RH = mean(RH),
+    min_RH = min(RH),
+    sd_RH = sd(RH)
+  )
 
 # calculate grand means of daily values for temperature and RH by site
-grand_means <- plyr::ddply(daily_values, "site", plyr::summarize,
-                           max_temp = mean(max_temp),
-                           mean_temp = mean(mean_temp),
-                           min_temp = mean(min_temp),
-                           sd_temp = mean(sd_temp),
-                           max_RH = mean(max_RH),
-                           mean_RH = mean(mean_RH),
-                           min_RH = mean(min_RH),
-                           sd_RH = mean(sd_RH))
+grand_means <- 
+  daily_values %>%
+  group_by(site) %>%
+  summarize(
+    max_temp = mean(max_temp),
+    mean_temp = mean(mean_temp),
+    min_temp = mean(min_temp),
+    sd_temp = mean(sd_temp),
+    max_RH = mean(max_RH),
+    mean_RH = mean(mean_RH),
+    min_RH = mean(min_RH),
+    sd_RH = mean(sd_RH)
+  )
 
 ### reformat data to be in site x variable format
 # add a column for growth habit: daily means

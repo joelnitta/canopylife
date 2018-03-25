@@ -4,6 +4,7 @@
 # using Fritz and Purvis' D
 
 # load packages
+library(dplyr) # bind_rows
 library(caper) # phylo.d()
 library(mooreaferns)
 
@@ -67,7 +68,7 @@ parameters[[5]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.
 
 # combine results into single dataframe
 parameters <- lapply(parameters, setNames, c("trait", "num_present", "num_absent", "D", "prob_random", "prob_brownian"))
-binary_phylosig.results <- as.data.frame(dplyr::bind_rows(parameters))
+binary_phylosig.results <- as.data.frame(bind_rows(parameters))
 
 # name rows by trait and reorder
 rownames(binary_phylosig.results) <- binary_phylosig.results$trait
