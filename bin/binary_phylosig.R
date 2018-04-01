@@ -4,16 +4,14 @@
 # using Fritz and Purvis' D
 
 # load packages
-library(dplyr) # bind_rows
 library(caper) # phylo.d()
-library(mooreaferns)
+library(mooreaferns) # data
+library(tidyverse) # bind_rows(), map(). load last to avoid unwanted conflicts.
 
 # set working directory
 setwd(here::here())
 
-###########################
-### load and clean data ###
-###########################
+# load and wrangle data ---------------------------------------------------
 
 # load tree
 phy <- mooreaferns::fern_tree
@@ -21,59 +19,66 @@ phy <- mooreaferns::fern_tree
 # load un-transformed species traits
 traits <- mooreaferns::fern_traits
 
-# make cordate morphotype category: 0 is noncordate, 1 is cordate
-traits$cordate_morph <- 0
-traits$cordate_morph[which(traits$morphotype == "cordate")] <- 1
+# make morphotype into a binary numeric category: 0 is noncordate, 1 is cordate
+traits <- mutate (traits, morphotype = case_when (
+  morphotype == "cordate" ~ 1,
+  morphotype != "cordate" ~ 0 ))
 
-# make growth habit into a binary category: 0 is not epiphtyic (ie, terrestrial), 1 is epiphytic
-# growth habit is already a 2-level factor, so just convert to numeric and adjust
-traits$epiphytic <- as.numeric(traits$habit)
-traits$epiphytic <- traits$epiphytic-1
+# make growth habit into a binary category: 0 is not epiphytic (ie, terrestrial), 1 is epiphytic
+traits <- mutate (traits, habit = case_when (
+  habit == "terrestrial" ~ 0,
+  habit == "epiphytic" ~ 1 ))
+
+# set up data lists for phylo.d -------------------------------------------
+
+# make vector of traits to test
+binary_traits <- c("habit", "gemmae", "glands", "hairs", "morphotype")
+
+# make list of dataframes, each only including species and the trait to test
+traits_list <- map(binary_traits, function (x) {
+  traits[,c("species", x)]
+})
+
+names(traits_list) <- binary_traits
 
 ### make caper tree/trait datasets silently dropping missing data
 # some of the traits include NAs.
 # for phylo.d, need to have matching tree and trait data with all NAs removed
 # don't do comparative.data on all the traits together, or species missing data for ANY trait will get dropped
-epi.comp  <- comparative.data(phy, traits[,c("species", "epiphytic")], "species", na.omit=TRUE)
-gemmae.comp <- comparative.data(phy, traits[,c("species", "gemmae")], "species", na.omit=TRUE)
-glands.comp <- comparative.data(phy, traits[,c("species", "glands")], "species", na.omit=TRUE)
-hairs.comp  <- comparative.data(phy, traits[,c("species", "hairs")], "species", na.omit=TRUE)
-morph.comp  <- comparative.data(phy, traits[,c("species", "cordate_morph")], "species", na.omit=TRUE)
 
-##############################
-### run Fitz and Purvis' D ###
-##############################
+comp_data_list <- map(traits_list, function (x) {
+   comparative.data(phy=phy, data=x, names.col="species", na.omit=TRUE)
+  }
+)
 
-# I would rather do this as a loop but can't figure out how to specify binvar, so hard-code it
+# run Fitz and Purvis' D  -------------------------------------------------
 
-# make list to store observed D and associated P values for each trait
-parameters <- list()
+# helper function to run phylo.d and store observed D and associated P values for each trait
+# use eval(parse(text())) to feed variable into phylo.d
+# see https://stackoverflow.com/questions/12516260/defining-dependent-and-independent-variables-dynamically-in-the-ezanova-function
 
-# run phylo.d on a single trait, store output as first item in list
-phylo.d.out <- phylo.d(epi.comp, binvar=epiphytic)
-parameters[[1]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+run_phylo_d <- function(binary_var) {
+  phylo.d.out <- eval(parse
+       (text=paste0('phylo.d(data=comp_data_list[["',binary_var,'"]],
+                      binvar=',binary_var,')')
+  ))
+  list(trait = phylo.d.out$binvar, 
+       num_present = phylo.d.out$StatesTable[1], 
+       num_absent = phylo.d.out$StatesTable[2], 
+       D = phylo.d.out$DEstimate, 
+       prob_random = phylo.d.out$Pval1, 
+       prob_brownian = phylo.d.out$Pval0)
+}
 
-# repeat for other traits
-phylo.d.out <- phylo.d(gemmae.comp, binvar=gemmae)
-parameters[[2]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+# apply function to list of traits
+binary_phylosig.results <- map_df(binary_traits, run_phylo_d)
 
-phylo.d.out <- phylo.d(glands.comp, binvar=glands)
-parameters[[3]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
+# format results table ----------------------------------------------------
 
-phylo.d.out <- phylo.d(hairs.comp, binvar=hairs)
-parameters[[4]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
-
-phylo.d.out <- phylo.d(morph.comp, binvar=cordate_morph)
-parameters[[5]] <- list(phylo.d.out$binvar, phylo.d.out$StatesTable[1], phylo.d.out$StatesTable[2], phylo.d.out$DEstimate, phylo.d.out$Pval1, phylo.d.out$Pval0)
-
-# combine results into single dataframe
-parameters <- lapply(parameters, setNames, c("trait", "num_present", "num_absent", "D", "prob_random", "prob_brownian"))
-binary_phylosig.results <- as.data.frame(bind_rows(parameters))
-
-# name rows by trait and reorder
+# need to have results as data frame with named rows for xtable
+binary_phylosig.results <- as.data.frame(binary_phylosig.results)
 rownames(binary_phylosig.results) <- binary_phylosig.results$trait
 binary_phylosig.results$trait <- NULL
-binary_phylosig.results <- binary_phylosig.results[c("epiphytic", "gemmae", "glands", "hairs", "cordate_morph"), ]
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)
 rm(list=ls()[grep("result", ls(), invert=TRUE)])
