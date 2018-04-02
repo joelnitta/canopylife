@@ -3,16 +3,14 @@
 # for binary (gametophyte) traits related to epiphytic growth
 
 # load packages
-library(dplyr) # bind_rows
-library(ape) # binaryPGLMM
+library(ape) # binaryPGLMM()
 library(mooreaferns)
+library(tidyverse)
 
 # set working directory
 setwd(here::here())
 
-########################################################
-### load, clean data for qualitative (binary) traits ###
-########################################################
+# load and wrangle data ---------------------------------------------------
 
 # load tree
 phy <- mooreaferns::fern_tree
@@ -20,55 +18,52 @@ phy <- mooreaferns::fern_tree
 # load un-transformed species traits
 traits <- mooreaferns::fern_traits
 
-# trim to only species with trait data
-rownames(traits) <- traits$species
-phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
+# make morphotype into a binary numeric category: 0 is noncordate, 1 is cordate
+traits <- mutate (traits, morphotype = case_when (
+  morphotype == "cordate" ~ 1,
+  morphotype != "cordate" ~ 0 ))
 
-# get traits in same order as tips
-traits <- traits[phy$tip.label,]
+# binaryPGLMM -------------------------------------------------------------
 
-# make binary morphotype category: 0 is noncordate, 1 is cordate
-traits$morph_binary <- 0
-traits$morph_binary[which(traits$morphotype == "cordate")] <- 1
-
-####################
-### binaryPGLMM ####
-####################
-
-# define traits to test
-traits.test <- c("glands", "hairs", "gemmae", "morph_binary")
-
-# binaryPGLMM can't take NA values
-# make list of trait dataframes and phylogenies which only include species with no NA values for each of traits to test
-traits.df <- list()
-phy.list <- list()
-for (i in 1:length(traits.test)) {
-  traits.df[[i]] <- traits[!(is.na(traits[,traits.test[i]])), ]
-  phy.list[[i]] <- drop.tip(phy,  phy$tip.label[!(phy$tip.label %in% rownames(traits.df[[i]]))])
-  traits.df[[i]] <- traits.df[[i]][phy.list[[i]]$tip.label, ]
+### make function to trim data and run binaryPGLMM
+# binaryPGLMM can't take NA values, so trim trait dataframes and 
+# phylogenies so they only include species with no NA values for each of 
+# traits to test
+run_bPGLMM <- function (selected_trait, traits, phy) {
+  
+  # trim data to non-missing trait values and
+  # make sure species in same order in tree and traits
+  traits_trim <- traits[!is.na(traits[selected_trait]), ]
+  phy_trim <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% traits_trim$species)])
+  traits_trim <- traits_trim[match(traits_trim$species, phy_trim$tip.label), ]
+  rownames(traits_trim) <- traits_trim$species
+  
+  # run binaryPGLMM on selected trait
+  model <- binaryPGLMM(formula(paste(selected_trait, "~ habit", sep="")), phy=phy_trim, data=traits_trim)
+  
+  # get model results
+  list(trait = selected_trait,
+       sigmasq = model$s2, 
+       sigmap = model$P.H0.s2, 
+       coeff = model$B[2,1], 
+       se=model$B.se[2,1], 
+       zscore = model$B.zscore[2,1], 
+       pval = model$B.pvalue[2,1])
 }
 
-# run binary PGLMM as loop
-model <- list()
-parameters <- list()
-for (i in 1:length(traits.test)) {
-  model[[i]] <- binaryPGLMM(formula(paste(traits.test[i], "~ habit", sep="")), phy=phy.list[[i]], data=traits.df[[i]] )
-  parameters[[i]] <- list(sigmasq = model[[i]]$s2, 
-                       sigmap = model[[i]]$P.H0.s2, 
-                       coeff = model[[i]]$B[2,1], 
-                       se=model[[i]]$B.se[2,1], 
-                       zscore = model[[i]]$B.zscore[2,1], 
-                       pval = model[[i]]$B.pvalue[2,1])
-  }
+# set up input for mapping run_bPGLMM() to list of selected traits
+map_input <- list(
+  as.list(c("gemmae", "glands", "hairs", "morphotype")),
+  list(traits),
+  list(phy)
+)
 
-# compile model parameters/results of interest into final results dataframe
-bpglmm.results <- as.data.frame(bind_rows(parameters))
-bpglmm.results$trait <- traits.test
+# map run_bPGLMM() to selected traits
+bpglmm.results <- pmap_dfr(map_input, run_bPGLMM)
 
-# rename rows as traits and reorder alphabetically
-bpglmm.results$trait <- factor(bpglmm.results$trait, levels = sort(bpglmm.results$trait))
+# rename rows for xtable
+bpglmm.results <- as.data.frame(bpglmm.results)
 rownames(bpglmm.results) <- bpglmm.results$trait
-bpglmm.results <- bpglmm.results[levels(bpglmm.results$trait), ]
 bpglmm.results$trait <- NULL
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)

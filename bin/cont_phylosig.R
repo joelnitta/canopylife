@@ -4,90 +4,65 @@
 # using Blomberg's K and Pagel's lambda
 
 # load packages
-library(dplyr) # bind_rows
 library(phytools) # phylosig
 library(mooreaferns)
+library(tidyverse)
 
 # set working directory
 setwd(here::here())
 
-###########################
-### load and clean data ###
-###########################
+# load data ---------------------------------------------------------------
 
-# load tree
+# tree
 phy <- mooreaferns::fern_tree
 
-# load un-transformed species traits
+# un-transformed species traits
 traits <- mooreaferns::fern_traits
 
-# keep only quantitative traits with decent sampling
-rownames(traits) <- traits$species
-sporo_traits <-c("stipe", "length", "width", "rhizome", "dissection", "pinna", "sla")
-traits <- traits[,sporo_traits]
+# Analyze Blomberg's K and Pagel's Lambda ---------------------------------
 
-# trim phylogeny to only species with trait data
-phy <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% rownames(traits))])
+### make function to trim data and run phylosig() for a trait of interest
+run_phylosig <- function (selected_trait, traits, phy) {
+  
+  # trim data to non-missing trait values and
+  # make sure species in same order in tree and traits
+  traits_trim <- traits[!is.na(traits[selected_trait]), ]
+  phy_trim <- drop.tip(phy, phy$tip.label[!(phy$tip.label %in% traits_trim$species)])
+  traits_trim <- traits_trim[match(traits_trim$species, phy_trim$tip.label), ]
 
-# get traits in same order as tips
-traits <- traits[phy$tip.label,]
+  # extract named vector of trait values for phylosig()
+  trait_vec <- traits_trim[[selected_trait]]
+  names(trait_vec) <- traits_trim$species
+  
+  # run phylosig() on selected trait
+  # using Blomberg's K
+  k_model <- phylosig(phy_trim, trait_vec, method = "K", test = TRUE)
+  # and Pagel's lambda
+  lambda_model <- phylosig(phy_trim, trait_vec, method = "lambda", test = TRUE)
+  
+  # get model results
+  list(trait = selected_trait,
+       kval = k_model$K,
+       k.pval = k_model$P,
+       lambda = lambda_model$lambda,
+       lambda.pval = lambda_model$P)
 
-###########################################
-### run Blomberg's K and Pagel's lambda ###
-###########################################
-
-# use phytools phylosig function to calculate K, lambda for each trait and summarize in result table
-# phylosig will automatically drop species missing trait data
-
-# Blomberg's K
-trait.test <- NULL
-trait.name <- NULL
-phylosig.out <- NULL
-kval <- NULL
-pval <- NULL
-parameters <- NULL
-for (i in 1:ncol(traits)) {
-  trait.test <- traits[,i]
-  names(trait.test) <- rownames(traits)
-  phylosig.out <- phylosig(phy, trait.test, method = "K", test = TRUE)
-  kval <- phylosig.out$K
-  pval <- phylosig.out$P
-  trait.name <- colnames(traits)[i]
-  parameters[[i]] <- list(trait=trait.name, K = kval, k.pval = pval)
 }
 
-k.summary <- as.data.frame(bind_rows(parameters))
+# set up input for mapping run_phylosig() to list of selected traits
+map_input <- list(
+  as.list(c("stipe", "length", "width", "dissection", "pinna", "sla", "rhizome")),
+  list(traits),
+  list(phy)
+)
 
+# map run_phylosig() to selected traits
+cont_phylosig.results <- pmap_dfr(map_input, run_phylosig)
 
-# Pagel's lambda
-trait.test <- NULL
-trait.name <- NULL
-phylosig.out <- NULL
-lambda <- NULL
-pval <- NULL
-parameters <- NULL
-for (i in 1:ncol(traits)) {
-  trait.test <- traits[,i]
-  names(trait.test) <- rownames(traits)
-  phylosig.out <- phylosig(phy, trait.test, method = "lambda", test = TRUE)
-  lambda <- phylosig.out$lambda
-  pval <- phylosig.out$P
-  trait.name <- colnames(traits)[i]
-  parameters[[i]] <- list(trait=trait.name, lambda = lambda, lambda.pval = pval)
-}
-
-lambda.summary <- as.data.frame(bind_rows(parameters))
-
-###########################
-### combine the results ###
-###########################
-
-cont_phylosig.results <- merge(lambda.summary, k.summary, by="trait")
-
-# name rows by trait and reorder
+# rename rows for xtable
+cont_phylosig.results <- as.data.frame(cont_phylosig.results)
 rownames(cont_phylosig.results) <- cont_phylosig.results$trait
 cont_phylosig.results$trait <- NULL
-cont_phylosig.results <- cont_phylosig.results[c("stipe", "length", "width", "dissection", "pinna", "sla", "rhizome"), ]
 
 # clean up workspace (reserve "result" in object name only for final results objects to keep)
 rm(list=ls()[grep("result", ls(), invert=TRUE)])

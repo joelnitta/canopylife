@@ -3,110 +3,99 @@
 # plot grand mean values with modeled fit
 
 # load packages
-library(ggplot2) # plotting functions
-library(cowplot) # plot_grid
 library(RColorBrewer) # brewer.pal
 library(mooreaferns) # datasets and custom functions
+library(tidyverse)
+library(cowplot) # plot_grid
 
 # set working directory
 setwd(here::here())
 
-##########################################
-### calculate mean microclimate values ###
-##########################################
+# calculate mean microclimate values --------------------------------------
 
 source("bin/microclimate_means.R")
 
-##################
-### run ANCOVA ###
-##################
+# load and wrangle data ---------------------------------------------------
 
-# use only sites on Moorea
+# load data for sites on Moorea
 moorea_sites <- mooreaferns::sites[grep("Aorai", mooreaferns::sites$site, invert=TRUE), ]
 
 # add latitude, longitude, and elevation to microclimate means
-daily_values <- merge(daily_values, moorea_sites, by="site", all.x=TRUE)
-grand_means <- merge(grand_means, moorea_sites, by="site", all.x=TRUE)
-
-# check to make sure it worked
-#anyNA(daily_values)
-#anyNA(grand_means)
+daily_values <- left_join(daily_values, moorea_sites)
+grand_means <- left_join(grand_means, moorea_sites)
 
 # convert growth habit to factor
 daily_values$habit <- factor(daily_values$habit, levels=c("terrestrial", "epiphytic"))
 grand_means$habit <- factor(grand_means$habit, levels=c("terrestrial", "epiphytic"))
 
+# run ANCOVA --------------------------------------------------------------
+
+# make function to run ancova on a response variable of choice
+run_ancova <- function (resp_var) {
+  
+  # test for different intercepts between epiphytic and terrestrial dataloggers (but constant slope)
+  model1 <- summary(lm(formula(paste(resp_var, " ~ habit + el", sep="")), data=daily_values))
+  
+  # test for different slopes (and different intercepts) between epiphytic and terrestrial dataloggers 
+  model2 <- summary(lm(formula(paste(resp_var, " ~ habit * el", sep="")), data=daily_values))
+  
+  # compile results
+  list (
+    resp_var = resp_var,
+    
+    # pval for different intercepts between epiphytic and terrestrial dataloggers (with same slope)
+    pval.intercept = model1$coefficients[2,4],
+    f.intercept = model1$fstatistic[1],
+    df.intercept = paste(model1$fstatistic[2], model1$fstatistic[3], sep=", "),
+    
+    # pval for different intercepts between epiphytic and terrestrial (with different slopes)
+    pval.slope = model2$coefficients[4,4],
+    f.slope = model2$fstatistic[1],
+    df.slope = paste(model2$fstatistic[2], model2$fstatistic[3], sep=", ")
+    )
+}
+
 # set response variables
 resp_vars <- c("max_temp", "mean_temp", "min_temp", "sd_temp", "max_RH", "mean_RH", "min_RH", "sd_RH")
 
-# set up dummy variables for loop
-pval.intercept <- NULL
-f.intercept <- NULL
-df.intercept <- NULL
-pval.slope <- NULL
-f.slope  <- NULL
-df.slope <- NULL
-model1 <- NULL
-model2 <- NULL
-parameters <- NULL
+# map function to variables
+ancova.results <- map_df(resp_vars, run_ancova)
 
-# run the ANCOVA for each response variable
-for (i in 1:length(resp_vars)) {
-  # test for different intercepts (but constant slope)
-  model1 <- summary(lm(formula(paste(resp_vars[i], " ~ habit + el", sep="")), data=daily_values))
-  # pval for different intercepts between epi and ter (with same slope)
-  pval.intercept <- model1$coefficients[2,4]
-  f.intercept <- model1$fstatistic[1]
-  df.intercept <- paste(model1$fstatistic[2], model1$fstatistic[3], sep=", ")
-  
-  # test for different slopes (and different intercepts)
-  model2 <- summary(lm(formula(paste(resp_vars[i], " ~ habit * el", sep="")), data=daily_values))
-  pval.slope <- model2$coefficients[4,4]
-  f.slope <- model2$fstatistic[1]
-  df.slope <- paste(model2$fstatistic[2], model2$fstatistic[3], sep=", ")
-  
-  parameters[[i]] <- list(df.intercept = df.intercept, f.intercept = f.intercept, pval.intercept = pval.intercept, 
-                       df.slope = df.slope, f.slope = f.slope, pval.slope = pval.slope)
-}
+# add rownames
+ancova.results <- as.data.frame(ancova.results)
+rownames(ancova.results) <- ancova.results$resp_var
+ancova.results$resp_var <- NULL
 
-# combine results into single dataframe
-ancova.results <- as.data.frame(dplyr::bind_rows(parameters))
-rownames(ancova.results) <- resp_vars
-
-###############################################
-#### Get slopes and intercepts for plotting ###
-###############################################
+# Get slopes and intercepts for plotting ----------------------------------
 
 # Note that this calculates interaction effects for all variables
 # (even though min temp isn't significant)
 
-model1<- NULL
-model2 <- NULL
-parameters <- NULL
-slope.epi <- list()
-inter.epi <- list()
-slope.ter <- list()
-inter.ter<- list()
-r.squared <- list()
-pval <- list ()
-for (i in 1:length(resp_vars)) {
-  model1 <- lm(formula(paste(resp_vars[i], " ~ habit/el + 0", sep="")), data=daily_values)
-  model2 <- lm(formula(paste(resp_vars[i], " ~ habit*el", sep="")), data=daily_values)
-  parameters <- coef(model1)
-  slope.epi[[i]] <- parameters[4]
-  inter.epi[[i]] <- parameters[2]
-  slope.ter[[i]] <- parameters[3]
-  inter.ter[[i]] <- parameters[1]
-  r.squared[[i]] <- summary(model2)$r.squared
-  pval[[i]] <- summary(model2)$coefficients[4,4]
+get_plot_values <- function (resp_var) {
+  
+  model1 <- lm(formula(paste(resp_var, " ~ habit/el + 0", sep="")), data=daily_values)
+  model2 <- lm(formula(paste(resp_var, " ~ habit*el", sep="")), data=daily_values)
+  
+  list(
+  resp_var = resp_var,
+  slope.epi = coef(model1)[4],
+  inter.epi = coef(model1)[2],
+  slope.ter = coef(model1)[3],
+  inter.ter = coef(model1)[1],
+  r.squared = summary(model2)$r.squared,
+  pval = summary(model2)$coefficients[4,4] )
+  
 }
 
-slopes.results <- data.frame(r.squared = unlist(r.squared), slope.epi = unlist(slope.epi), inter.epi=unlist(inter.epi), slope.ter=unlist(slope.ter), inter.ter=unlist(inter.ter), pval = unlist(pval))
-rownames(slopes.results) <- resp_vars
+# map function to variables
+slopes.results <- map_df(resp_vars, get_plot_values)
 
-################
-### Plotting ### 
-################
+# add rownames
+slopes.results <- as.data.frame(slopes.results)
+rownames(slopes.results) <- slopes.results$resp_var
+slopes.results$resp_var <- NULL
+
+# Plotting ----------------------------------------------------------------
 
 # function to make scatterplot with lines and R2 values from linear model
 make_scatter_plot <- function (input.plot.data, model_data, indep_var, dep_var, ylabel) {
@@ -133,7 +122,6 @@ make_scatter_plot <- function (input.plot.data, model_data, indep_var, dep_var, 
     scale_x_continuous(breaks=c(0,250,500,750,1000))
   return(p)
 }
-
 
 # set colors for manual line plotting: green for epiphytes, brown for terrestrial
 qualcols <- brewer.pal(9, "Set1")
