@@ -8,10 +8,9 @@ library(scales)
 library(RColorBrewer)
 library(mooreaferns)
 
-# axisGeo from phyloch is used to make geological time scale
-# phyloch must be installed from source from the developer's website
-# http://www.christophheibl.de/Rpackages.html
-# download "package source", unzip, then run: install.packages("path_to_package", repos = NULL, type="source")
+# phyloch::axisGeo() is used to make geological time scale
+# phyloch in not on CRAN and must be installed from the developer's website as follows
+# install.packages(pkgs="http://www.christophheibl.de/phyloch_1.5-3.tar.gz", repos=NULL, type="source")
 library(phyloch)
 
 # set working directory
