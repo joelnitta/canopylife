@@ -1,3 +1,5 @@
+# Traits ----
+
 #' Process fern trait data for supp. info.
 #'
 #' @param sla_raw Dataframe; raw measurements of specific leaf area, including 
@@ -127,5 +129,266 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
       SLA = sla, 
       `sporophyte data source` = source
     )
+  
+}
+
+# Climate ----
+
+#' Reformat Moorea climate data
+#' 
+#' @param moorea_climate_raw Dataframe; raw values with growth habit
+#' (terrestrial or epiphytic) coded in site name
+#' @return Dataframe; raw values with habit as a separate column.
+reformat_raw_climate <- function (moorea_climate_raw) {
+  moorea_climate_raw %>%
+    # Split out habit as separate column and set levels
+    mutate(
+      habit = case_when(
+        str_detect(site, "epi") ~ "epiphytic",
+        str_detect(site,  "ter") ~ "terrestrial"
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
+      site = str_remove_all(site, "_epi|_ter")
+    )
+}
+
+#' Calculate daily means in moorea climate data
+#'
+#' @param moorea_climate_raw Dataframe; raw climate measurements
+#'
+#' @return Dataframe of daily climate measurements (daily mean, SD,
+#' min, max of temperature and RH)
+get_daily_means <- function (climate_raw) {
+  climate_raw %>%
+    group_by(site, date, habit) %>%
+    summarize(
+      max_temp = max(temp),
+      mean_temp = mean(temp),
+      min_temp = min(temp),
+      sd_temp = sd(temp),
+      max_RH = max(RH),
+      mean_RH = mean(RH),
+      min_RH = min(RH),
+      sd_RH = sd(RH)
+    ) %>%
+    ungroup() %>%
+    mutate(
+      is_outlier = case_when(
+        site == "Rotui_800m_slope" ~ "yes",
+        TRUE ~ "no"
+      )
+    )
+}
+
+#' Calculate grand means of daily values for temperature and RH by site
+#'
+#' @param daily_means Dataframe; daily mean climate
+#'
+#' @return Dataframe; grand climate means of daily mean, SD,
+#' min, max of temperature and RH.
+get_grand_means <- function(daily_means) {
+  daily_means %>%
+    group_by(site, habit) %>%
+    summarize(
+      max_temp = mean(max_temp),
+      mean_temp = mean(mean_temp),
+      min_temp = mean(min_temp),
+      sd_temp = mean(sd_temp),
+      max_RH = mean(max_RH),
+      mean_RH = mean(mean_RH),
+      min_RH = mean(min_RH),
+      sd_RH = mean(sd_RH)
+    ) %>%
+    ungroup() %>%
+    mutate(
+      is_outlier = case_when(
+        site == "Rotui_800m_slope" ~ "yes",
+        TRUE ~ "no"
+      )
+    )
+}
+
+#' Make climate models
+#'
+#' @param climate_data 
+#' @param site_data 
+#'
+#' @return Dataframe.
+make_climate_models <- function (climate_data, site_data) {
+  
+  # Make dataset for modeling. Each row is a nested dataset for a single
+  # climate variable so it will be easier to loop over them.
+  data_for_modeling <- 
+    # Combine grand climate means and site data into 'diversity data'
+    left_join(climate_data, site_data) %>%
+    # REMOVE OUTLIER: Mt Rotui exposed slope
+    filter(is_outlier == "no") %>%
+    # Reformat data into nested set by variable (mean and SD of temp and RH)
+    select(site, habit, el, mean_temp, sd_temp, min_RH, sd_RH) %>%
+    gather(var, value, -site, -habit, -el) %>%
+    nest(-var)
+  
+  # Make all combinations of models including each climate variable
+  # by elevation only, by growth habit only, and by the interaction of
+  # growth habit and elevation.
+  all_models <-
+    data_for_modeling %>%
+    # Construct a linear model for each variable
+    mutate(
+      interaction = map(data, ~lm(value ~ el * habit, .)),
+      habit_only = map(data, ~lm(value ~ habit, .)),
+      el_only = map(data, ~lm(value ~ el, .))
+    ) %>%
+    select(-data) %>%
+    gather(model_type, model, -var)
+  
+  # Run analysis of variance on each interaction model and filter to only
+  # the significant parts of the model. Use this to determine which of the
+  # possible set of models is best.
+  aov_results <-
+    data_for_modeling %>%
+    # Construct a linear model for each variable, and pull out summaries
+    mutate(
+      model = map(data, ~aov(value ~ el * habit, .)),
+      summary = map(model, tidy)
+    ) %>%
+    select(var, summary) %>%
+    unnest() %>%
+    # Filter to only features of model that are significant
+    filter(p.value < 0.05) %>%
+    select(var, term) %>%
+    group_by(var) %>%
+    summarize(
+      term = paste(unique(term), collapse = " * ")
+    ) %>%
+    mutate(
+      model_type = case_when(
+        term == "el" ~ "el_only",
+        term == "el * habit" ~ "interaction",
+        term == "habit" ~ "habit_only"
+      )
+    ) %>%
+    select(var, model_type)
+  
+  # Based on the AOV results, filter to only the best models.
+  left_join(aov_results, all_models) 
+}
+
+# Extract model fits
+extract_model_fits <- function (supported_models) {
+  supported_models %>%
+  mutate(
+    fits = map(model, augment)
+  ) %>%
+  select(var, model_type, fits) %>%
+  unnest
+}
+
+# Extract model summaries
+extract_model_summaries <- function (supported_models) {
+  supported_models %>%
+  mutate(
+    summary = map(model, tidy)
+  ) %>%
+  select(var, model_type, summary) %>%
+  unnest
+}
+
+# Plotting ----
+make_climate_plot <- function (climate_data, site_data, 
+                               fits, summaries, 
+                               habit_colors, alpha_val = 0.6) {
+  
+  climate_site_data <- left_join(climate_data, site_data)
+  
+  mean_temp_fits <-
+    fits %>%
+    filter(var == "mean_temp") %>%
+    rename(mean_temp = value)
+  
+  # mean temp subplot
+  a <- ggplot(climate_site_data, aes(x = el)) +
+    geom_line(data = mean_temp_fits, aes(y = .fitted)) +
+    geom_point(aes(y = mean_temp, alpha = is_outlier, color = habit)) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    scale_alpha_manual(
+      values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = "Mean temp. (°C)",
+      x = "Elevation (m)"
+    ) +
+    standard_theme()
+  
+  sd_temp_fits <-
+    fits %>%
+    filter(var == "sd_temp") %>%
+    rename(sd_temp = value)
+  
+  # SD temp subplot
+  b <- ggplot(climate_site_data, aes(x = el)) +
+    geom_line(data = sd_temp_fits, aes(y = .fitted)) +
+    geom_point(aes(y = sd_temp, alpha = is_outlier, color = habit)) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    scale_alpha_manual(
+      values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = "SD Temp. (°C)",
+      x = "Elevation (m)"
+    ) +
+    standard_theme()
+  
+  min_RH_fits <-
+    fits %>%
+    filter(var == "min_RH") %>%
+    rename(min_RH = value)
+  
+  # min RH subplot
+  c <- ggplot(climate_site_data, aes(x = el, color = habit)) +
+    geom_line(data = min_RH_fits, aes(y = .fitted)) +
+    geom_point(aes(y = min_RH, alpha = is_outlier)) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    scale_alpha_manual(
+      values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = "Min. RH (%)",
+      x = "Elevation (m)"
+    ) +
+    standard_theme()
+  
+  sd_RH_fits <-
+    fits %>%
+    filter(var == "sd_RH") %>%
+    rename(sd_RH = value)
+  
+  # SD RH subplot
+  d <- ggplot(climate_site_data, aes(x = el, color = habit)) +
+    geom_line(data = sd_RH_fits, aes(y = .fitted)) +
+    geom_point(aes(y = sd_RH, alpha = is_outlier)) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    scale_alpha_manual(
+      values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = "SD RH (%)",
+      x = "Elevation (m)"
+    ) +
+    standard_theme()
+  
+  a <- a + blank_x_theme() 
+  b <- b + blank_x_theme() 
+  
+  a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
+    theme(legend.position = "none")
   
 }
