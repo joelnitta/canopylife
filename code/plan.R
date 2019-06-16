@@ -26,6 +26,9 @@ plan <- drake_plan(
   daily_mean_climate = get_daily_means(moorea_climate_raw),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
+  # Phylogeny
+  phy = mooreaferns::fern_tree,
+  
   # Format trait data for SI.
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
@@ -52,6 +55,12 @@ plan <- drake_plan(
   # Get summaries of supported models.
   climate_model_summaries = extract_model_summaries(
     supported_models = climate_models
+  ),
+  
+  # Principal components analysis ----
+  pca_results = run_trait_PCA(
+    traits = fern_traits,
+    phy = phy
   ),
   
   # Plots ----

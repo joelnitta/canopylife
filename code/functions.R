@@ -294,6 +294,141 @@ extract_model_summaries <- function (supported_models) {
   unnest
 }
 
+# Trait PCA ----
+
+#' Run principal components analysis on traits
+#'
+#' @param traits Dataframe of pre-processed traits
+#' @param phy Phylogeny
+#' @param analysis 
+#'
+#' @return List of dataframes including
+#'   species_locs: Positions of species along PC axes
+#'   traits_locs: Positions of traits along PC axes
+#'   variance: Contribution to variance of each PC
+#'   
+#' For each dataframe, the type of PCA is included:
+#' "standard" for standard PCA (not using phylogeny), 
+#' or "phylo" for PCA including phylogeny.
+#' 
+run_trait_PCA <- function (traits, phy) {
+  
+  ### Data wrangling ###
+  
+  # Make vector of continuous traits to include in PCA
+  cont_vars <- c(
+    "sla", "stipe", "length", "width", "rhizome", "pinna"
+  )
+  
+  # Subset to continuous traits
+  traits <- traits %>%
+    select(species, habit, sla, stipe, length, width, rhizome, pinna) %>%
+    # Keep only completely sampled species
+    filter(complete.cases(.)) %>%
+    # Keep only species in phylogeny
+    filter(species %in% phy$tip.label) 
+  
+  # Trim to only species with trait data
+  phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
+  
+  # Get traits in same order as tips
+  traits <- left_join(
+    tibble(species = phy$tip.label),
+    traits
+  )
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
+  
+  # Both standard and phylo PCA expect data frames with row names
+  traits_df_for_pca <- select(traits, species, cont_vars) %>%
+    as.data.frame
+  rownames(traits_df_for_pca) <- traits_df_for_pca$species
+  traits_df_for_pca$species <- NULL
+  
+  ### Standard PCA ###
+  
+  pca_std_results <- PCA(traits_df_for_pca, graph=FALSE)
+  
+  # Get position of species along PC axes
+  pca_std_species_locs <- pca_std_results$ind$coord %>%
+    as.data.frame %>%
+    rownames_to_column("species") %>%
+    as_tibble %>%
+    rename_if(is.numeric, ~str_replace_all(., "Dim\\.", "PC")) %>%
+    mutate(
+      analysis_type = "standard"
+    )
+  
+  # Get position of traits along PC axes
+  pca_std_trait_locs <- pca_std_results$var$coord %>%
+    as.data.frame %>%
+    rownames_to_column("trait") %>%
+    as_tibble %>%
+    rename_if(is.numeric, ~str_replace_all(., "Dim\\.", "PC")) %>%
+    mutate(
+      analysis_type = "standard"
+    )
+  
+  # Get contribution to variance of each PC
+  pca_std_variance <- t(pca_std_results$eig) %>%
+    as.data.frame() %>%
+    rownames_to_column("variance_type") %>%
+    as_tibble %>%
+    rename_if(is.numeric, ~str_replace_all(., "comp ", "PC")) %>%
+    filter(variance_type  != "eigenvalue") %>%
+    mutate(variance_type = case_when(
+      variance_type == "percentage of variance" ~ "Proportion of Variance",
+      variance_type == "cumulative percentage of variance" ~ "Cumulative Proportion")
+    ) %>%
+    mutate_if(is.numeric, ~magrittr::multiply_by(., 0.01)) %>%
+    mutate(
+      analysis_type = "standard"
+    )
+  
+  ### Phylogenetic PCA ###
+  pca_phy_results <- phyl.pca(phy, traits_df_for_pca, method="BM")
+  
+  # Get position of species along PC axes
+  pca_phy_species_locs <- pca_phy_results$S %>%
+    as.data.frame %>%
+    rownames_to_column("species") %>%
+    as_tibble %>%
+    mutate(
+      analysis_type = "phylogenetic"
+    )
+  
+  # Get position of traits along PC axes
+  pca_phy_trait_locs <- pca_phy_results$L %>%
+    as.data.frame %>%
+    rownames_to_column("trait") %>%
+    as_tibble %>%
+    mutate(
+      analysis_type = "phylogenetic"
+    )
+  
+  # Get contribution to variance of each PC
+  pca_phy_variance <- 
+    pca_phy_results %>%
+    summary %>%
+    magrittr::extract2("importance") %>%
+    as.data.frame %>%
+    rownames_to_column("variance_type") %>%
+    as_tibble %>%
+    mutate(
+      analysis_type = "phylogenetic"
+    )
+  
+  ### Combine results as list
+  list(
+    species_locs = bind_rows(pca_phy_species_locs, pca_std_species_locs),
+    traits_locs = bind_rows(pca_phy_trait_locs, pca_std_trait_locs),
+    variance =  bind_rows(pca_phy_variance, pca_std_variance)
+  )
+  
+}
+
+
 # Plotting ----
 make_climate_plot <- function (climate_data, site_data, 
                                fits, summaries, 
