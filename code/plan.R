@@ -69,12 +69,20 @@ plan <- drake_plan(
   ),
   
   # Phylogenetic signal ----
+  
+  # - Continuous traits (Blomberg's K and Pagel's lambda)
   phylosig_cont_traits = list(
     as.list(c("stipe", "length", "width", "dissection", "pinna", "sla", "rhizome")),
     traits = list(fern_traits),
     phy = list(phy)
   ) %>%
     pmap_dfr(analyze_cont_phylosig),
+  
+  # - Binary traits (Fritz and Purvis' D)
+  phylosig_binary_traits = analyze_binary_phylosig(
+    traits = fern_traits,
+    phy = phy
+  ),
   
   # Plots ----
   

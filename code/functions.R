@@ -512,6 +512,71 @@ analyze_cont_phylosig <- function (selected_trait, traits, phy) {
   
 }
 
+#' Analyze phylogenetic signal in binary traits
+#'
+#' @param traits Dataframe including all untransformed traits, with
+#' 'species' as a column and other traits as other columns.
+#' @param phy Phylogeny
+#'
+#' @return Dataframe of estimated Fritz and Purvis' D values and
+#' associated statistics for each binary trait in `traits`
+#' 
+analyze_binary_phylosig <- function (traits, phy) {
+  
+  # Format binary traits as integer
+  traits_binary <- 
+    traits %>% 
+    mutate (
+      morphotype = case_when (
+        morphotype == "cordate" ~ 1,
+        morphotype != "cordate" ~ 0 ),
+      habit = case_when (
+        habit == "terrestrial" ~ 0,
+        habit == "epiphytic" ~ 1)) %>%
+    mutate_at(vars(habit, morphotype, gemmae, glands, hairs), as.integer) %>%
+    select(species, habit, morphotype, gemmae, glands, hairs)
+  
+  # Nest by trait and loop phylo.d()
+  # Note: some of the traits include NAs.
+  # For phylo.d(), need to have matching tree and trait data with all NAs removed
+  # Don't do comparative.data() on all the traits together, or species missing 
+  # data for ANY trait will get dropped
+  traits_binary %>%
+    gather(trait, value, -species) %>%
+    nest(-trait) %>%
+    mutate(
+      # Construct a comparative data object for each
+      # binary trait
+      comp_data = map(
+        data, 
+        ~ comparative.data(
+          phy = phy, 
+          data = as.data.frame(.), 
+          names.col= "species", 
+          na.omit=TRUE)
+      ),
+      # Run phylo.d on each binary trait
+      phylo_d_out = map(
+        comp_data,
+        ~phylo.d(data = ., binvar = value) # phylo.d() uses NSE for `binvar`
+      ),
+      # Extract the useful bits of information from each model fit
+      phylo_d_summary = map(
+        phylo_d_out,
+        ~tibble(
+          num_present = pluck(., "StatesTable", 1), 
+          num_absent = pluck(., "StatesTable", 2), 
+          D = pluck(., "DEstimate"),
+          prob_random = pluck(., "Pval1"), 
+          prob_brownian = pluck(., "Pval0")
+        )
+      )
+    ) %>%
+    select(trait, phylo_d_summary) %>%
+    unnest()
+
+}
+
 # Misc ----
 
 #' Match trait data and tree
