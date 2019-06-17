@@ -477,6 +477,96 @@ run_trait_PCA <- function (traits, phy) {
   )
 }
 
+# Phylogentic signal ----
+
+#' Analyze phylogenetic signal in a continuous trait of interest
+#'
+#' @param selected_trait Name of trait to analyze phylogenetic signal
+#' @param traits Dataframe including all untransformed traits, with
+#' 'species' as a column and other traits as other columns.
+#' @param phy Phylogeny
+#'
+#' @return List of estimated Blomberg's K and Pagel's lambda and
+#' their significance
+#' 
+analyze_cont_phylosig <- function (selected_trait, traits, phy) {
+  
+  # Trim data to non-missing trait values and
+  # make sure species in same order in tree and traits
+  traits_select <- traits %>% select(species, selected_trait) %>%
+    remove_missing(na.rm = TRUE)
+  
+  traits_trim <- match_traits_and_tree(traits = traits_select, phy = phy, "traits") 
+  phy_trim <- match_traits_and_tree(traits = traits_select, phy = phy, "tree") 
+  
+  # Extract named vector of trait values for phylosig()
+  trait_vec <- pull(traits_trim, selected_trait) %>%
+    set_names(traits_trim$species)
+  
+  # Run phylosig() on selected trait
+  # using Blomberg's K
+  k_model <- phylosig(phy_trim, trait_vec, method = "K", test = TRUE)
+  # and Pagel's lambda
+  lambda_model <- phylosig(phy_trim, trait_vec, method = "lambda", test = TRUE)
+  
+  # get model results
+  list(trait = selected_trait,
+       kval = k_model$K,
+       k_pval = k_model$P,
+       lambda = lambda_model$lambda,
+       lambda_pval = lambda_model$P)
+  
+}
+
+# Misc ----
+
+#' Match trait data and tree
+#' 
+#' Order of species in traits will be rearranged to match the
+#' phylogeny.
+#'
+#' @param traits Dataframe of traits, with 'species' column and
+#' additional columns, one for each trait
+#' @param phy Phylogeny (list of class "phylo")
+#' @param return Type of object to return
+#'
+#' @return Either a dataframe or a list of class "phylo"; the tree or
+#' the traits, pruned so that only species occurring in both datasets
+#' are included.
+#' @export
+#'
+#' @examples
+match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
+  
+  assert_that("species" %in% colnames(traits))
+  
+  # Keep only species in phylogeny
+  traits <- traits %>%
+  filter(species %in% phy$tip.label) 
+  
+  # Trim to only species with trait data
+  phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
+  
+  # Get traits in same order as tips
+  traits <- left_join(
+    tibble(species = phy$tip.label),
+    traits
+  )
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
+  
+  # Return traits or tree
+  assert_that(return %in% c("tree", "traits"))
+  
+  if(return == "tree") { 
+    return (phy) 
+    } else {
+    return (traits)
+    }
+  
+}
+
 # Plotting ----
 make_climate_plot <- function (climate_data, site_data, 
                                fits, summaries, 

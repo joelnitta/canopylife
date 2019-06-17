@@ -68,6 +68,14 @@ plan <- drake_plan(
     phy = phy
   ),
   
+  # Phylogenetic signal ----
+  phylosig_cont_traits = list(
+    as.list(c("stipe", "length", "width", "dissection", "pinna", "sla", "rhizome")),
+    traits = list(fern_traits),
+    phy = list(phy)
+  ) %>%
+    pmap_dfr(analyze_cont_phylosig),
+  
   # Plots ----
   
   # Set color scheme
