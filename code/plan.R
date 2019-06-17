@@ -84,6 +84,14 @@ plan <- drake_plan(
     phy = phy
   ),
   
+  # Correlated evolution ----
+  correlated_evo_test = list(
+    as.list(c("morphotype", "glands", "hairs", "gemmae")),
+    traits = list(fern_traits),
+    phy = list(phy)
+  ) %>%
+    pmap_dfr(test_corr_evo)
+  
   # Plots ----
   
   # Set color scheme

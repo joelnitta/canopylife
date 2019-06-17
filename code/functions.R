@@ -577,6 +577,56 @@ analyze_binary_phylosig <- function (traits, phy) {
 
 }
 
+# Correlated evolution ----
+
+#' Test for correlated evolution between growth habit and another
+#' binary trait of interest
+#'
+#' @param selected_trait Name of trait to test for correlated evolution
+#' with growth habit
+#' @param traits Dataframe including all untransformed traits, with
+#' 'species' as a column and other traits as other columns.
+#' @param phy Phylogeny
+#'
+#' @return List of loglikelihood values for the independent
+#' and dependent model and p value for the test if they
+#' are different.
+#' 
+test_corr_evo <- function (selected_trait, traits, phy) {
+  
+  # Make morphotype binary
+  traits <- mutate (traits, morphotype = case_when (
+    morphotype == "cordate" ~ "cordate",
+    morphotype != "cordate" ~ "noncordate"))
+  
+  # Trim data to non-missing trait values and
+  # make sure species in same order in tree and traits
+  traits_select <- traits %>% select(species, habit, selected_trait) %>%
+    remove_missing(na.rm = TRUE)
+  
+  traits_trim <- match_traits_and_tree(traits = traits_select, phy = phy, "traits") 
+  phy_trim <- match_traits_and_tree(traits = traits_select, phy = phy, "tree") 
+  
+  # Format input data for phytools
+  # - Extract named vector of trait values
+  trait_vec <- pull(traits_trim, selected_trait) %>%
+    set_names(traits_trim$species)
+  # - Extract named vector of growth habit
+  habit_vec <- pull(traits_trim, habit) %>%
+    set_names(traits_trim$species)
+  
+  # run fitPagel() on selected trait vs. growth habit
+  model <- fitPagel(tree = phy_trim, x = trait_vec, y = habit_vec)
+  
+  # get model results
+  list(trait = selected_trait,
+       logL_indep = model$independent.logL, 
+       logL_dep = model$dependent.logL, 
+       likelihood_ratio = model$lik.ratio, 
+       pval = model$P)
+  
+}
+
 # Misc ----
 
 #' Match trait data and tree
