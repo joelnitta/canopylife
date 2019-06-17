@@ -6,7 +6,7 @@
 # For more information about drake, see
 # https://ropensci.github.io/drake/
 
-# Set working directory.
+# Set working directory to project root.
 setwd(here::here())
 
 # Load packages.

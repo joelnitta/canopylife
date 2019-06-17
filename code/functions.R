@@ -377,16 +377,10 @@ run_trait_PCA <- function (traits, phy) {
     # Keep only completely sampled species
     filter(complete.cases(.)) %>%
     # Keep only species in phylogeny
-    filter(species %in% phy$tip.label) 
+    match_traits_and_tree(traits = ., phy = phy, "traits") 
   
   # Trim to only species with trait data
-  phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
-  
-  # Get traits in same order as tips
-  traits <- left_join(
-    tibble(species = phy$tip.label),
-    traits
-  )
+  phy <- match_traits_and_tree(traits, phy, "tree") 
   
   # Make sure that worked
   assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
