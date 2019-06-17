@@ -11,7 +11,7 @@
 #' @return data frame formatted for export as CSV to be included with SI.
 process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
   
-  # SLA ----
+  ### SLA ###
   # Nitta 2543 Ptisana salicina is in error, it should be Nitta 2544.
   # Already have measurements for 2544 P. salicina, so it must have been measured twice.
   # So exclude 2544 P. salicina
@@ -31,8 +31,7 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
     summarize(mean = mean(sla) , sd = sd(sla), n = n()) %>%
     mutate(trait = "sla")
   
-  # Other traits ----
-  
+  ### Other traits ###
   # Load raw measurements, in long format.
   # Includes only one measurment per individual but multiple individuals 
   # per species.
@@ -82,8 +81,7 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
     select(species, trait, print) %>%
     spread(trait, print)
   
-  # Merge into final data table ----
-  
+  ### Merge into final data table ###
   morph_table <- 
     fern_traits %>%
     select(species, habit, dissection, morphotype, glands, hairs, gemmae, gameto_source) %>%
@@ -277,24 +275,74 @@ make_climate_models <- function (climate_data, site_data) {
 # Extract model fits
 extract_model_fits <- function (supported_models) {
   supported_models %>%
-  mutate(
-    fits = map(model, augment)
-  ) %>%
-  select(var, model_type, fits) %>%
-  unnest
+    mutate(
+      fits = map(model, augment)
+    ) %>%
+    select(var, model_type, fits) %>%
+    unnest
 }
 
 # Extract model summaries
 extract_model_summaries <- function (supported_models) {
   supported_models %>%
-  mutate(
-    summary = map(model, tidy)
-  ) %>%
-  select(var, model_type, summary) %>%
-  unnest
+    mutate(
+      summary = map(model, tidy)
+    ) %>%
+    select(var, model_type, summary) %>%
+    unnest
 }
 
-# Trait PCA ----
+# PCA ----
+
+#' Transform traits
+#'
+#' @param traits dataframe; trait data with one column per trait.
+#' @param log_trans logical; should log-transform be applied?
+#' @param scale_traits logical; should traits be scaled?
+#' @param small_number Arbitrarily small number to use in place
+#' of 0 before log-transform
+#' @param trans_select Character vector of trait names to log
+#' transform.
+#' @param scale_select Character vector of trait names to rescale.
+#'
+#' @return dataframe
+#' 
+transform_traits <- function (traits, 
+                              log_trans = TRUE, 
+                              scale_traits = TRUE, 
+                              small_number = 0.1, 
+                              trans_select = c("dissection", "stipe", "length", "width", 
+                                               "rhizome", "pinna"), 
+                              scale_select = c("sla", "dissection", "stipe", "length", 
+                                               "width", "rhizome", "pinna")
+) {
+  
+  # Log-transform
+  if (log_trans == TRUE) {
+    traits <-
+      traits %>%
+      verify(trans_select %in% colnames(traits)) %>%
+      assert(is.numeric, trans_select) %>%
+      # Replace zeros with arbitrarily small number
+      mutate_at(trans_select, ~ifelse(. == 0, small_number, .)) %>%
+      mutate_at(trans_select, log)
+  }
+  
+  # Rescale by dividing original value by range of 
+  # that value (max - min) across the dataset
+  if (scale_traits == TRUE) {
+    traits <-
+      traits %>% 
+      verify(scale_select %in% colnames(traits)) %>%
+      assert(is.numeric, scale_select) %>%
+      mutate_at(
+        scale_select, ~ . / (max(., na.rm = TRUE) - min(., na.rm = TRUE))
+      )
+  }
+  
+  traits
+  
+}
 
 #' Run principal components analysis on traits
 #'
@@ -320,8 +368,11 @@ run_trait_PCA <- function (traits, phy) {
     "sla", "stipe", "length", "width", "rhizome", "pinna"
   )
   
-  # Subset to continuous traits
+  # Prepare trait data
   traits <- traits %>%
+    # Log-transform and scale
+    transform_traits() %>%
+    # Subset to continuous traits
     select(species, habit, sla, stipe, length, width, rhizome, pinna) %>%
     # Keep only completely sampled species
     filter(complete.cases(.)) %>%
@@ -347,7 +398,6 @@ run_trait_PCA <- function (traits, phy) {
   traits_df_for_pca$species <- NULL
   
   ### Standard PCA ###
-  
   pca_std_results <- PCA(traits_df_for_pca, graph=FALSE)
   
   # Get position of species along PC axes
@@ -425,9 +475,7 @@ run_trait_PCA <- function (traits, phy) {
     traits_locs = bind_rows(pca_phy_trait_locs, pca_std_trait_locs),
     variance =  bind_rows(pca_phy_variance, pca_std_variance)
   )
-  
 }
-
 
 # Plotting ----
 make_climate_plot <- function (climate_data, site_data, 
@@ -524,6 +572,109 @@ make_climate_plot <- function (climate_data, site_data,
   b <- b + blank_x_theme() 
   
   a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
+    theme(legend.position = "none")
+}
+
+make_pca_plot <- function (pca_results, habit_colors, traits) {
+  
+  # Make a dataframe of axis labels that include
+  # amount of variance explained by each PC
+  axis_labels <-
+    pca_results$variance %>%
+    filter(variance_type == "Proportion of Variance") %>%
+    select(analysis_type, PC1, PC2) %>%
+    gather(axis, proportion, -analysis_type) %>%
+    mutate(
+      label = glue("{axis} ({round(proportion, 3) %>% percent})"),
+      axis = case_when(
+        axis == "PC1" ~ "x",
+        axis == "PC2" ~ "y"
+      ))
+  
+  get_label <- function(axis_labels, analysis_type_select, axis_select) {
+    axis_labels %>% 
+      filter(analysis_type == analysis_type_select, axis == axis_select) %>% 
+      pull(label)
+  }
+  
+  # Standard trait PCA 
+  a <- 
+    pca_results$traits_locs %>%
+    filter(analysis_type == "standard") %>%
+    ggplot(aes(x = PC1, y = PC2)) +
+    geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_point(size=3, shape=16) +
+    geom_text_repel(aes(label = trait), show.legend=FALSE, segment.colour = NA) +
+    scale_x_continuous(
+      limits = c(-1,1)
+    ) +
+    scale_y_continuous(
+      limits = c(-1,1)
+    ) +
+    labs(
+      x = get_label(axis_labels, "standard", "x"),
+      y = get_label(axis_labels, "standard", "y"),
+      subtitle = "(a)"
+    )
+  
+  # Phylogenetic trait PCA 
+  b <- 
+    pca_results$traits_locs %>%
+    filter(analysis_type == "phylogenetic") %>%
+    ggplot(aes(x = PC1, y = PC2)) +
+    geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_point(size=3, shape=16) +
+    geom_text_repel(aes(label = trait), show.legend=FALSE, segment.colour = NA) +
+    scale_x_continuous(
+      limits = c(-1,1)
+    ) +
+    scale_y_continuous(
+      limits = c(-1,1)
+    ) +
+    labs(
+      x = get_label(axis_labels, "phylogenetic", "x"),
+      y = get_label(axis_labels, "phylogenetic", "y"),
+      subtitle = "(b)"
+    )
+  
+  c <-
+  pca_results$species_locs %>%
+    filter(analysis_type == "standard") %>%
+    left_join(select(traits, species, habit)) %>%
+    ggplot(aes(x = PC1, y = PC2, color = habit)) +
+    geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_point(size=3, shape=16) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    labs(
+      x = get_label(axis_labels, "standard", "x"),
+      y = get_label(axis_labels, "standard", "y"),
+      subtitle = "(c)"
+    )
+  
+  d <-
+    pca_results$species_locs %>%
+    filter(analysis_type == "phylogenetic") %>%
+    left_join(select(traits, species, habit)) %>%
+    ggplot(aes(x = PC1, y = PC2, color = habit)) +
+    geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
+    geom_point(size=3, shape=16) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    labs(
+      x = get_label(axis_labels, "phylogenetic", "x"),
+      y = get_label(axis_labels, "phylogenetic", "y"),
+      subtitle = "(d)"
+    )
+  
+  a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
+    standard_theme() &
     theme(legend.position = "none")
   
 }

@@ -6,10 +6,15 @@ plan <- drake_plan(
   # - Raw specific leaf area (SLA) measurments,
   # includes multiple measures per specimen
   sla_raw = mooreaferns::sla.raw %>% as_tibble,
+  
   # - Other raw trait data, includes one measure per specimen
   morph_raw = mooreaferns::morph.raw %>% as_tibble,
-  # - Pre-processed data
-  fern_traits = mooreaferns::fern_traits %>% as_tibble,
+  
+  # - Pre-processed trait data
+  fern_traits = mooreaferns::fern_traits %>% 
+    as_tibble %>%
+    # make sure binary traits are coded as character
+    mutate_at(vars(glands, hairs, gemmae), as.character),
   
   # Site data
   moorea_sites = mooreaferns::sites %>%
@@ -17,12 +22,12 @@ plan <- drake_plan(
     filter(str_detect(site, "Aorai", negate = TRUE)),
 
   # Climate data
-  # - Raw data (rel. humidity and temperature every 15 min.)
+  # Raw climate data (rel. humidity and temperature every 15 min.)
   moorea_climate_raw = mooreaferns::moorea_climate %>% 
     as_tibble %>% 
     reformat_raw_climate,
   
-  # - Process climate data
+  # Process climate data
   daily_mean_climate = get_daily_means(moorea_climate_raw),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
@@ -76,6 +81,13 @@ plan <- drake_plan(
     site_data = moorea_sites,
     fits = climate_model_fits, 
     summaries = climate_model_summaries, 
-    habit_colors = habit_colors)
+    habit_colors = habit_colors),
+  
+  # Make PCA plot
+  pca_plot = make_pca_plot(
+    pca_results = pca_results, 
+    habit_colors = habit_colors, 
+    traits = fern_traits
+  )
   
 )
