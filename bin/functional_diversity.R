@@ -515,6 +515,9 @@ multvar.t.results <- make_barplot_means (compare.df, resp_vars, t.test.out)
 # generate boxplots as list
 boxplots <- plot_box_dataset (compare.df, resp_vars, multvar.t.results)
 
+# save RDS for exporting to presentation
+saveRDS(boxplots, "tmp/multvar_boxplots.RDS")
+
 # modifications for boxplots
 # strip y axis titles and scale, since these are same across all plots in a row
  for (i in 1:length(boxplots)) {
@@ -630,6 +633,9 @@ univar.t.results <- make_barplot_means (traits.test, resp_vars, t.test.out)
 
 ### make barplots
 barplots <- plot_bar_dataset(univar.t.results, resp_vars)
+
+# save RDS for exporting to presentation
+saveRDS(barplots, "tmp/univar_barplots.RDS")
 
 # modifications for barplots
 # strip y axis titles (but keep scale, because different from part A)
