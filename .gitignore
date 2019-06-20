@@ -1,7 +1,10 @@
 .Rproj.user
 .Rhistory
-.RData
+*.RData
 .Ruserdata
+.drake
+old
+tmp
 
 *.pdf
 !traits.pdf
