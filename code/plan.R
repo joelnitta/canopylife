@@ -90,7 +90,13 @@ plan <- drake_plan(
     traits = list(fern_traits),
     phy = list(phy)
   ) %>%
-    pmap_dfr(test_corr_evo)
+    pmap_dfr(test_corr_evo),
+  
+  # Phylogenetically independent contrasts ----
+  pic_results = run_pic(
+    traits = fern_traits,
+    phy = phy
+  ),
   
   # Plots ----
   

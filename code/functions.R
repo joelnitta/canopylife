@@ -627,6 +627,70 @@ test_corr_evo <- function (selected_trait, traits, phy) {
   
 }
 
+#' Calculate phylogenetically independent contrasts between trait
+#' values comparing between species that differ in (another) binary
+#' trait
+#'
+#' @param traits Dataframe of traits, including species, a binary
+#' trait (here, growth habit) and several other continuous traits 
+#' @param phy Phylogeny of the species
+#'
+#' @return Dataframe
+#' 
+run_pic <- function (traits, phy) {
+  
+  ### Setup
+  # Make sure growth habit is factor with levels set as we expect
+  assert_that(isTRUE(all.equal(levels(traits$habit), c("terrestrial", "epiphytic"))))
+  
+  # Keep only species, habit, and quantitative traits to test
+  traits <- traits %>%
+    select(species, habit, stipe, length, width, rhizome, dissection, pinna, sla) %>%
+    # Keep only species in phylogeny
+    match_traits_and_tree(traits = ., phy = phy, "traits") 
+  
+  # Trim to only species with trait data
+  phy <- match_traits_and_tree(traits, phy, "tree")
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
+  
+  ### Run PICs using brunch
+  traits %>%
+    gather(trait, value, -species, -habit) %>%
+    nest(-trait) %>%
+    mutate(
+      # Construct a comparative data object for each trait
+      # so none are missing any data.
+      comp_data = map(
+        data, 
+        ~ comparative.data(
+          phy = phy, 
+          data = as.data.frame(.), 
+          names.col= "species", 
+          na.omit=TRUE)
+      ),
+      # Run brunch on each trait
+      model = map(
+        comp_data,
+        ~ brunch(value ~ habit, data = .) # phylo.d() uses NSE
+      ),
+      # Extract the useful bits of information from each model fit
+      pic_table = map(model, caic.table),
+      summary = map(model, summary),
+      tidy_summary = map(summary, tidy),
+      contrasts_summary = map(pic_table, 
+        ~ tibble(
+          n_contrasts = nrow(.),
+          n_pos_con = sum(.[,1] > 0)
+        )
+      )
+    ) %>%
+    # Select only results and format as output dataframe
+    select(trait, tidy_summary, contrasts_summary) %>%
+    unnest
+}
+
 # Misc ----
 
 #' Match trait data and tree
