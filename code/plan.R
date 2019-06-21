@@ -34,6 +34,15 @@ plan <- drake_plan(
   # Phylogeny
   phy = mooreaferns::fern_tree,
   
+  # Community data for ferns of Moorea only 
+  # with rows as species and sites as columns
+  comm = mooreaferns::sporocomm %>%
+    rownames_to_column("site") %>%
+    as_tibble %>%
+    filter(site %in% moorea_sites$site) %>%
+    gather(species, abundance, -site) %>%
+    spread(site, abundance)
+  
   # Format trait data for SI.
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(

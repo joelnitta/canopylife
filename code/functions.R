@@ -691,6 +691,123 @@ run_pic <- function (traits, phy) {
     unnest
 }
 
+# Community and functional diversity ----
+
+#' Analyze phylogenetic community structure in epiphytic and 
+#' terrestrial communities separately
+#'
+#' @param comm Community matrix with sites as columns and species as rows
+#' @param phy Phylogeny
+#' @param traits Traits of each species, including growth habit
+#'
+#' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
+#' merged together.
+#' 
+comm_struc_by_habit <- function (comm, phy, traits) {
+  
+  ### Prepare data ###
+  
+  # Keep only species in community with trait data
+  comm <- comm %>%
+    filter(species %in% traits$species)
+  
+  # Add growth habit to community data
+  comm <- left_join(
+    comm,
+    select(traits, species, habit)
+    ) %>%
+  assert(not_na, habit)
+  
+  # check for mismatches/missing species between phy and comm
+  phy <- match_comm_and_tree(comm, phy, "tree")
+  comm <- match_comm_and_tree(comm, phy, "comm")
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(comm$species, phy$tip.label)))
+  
+  # Split communities into epiphytic / terrestrial taxa, 
+  # but keep together in a single dataframe so we can
+  # use whole fern community as null model.
+  # 
+  # Rename columns with _E or _T at end for epiphytic or terrestrial
+  # Set species abundances to 0, e.g. for terrestrial species 
+  # in an epiphytic community.
+  # 
+  # For ses.mpd() and ses.mntd(), needs to be a dataframe
+  # with sites as rows and species as columns, and rownames
+  # equal to site.
+  comm_by_habit <- left_join(
+    comm %>%
+    mutate_at(
+      vars(-species, -habit), 
+      ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
+      select(-habit),
+    comm %>%
+      mutate_at(
+        vars(-species, -habit), 
+        ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
+      select(-habit)
+  ) %>%
+    gather(site, abundance, -species) %>%
+    spread(species, abundance) %>%
+    as.data.frame()
+  
+  rownames(comm_by_habit) <- comm_by_habit$site
+  comm_by_habit$site <- NULL
+  
+  ### Run community structure analysis ###
+  
+  # Look at phylo structure of each plot individually, compared to null 
+  # (standard effect size). 
+  # Null model shuffles tips of phylogeny in plots, keeps freq and richness the same
+  # Positive SES values (mpd.obs.z > 0) and high quantiles (mpd.obs.p > 0.95) 
+  # indicate phylogenetic evenness.
+  # Negative SES values and low quantiles (mpd.obs.p < 0.05) indicate 
+  # phylogenetic clustering.
+  # SES values of 0 are for trees with species spread randomly across the tree.
+  # mpd.obs.z is the standardized effect size of mpd vs. null communities 
+  # (equivalent to -NRI)
+  
+  # Run ses.mpd, convert output to tibble
+  mpd_out <- ses.mpd(
+    comm_by_habit, 
+    cophenetic(phy), 
+    null.model = "phylogeny.pool", 
+    abundance.weighted = TRUE, 
+    runs = 999, iterations = 1000) %>%
+    rownames_to_column("site") %>%
+    as_tibble
+  
+  # Run ses.mntd, convert output to tibble
+  mntd_out <- ses.mntd(
+    comm_by_habit, 
+    cophenetic(phy), 
+    null.model = "phylogeny.pool", 
+    abundance.weighted = TRUE, 
+    runs = 999, iterations = 1000) %>%
+    rownames_to_column("site") %>%
+    as_tibble
+  
+  ### Merge results ###
+  left_join(
+  select(mpd_out, site, ntaxa, starts_with("mpd")),
+  select(mntd_out, site, starts_with("mntd"))
+  # Convert back to site and growth habit as separate columns
+  ) %>%
+    mutate(habit = case_when(
+      str_detect(site, "_E") ~ "epiphytic",
+      str_detect(site, "_T") ~ "terrestrial",
+    )) %>%
+    mutate(
+      site = str_remove_all(site, "_E|_T")
+    ) %>% 
+    select(site, habit, everything())
+  
+}
+
+
 # Misc ----
 
 #' Match trait data and tree
@@ -737,6 +854,53 @@ match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
     } else {
     return (traits)
     }
+  
+}
+
+#' Match community data and tree
+#' 
+#' Order of species in comm will be rearranged to match the
+#' phylogeny.
+#'
+#' @param comm Community data frame, with one column for sites and
+#' the rest for species.
+#' @param phy Phylogeny (list of class "phylo")
+#' @param return Type of object to return
+#'
+#' @return Either a dataframe or a list of class "phylo"; the tree or
+#' the community, pruned so that only species occurring in both datasets
+#' are included.
+#' @export
+#'
+#' @examples
+match_comm_and_tree <- function (comm, phy, return = c("comm", "tree")) {
+  
+  assert_that("species" %in% colnames(comm))
+  
+  # Keep only species in phylogeny
+  comm <- comm %>%
+    filter(species %in% phy$tip.label) 
+  
+  # Trim to only species with trait data
+  phy <- drop.tip(phy, setdiff(phy$tip.label, comm$species))
+  
+  # Get comm in same order as tips
+  comm <- left_join(
+    tibble(species = phy$tip.label),
+    comm
+  )
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(comm$species, phy$tip.label)))
+  
+  # Return comm or tree
+  assert_that(return %in% c("tree", "comm"))
+  
+  if(return == "tree") { 
+    return (phy) 
+  } else {
+    return (comm)
+  }
   
 }
 
