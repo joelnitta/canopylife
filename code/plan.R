@@ -1,3 +1,4 @@
+# Setup workflow plan
 plan <- drake_plan(
   
   # Load data ----
@@ -20,14 +21,14 @@ plan <- drake_plan(
   moorea_sites = mooreaferns::sites %>%
     as_tibble %>%
     filter(str_detect(site, "Aorai", negate = TRUE)),
-
+  
   # Climate data
-  # Raw climate data (rel. humidity and temperature every 15 min.)
+  # - Raw climate data (rel. humidity and temperature every 15 min.)
   moorea_climate_raw = mooreaferns::moorea_climate %>% 
     as_tibble %>% 
     reformat_raw_climate,
   
-  # Process climate data
+  # - Process climate data
   daily_mean_climate = get_daily_means(moorea_climate_raw),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
@@ -129,10 +130,34 @@ plan <- drake_plan(
   
   func_div = bind_rows(func_div_epi, func_div_ter),
   
-  # Merge all diversity metrics ----
+  # Models ----
+  
+  # Merge all diversity metrics.
   diversity_data = list(comm_struc, func_div, grand_mean_climate, moorea_sites) %>% 
     reduce(left_join) %>%
     mutate(habit = fct_relevel(habit, c("terrestrial", "epiphytic"))),
+  
+  # Make list of arguments (dep. var. and indep. var.) for linear models.
+  args = cross_df(list(
+    resp_vars = c(
+      "ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic",
+      "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome"), 
+    indep_vars = c("el", "min_RH")
+  )),
+  
+  # Run linear models on each combination of variables for
+  # terrestrial and epiphytic communities separately.
+  model_summaries = map2_df(
+    .x = args$indep_vars, 
+    .y = args$resp_vars, 
+    ~ run_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
+  ),
+  
+  model_fits = map2_df(
+    .x = args$indep_vars, 
+    .y = args$resp_vars, 
+    ~ fit_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
+  ),
   
   # Plots ----
   

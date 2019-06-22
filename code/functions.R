@@ -912,6 +912,80 @@ analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terr
     as_tibble
   
 }
+# Models ----
+
+#' Run a linear model on terrestrial and epiphytic species
+#' separately.
+#'
+#' @param data Input data. Must include column for "habit"
+#' (growth habit, either epiphtyic or terrestrial).
+#' @param indep_var Independent variable in data
+#' @param resp_var Response variable in data
+#'
+#' @return Dataframe; model summary
+#'
+#' @examples
+#' # A rather ridiculous example
+#' mtcars_hab <- mutate(mtcars, habit = c(
+#' rep("terrestrial", 0.5*nrow(mtcars)), 
+#' rep("epiphtyic", 0.5*nrow(mtcars)))
+#' )
+#' run_lm_by_habit(mtcars_hab, "mpg", "wt")
+run_lm_by_habit <- function (data, indep_var, resp_var) {
+  
+  resp_var_enq <- enquo(resp_var)
+  indep_var_enq <- enquo(indep_var)
+  
+  data %>%
+    select(y = !!resp_var_enq, x = !!indep_var_enq, habit) %>%
+    nest(-habit) %>%
+    mutate(
+      response = resp_var,
+      model = map(data, ~lm(y ~ x, data = .)),
+      summ = map(model, tidy)
+    ) %>%
+    select(-model, -data) %>%
+    unnest %>%
+    mutate(term = case_when(
+      term == "x" ~ indep_var,
+      TRUE ~ term
+    ))
+}
+
+#' Get linear model fits on terrestrial and epiphytic species
+#' separately.
+#'
+#' @param data Input data. Must include column for "habit"
+#' (growth habit, either epiphtyic or terrestrial).
+#' @param indep_var Independent variable in data
+#' @param resp_var Response variable in data
+#'
+#' @return Dataframe; model summary
+#'
+#' @examples
+#' # A rather ridiculous example
+#' mtcars_hab <- mutate(mtcars, habit = c(
+#' rep("terrestrial", 0.5*nrow(mtcars)), 
+#' rep("epiphtyic", 0.5*nrow(mtcars)))
+#' )
+#' fit_lm_by_habit(mtcars_hab, "mpg", "wt")
+fit_lm_by_habit <- function (data, indep_var, resp_var) {
+  
+  resp_var_enq <- enquo(resp_var)
+  indep_var_enq <- enquo(indep_var)
+  
+  data %>%
+    select(y = !!resp_var_enq, x = !!indep_var_enq, habit) %>%
+    nest(-habit) %>%
+    mutate(
+      response = resp_var,
+      model = map(data, ~lm(y ~ x, data = .)),
+      fits = map(model, augment)
+    ) %>%
+    select(-model, -data) %>%
+    unnest %>%
+    rename(!!resp_var_enq := y, !!indep_var_enq := x)
+}
 
 # Misc ----
 
@@ -1010,6 +1084,7 @@ match_comm_and_tree <- function (comm, phy, return = c("comm", "tree")) {
 }
 
 # Plotting ----
+
 make_climate_plot <- function (climate_data, site_data, 
                                fits, summaries, 
                                habit_colors, alpha_val = 0.6) {
@@ -1107,6 +1182,14 @@ make_climate_plot <- function (climate_data, site_data,
     theme(legend.position = "none")
 }
 
+
+# Helper function for labeling PCA plot
+get_label <- function(axis_labels, analysis_type_select, axis_select) {
+  axis_labels %>% 
+    filter(analysis_type == analysis_type_select, axis == axis_select) %>% 
+    pull(label)
+}
+
 make_pca_plot <- function (pca_results, habit_colors, traits) {
   
   # Make a dataframe of axis labels that include
@@ -1122,12 +1205,6 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
         axis == "PC1" ~ "x",
         axis == "PC2" ~ "y"
       ))
-  
-  get_label <- function(axis_labels, analysis_type_select, axis_select) {
-    axis_labels %>% 
-      filter(analysis_type == analysis_type_select, axis == axis_select) %>% 
-      pull(label)
-  }
   
   # Standard trait PCA 
   a <- 
