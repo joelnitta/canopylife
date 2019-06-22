@@ -14,6 +14,8 @@ library(ggrepel)
 library(assertr)
 library(scales)
 library(caper)
+library(FD)
+library(picante)
 library(tidyverse)
 
 conflict_prefer("filter", "dplyr")

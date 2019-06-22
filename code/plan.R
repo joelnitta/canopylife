@@ -41,7 +41,7 @@ plan <- drake_plan(
     as_tibble %>%
     filter(site %in% moorea_sites$site) %>%
     gather(species, abundance, -site) %>%
-    spread(site, abundance)
+    spread(site, abundance),
   
   # Format trait data for SI.
   # Include SD and n for all quantitative (continuous) data
@@ -106,6 +106,33 @@ plan <- drake_plan(
     traits = fern_traits,
     phy = phy
   ),
+  
+  # Phylogenetic community diversity ----
+  comm_struc = analyze_comm_struc_by_habit(
+    comm = comm, 
+    phy = phy, 
+    traits = fern_traits
+  ),
+  
+  # Trait community diversity ----
+  func_div_epi = analyze_fd_by_habit(
+    traits = fern_traits,
+    comm = comm,
+    habit_type = "epiphytic"
+  ),
+  
+  func_div_ter = analyze_fd_by_habit(
+    traits = fern_traits,
+    comm = comm,
+    habit_type = "terrestrial"
+  ),
+  
+  func_div = bind_rows(func_div_epi, func_div_ter),
+  
+  # Merge all diversity metrics ----
+  diversity_data = list(comm_struc, func_div, grand_mean_climate, moorea_sites) %>% 
+    reduce(left_join) %>%
+    mutate(habit = fct_relevel(habit, c("terrestrial", "epiphytic"))),
   
   # Plots ----
   

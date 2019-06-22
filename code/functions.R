@@ -703,7 +703,7 @@ run_pic <- function (traits, phy) {
 #' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
 #' merged together.
 #' 
-comm_struc_by_habit <- function (comm, phy, traits) {
+analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   
   ### Prepare data ###
   
@@ -807,6 +807,111 @@ comm_struc_by_habit <- function (comm, phy, traits) {
   
 }
 
+#' Helper function to extract output from FD::dbFD()
+#' 
+#' FD::dbFD() outputs results in a list of named
+#' vectors and dataframes. This function extracts
+#' one of the named vectors as a dataframe.
+#'
+#' @param dbFD_output Output of FD::dbFD()
+#' @param fd_metric Name of metric to extract
+#'
+#' @return Dataframe
+#'
+#' @examples
+#' library(FD)
+#' ex1 <- dbFD(dummy$trait, dummy$abun)
+#' tidy_fd_output(ex1, "FDiv")
+tidy_fd_output <- function (dbFD_output, fd_metric) {
+  dbFD_output %>% 
+    magrittr::extract2(fd_metric) %>%
+    as.data.frame %>% 
+    rownames_to_column("site") %>% 
+    set_names("site", fd_metric)
+}
+
+
+#' Analyze functional diversity in epiphytic and 
+#' terrestrial communities separately
+#'
+#' @param comm Community matrix with sites as columns and species as rows
+#' @param traits Traits of each species, including growth habit
+#'
+#' @return Dataframe; results of FD::dbFD() in a single dataframe, including
+#' site name and growth habit.
+#' 
+analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terrestrial")) {
+  
+  # Only include species with trait data and 
+  # with at least one occurrence in all plots.
+  
+  # For FD::dbFD(), input community data needs to be data.frame with
+  # rows as sites (and rownames) and columns as species
+  comm <-
+    comm %>%
+    filter(species %in% traits$species) %>%
+    gather(plot, abundance, -species) %>%
+    group_by(species) %>%
+    filter(sum(abundance) > 0) %>%
+    spread(species, abundance) %>%
+    column_to_rownames("plot")
+  
+  # Make dataframe of traits subsetted to just
+  # epiphytic or terrestrial species (specify with habit_type).
+  
+  # For FD::dbFD(), input trait data needs to be data.frame with
+  # rows as species with rownames.
+  traits_sub <- 
+    traits %>%
+    # Keep only species in community data
+    filter(species %in% colnames(comm)) %>%
+    # Subset to epiphytes
+    filter(habit == habit_type) %>%
+    # Keep only species name and numeric characters
+    select(species, colnames(.)[map_lgl(., is.numeric)]) %>%
+    # Remove if NA for more than half the traits
+    mutate(num_na = rowSums(is.na(.))) %>%
+    filter(num_na < (ncol(.) - 1) * 0.5) %>% # minus one b/c of species name
+    column_to_rownames("species")
+  
+  # Make community of epiphytic or terrestrial species only
+  comm_sub <- select(comm, rownames(traits_sub))
+  
+  # Check order of community data and metadata
+  if (!(all.equal(colnames(comm_sub), rownames(traits_sub)))) {
+    stop ("community and metadata don't match")
+  }
+  
+  # Set names of FD metrics to exctract
+  fd_metrics <- c("FRic", "FEve", "FDiv", "FDis", "RaoQ") %>%
+    set_names(.)
+  
+  # Run FD analysis
+  # Transform traits using default settings for func div metrics
+  traits_sub_trans <- rownames_to_column(traits_sub, "species") %>%
+    transform_traits %>%
+    column_to_rownames("species")
+  
+  # Calculate functional diversity on transformed trait data
+  func_div <- dbFD(x = traits_sub_trans, a = comm_sub, 
+                       corr = "lingoes", m = "max", 
+                       w.abun = TRUE, calc.CWM = FALSE, stand.FRic = FALSE)
+  
+  # Calculate community-weighted means of untransformed trait data
+  cwm <- dbFD(x = traits_sub, a = comm_sub, 
+                  corr = "lingoes", m = "max", 
+                  w.abun = TRUE, calc.CWM = TRUE, stand.FRic = FALSE)
+  
+  # Tidy results, add habitat type
+    map(fd_metrics, ~ tidy_fd_output(func_div, .)) %>%
+    reduce(left_join, by = "site") %>%
+    left_join(
+      cwm$CWM %>% rownames_to_column("site") %>% select(-num_na)
+    ) %>%
+    mutate(habit = habit_type) %>%
+    as_tibble
+  
+}
 
 # Misc ----
 
