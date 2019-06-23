@@ -988,6 +988,26 @@ fit_lm_by_habit <- function (data, indep_var, resp_var) {
     rename(resp_val = y, indep_val = x)
 }
 
+#' Run a t-test comparing values between epiphytic and terrestrial
+#' species
+#'
+#' @param data Input data. Must include column for "habit"
+#' (growth habit, either epiphtyic or terrestrial).
+#' @param resp_var Response variable in data
+#'
+#' @return Dataframe; summary of t-test results
+#'
+run_t_test_by_habit <- function (data, resp_var) {
+  resp_var <- enquo(resp_var)
+  ter_vals <- data %>% filter(habit == "terrestrial") %>% pull(!!resp_var)
+  epi_vals <- data %>% filter(habit == "epiphytic") %>% pull(!!resp_var)
+  t.test(x = ter_vals, y = epi_vals, alternative = "two.sided", na.action="na.omit") %>%
+    tidy %>%
+    mutate(resp_var := !!resp_var) %>%
+    select(resp_var, everything())
+}
+
+
 # Misc ----
 
 #' Match trait data and tree
@@ -1329,4 +1349,53 @@ make_scatterplot_by_habit <- function (model_fits, model_summaries,
     ) +
     jntools::standard_theme() +
     theme(legend.position = "none")
+}
+
+#' Make boxplot for one variable by growth
+#' habit
+#'
+#' @param t_test_results Results of running t-test on the
+#' response variable;
+#' output of run_t_test_by_habit.
+#' @param plot_data Data with raw values to plot.
+#' @param y_var Dependent variable in plot_data, e.g. "ntaxa"
+#' @param habit_colors Named vector; colors to use
+#' to distinguish growth habit
+#'
+#' @return ggplot object. An asterisk will be added between the bars
+#' for significant results.
+make_boxplot_by_habit <- function (t_test_results, plot_data, y_var,
+                                   habit_colors) {
+  
+  t_test_results <- t_test_results %>%
+    mutate(
+      asterisk = case_when(
+        p.value < 0.0001 ~ "***",
+        p.value < 0.001 ~ "**",
+        p.value < 0.05 ~ "*",
+        TRUE ~ ""
+      )
+    )
+  
+  asterisk <- t_test_results %>% filter(resp_var == y_var) %>% pull(asterisk)
+  
+  y_var_enq <- sym(y_var)
+  
+  ggplot(plot_data, aes(x = habit, y = !!y_var_enq, fill = habit)) +
+    geom_boxplot() +
+    # Add asterisk for t-test result between the bars
+    annotate(
+      "text", label = asterisk, size = 5, fontface = "bold",
+      x = 1.5, 
+      y = Inf,
+      vjust = 2.0, hjust = 0.5) +
+    labs(
+      y = y_var
+    ) +
+    scale_fill_manual(
+      values = habit_colors
+    ) +
+    jntools::standard_theme() +
+    theme(legend.position = "none")
+  
 }

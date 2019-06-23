@@ -159,10 +159,14 @@ plan <- drake_plan(
     ~ fit_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
   ),
   
+  # Run t-test on community diversity metrics by growth habit
+  t_test_results = map_df(
+    args$resp_vars %>% set_names(.) %>% unique,
+    ~ run_t_test_by_habit(diversity_data, .)),
+
   # Plots ----
   
-  # Set color scheme
-  # Epiphytes in green, terrestrial in brown
+  # Set color scheme: epiphytes in green, terrestrial in brown
   habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
     set_names(levels(moorea_climate_raw$habit)),
   
@@ -181,8 +185,8 @@ plan <- drake_plan(
     traits = fern_traits
   ),
   
-  # Make community diversity plots
-  comm_div_plots = map2(
+  # Make community diversity scatter plots
+  comm_div_scatterplots = map2(
     .x = args$indep_vars, 
     .y = args$resp_vars, 
     ~ make_scatterplot_by_habit(
@@ -191,6 +195,16 @@ plan <- drake_plan(
       x_var = .x, 
       y_var = .y,
       habit_colors = habit_colors)
-    )
+  ),
+  
+  # Make community diversity box plots
+  comm_div_boxplots = map(
+    args$resp_vars %>% unique %>% set_names(.), 
+    ~ make_boxplot_by_habit(
+      t_test_results, 
+      diversity_data,
+      y_var = ., 
+      habit_colors = habit_colors) 
+  )
   
 )
