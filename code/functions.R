@@ -940,7 +940,7 @@ run_lm_by_habit <- function (data, indep_var, resp_var) {
     select(y = !!resp_var_enq, x = !!indep_var_enq, habit) %>%
     nest(-habit) %>%
     mutate(
-      response = resp_var,
+      resp_var = resp_var,
       model = map(data, ~lm(y ~ x, data = .)),
       summ = map(model, tidy)
     ) %>%
@@ -978,13 +978,14 @@ fit_lm_by_habit <- function (data, indep_var, resp_var) {
     select(y = !!resp_var_enq, x = !!indep_var_enq, habit) %>%
     nest(-habit) %>%
     mutate(
-      response = resp_var,
+      resp_var = resp_var,
+      indep_var = indep_var,
       model = map(data, ~lm(y ~ x, data = .)),
       fits = map(model, augment)
     ) %>%
     select(-model, -data) %>%
     unnest %>%
-    rename(!!resp_var_enq := y, !!indep_var_enq := x)
+    rename(resp_val = y, indep_val = x)
 }
 
 # Misc ----
@@ -1286,4 +1287,46 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     standard_theme() &
     theme(legend.position = "none")
   
+}
+
+
+#' Make scatterplot for two variables by growth
+#' habit
+#'
+#' @param model_fits Results of fitting linear models;
+#' output of fit_lm_by_habit
+#' @param model_summaries Model summaries; output of
+#' run_lm_by_habit
+#' @param x_var Independent variable, e.g. "el"
+#' @param y_var Dependent variable, e.g. "ntaxa"
+#' @param habit_colors Named vector; colors to use
+#' to distinguish growth habit
+#'
+#' @return ggplot object
+make_scatterplot_by_habit <- function (model_fits, model_summaries, 
+                                       x_var, y_var,
+                                       habit_colors) {
+  
+  model_summaries <-
+    model_summaries %>%
+    filter(term != "(Intercept)") %>%
+    rename(indep_var = term)
+  
+  plot_data <- 
+    left_join(
+      model_fits, model_summaries 
+    ) %>% filter(resp_var == y_var, indep_var == x_var)
+  
+  ggplot(plot_data, aes(x = indep_val, color = habit)) +
+    geom_line(data = filter(plot_data, p.value < 0.05), aes(y = .fitted)) +
+    geom_point(aes(y = resp_val)) +
+    labs(
+      y = y_var,
+      x = x_var
+    ) +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    jntools::standard_theme() +
+    theme(legend.position = "none")
 }

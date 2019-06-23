@@ -179,6 +179,18 @@ plan <- drake_plan(
     pca_results = pca_results, 
     habit_colors = habit_colors, 
     traits = fern_traits
-  )
+  ),
+  
+  # Make community diversity plots
+  comm_div_plots = map2(
+    .x = args$indep_vars, 
+    .y = args$resp_vars, 
+    ~ make_scatterplot_by_habit(
+      model_fits, 
+      model_summaries, 
+      x_var = .x, 
+      y_var = .y,
+      habit_colors = habit_colors)
+    )
   
 )
