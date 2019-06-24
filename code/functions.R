@@ -1608,7 +1608,8 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     geom_tile(aes(trait, species, fill = value)) +
     scale_y_discrete(
       position = "right",
-      labels = function(x) str_replace_all(x, "_", " ")) +
+      labels = function(x) str_replace_all(x, "_", " "),
+      expand = c(0,0)) +
     # jntools::blank_y_theme() +
     scale_x_discrete(
       position = "top",
@@ -1681,8 +1682,8 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
   phy_plot <- ggtree(phy) +
     # Expand y scale so the tips line up with the heatmap
     scale_y_continuous(expand = c(0,0),
-                       # KEY: Extend to 0.5 past the number of tips
-                       limits = c(0, 0.5 + length(phy$tip.label))) +
+                       # KEY: Extend from 0.5 to 0.5 past the number of tips
+                       limits = c(0.5, 0.5 + length(phy$tip.label))) +
     # Expand x scale so there's no empty space next to heatmap
     scale_x_continuous(expand = c(0,0)) +
     # Probably not necessary, but if we we're using tip labels
