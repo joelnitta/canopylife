@@ -162,18 +162,18 @@ plan <- drake_plan(
     ~ fit_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
   ),
   
-  # Run t-test on community diversity metrics by growth habit
+  # Run t-test on community diversity metrics by growth habit.
   t_test_results = map_df(
     args$resp_vars %>% set_names(.) %>% unique,
     ~ run_t_test_by_habit(diversity_data, .)),
 
   # Plots ----
   
-  # Set color scheme: epiphytes in green, terrestrial in brown
+  # Set color scheme: epiphytes in green, terrestrial in brown.
   habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
     set_names(levels(moorea_climate_raw$habit)),
   
-  # Make climate plot
+  # Make climate plot.
   climate_plot = make_climate_plot(
     climate_data = grand_mean_climate,
     site_data = moorea_sites,
@@ -181,21 +181,21 @@ plan <- drake_plan(
     summaries = climate_model_summaries, 
     habit_colors = habit_colors),
   
-  # Make PCA plot
+  # Make PCA plot.
   pca_plot = make_pca_plot(
     pca_results = pca_results, 
     habit_colors = habit_colors, 
     traits = fern_traits
   ),
   
-  # Make plot of traits with tree
+  # Make plot of traits with tree.
   traits_with_tree = plot_traits_on_tree(
     traits = fern_traits,
     phy = phy,
     ppgi = ppgi
   ),
   
-  # Make community diversity scatter plots
+  # Make community diversity scatterplots.
   comm_div_scatterplots = map2(
     .x = args$indep_vars, 
     .y = args$resp_vars, 
@@ -207,7 +207,7 @@ plan <- drake_plan(
       habit_colors = habit_colors)
   ),
   
-  # Make community diversity box plots
+  # Make community diversity boxplots.
   comm_div_boxplots = map(
     args$resp_vars %>% unique %>% set_names(.), 
     ~ make_boxplot_by_habit(
@@ -215,6 +215,20 @@ plan <- drake_plan(
       diversity_data,
       y_var = ., 
       habit_colors = habit_colors) 
-  )
+  ),
+  
+  # Combine community diversity scatterplots
+  # and boxplots into final figure.
+  combined_comm_div_plots = combine_comm_div_plots(
+    args = args, 
+    scatterplots = comm_div_scatterplots, 
+    boxplots = comm_div_boxplots),
+  
+  # Combine community-weighted means scatterplots
+  # and boxplots into final figure.
+  combined_cwm_plots = combine_cwm_plots(
+    args = args, 
+    scatterplots = comm_div_scatterplots, 
+    boxplots = comm_div_boxplots)
   
 )

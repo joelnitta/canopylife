@@ -1398,6 +1398,122 @@ make_boxplot_by_habit <- function (t_test_results, plot_data, y_var,
   
 }
 
+#' Combine community-weighted mean plots into final figure
+#'
+#' @param args Dataframe of independent and dependent variables
+#' used to make scatterplots
+#' @param scatterplots List of scatterplots
+#' @param boxplots List of boxplots
+#'
+#' @return ggplot object
+combine_cwm_plots <- function (args, scatterplots, boxplots) {
+  
+  # Combine scatterplots and boxplots into tibble
+  plot_list <- 
+    bind_rows(
+      mutate(args, plot = scatterplots), 
+      args %>%
+        select(resp_vars) %>%
+        unique() %>%
+        mutate(
+          plot = boxplots,
+          indep_vars = "habit")
+    )
+  
+  # Sort plots by response and indep var.
+  # Goal is to have three-column multipart plot,
+  # with the x-axes of each column matching up.
+  # Order by response var., then indep var.
+  # so that patchwork::wrap_plots will output them in the
+  # correct order.
+  cwm_plots <- plot_list %>%
+    # Subset to traits that were use to calculate community-weighted means.
+    filter(resp_vars %in% c("length", "width", "dissection", "pinna", "sla", "rhizome")) %>%
+    mutate(indep_vars = factor(indep_vars, levels = c("min_RH", "el", "habit"))) %>%
+    arrange(resp_vars, indep_vars)
+  
+  # Remove un-needed plot features.
+  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
+  for(i in 1:nrow(cwm_plots)) {
+    if(cwm_plots$indep_vars[[i]] != "min_RH") {
+      cwm_plots$plot[[i]] <- cwm_plots$plot[[i]] + theme(axis.title.y = element_blank())
+    }
+    if(cwm_plots$resp_vars[[i]] != "width") {
+      cwm_plots$plot[[i]] <- cwm_plots$plot[[i]] + 
+        theme(
+          axis.title.x = element_blank(),
+          axis.text.x = element_blank())
+    }
+  }
+  
+  # Combine plots into single output
+  wrap_plots(cwm_plots$plot, ncol = 3) & theme(
+    # Tweak margins to remove whitespace between plots
+    plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+  )
+}
+
+#' Combine functional diveristy plots into final figure
+#'
+#' @param args Dataframe of independent and dependent variables
+#' used to make scatterplots
+#' @param scatterplots List of scatterplots
+#' @param boxplots List of boxplots
+#'
+#' @return ggplot object
+combine_comm_div_plots <- function (args, scatterplots, boxplots) {
+  
+  # Combine scatterplots and boxplots into tibble
+  plot_list <- 
+    bind_rows(
+      mutate(args, plot = scatterplots), 
+      args %>%
+        select(resp_vars) %>%
+        unique() %>%
+        mutate(
+          plot = boxplots,
+          indep_vars = "habit")
+    )
+  
+  # Sort plots by response and indep var.
+  # Goal is to have three-column multipart plot,
+  # with the x-axes of each column matching up.
+  # Order by response var., then indep var.
+  # so that patchwork::wrap_plots will output them in the
+  # correct order.
+  div_plots <- plot_list %>%
+    # Subset to traits that were use to calculate community-weighted means.
+    filter(resp_vars %in% 
+             c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic")) %>%
+    mutate(resp_vars = factor(
+      resp_vars, 
+      levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic"))) %>%
+    mutate(indep_vars = factor(
+      indep_vars, 
+      levels = c("min_RH", "el", "habit"))) %>%
+    arrange(resp_vars, indep_vars)
+  
+  # Remove un-needed plot features.
+  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
+  for(i in 1:nrow(div_plots)) {
+    if(div_plots$indep_vars[[i]] != "min_RH") {
+      div_plots$plot[[i]] <- div_plots$plot[[i]] + theme(axis.title.y = element_blank())
+    }
+    if(div_plots$resp_vars[[i]] != "FRic") {
+      div_plots$plot[[i]] <- div_plots$plot[[i]] + 
+        theme(
+          axis.title.x = element_blank(),
+          axis.text.x = element_blank())
+    }
+  }
+  
+  # Combine plots into single output
+  wrap_plots(div_plots$plot, ncol = 3) & theme(
+    # Tweak margins to remove whitespace between plots
+    plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+  )
+}
+
 #' Plot sporophyte and gametophyte traits on phylogenetic tree
 #'
 #' @param traits Dataframe with traits of fern sporophytes and gametophytes
