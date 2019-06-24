@@ -1696,36 +1696,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       fill = qual_palette[["epiphytic"]],
       size = 2,
       label.padding = unit(0.1, "lines")) +
-   # Add tip labels
-    # geom_tiplab(size = 2, fontface = "italic") +
-    # Add timescale in millions of years
     geom_treescale(width = 50, offset = 1, x = 0 , y = 50)
-  
-  # Add quantitative legend to tree plot to save space
-  # Manually tweak x and y values to get in right spot.
-  # phy_plot <-
-  # cowplot::ggdraw(phy_plot) +
-  #   cowplot::draw_plot(quant_legend, x = -0.38, y = 0.25)
-  
-  ### Subplot 3: Family names as a barplot
-  
-  family_bars <-
-    ggplot(family_bars_data, aes(ymin = start, ymax = end, xmin = 1, xmax =1.5)) +
-    geom_rect(aes(fill = is_odd)) +
-    geom_text(aes(x = 1.01, y = mid, label = family, hjust = 0, size = size_class)) +
-    scale_x_continuous(expand = c(0,0)) +
-    scale_y_continuous(expand = c(0,0),
-                       limits = c(0, 0.5 + length(phy$tip.label))) +
-    scale_fill_manual(
-      values = c(
-        "yes" = "grey50",
-        "no" = "grey70"
-      )
-    ) +
-    coord_cartesian(clip = "off") +
-    jntools::blank_x_theme() +
-    jntools::blank_y_theme() +
-    theme(legend.position = "none")
   
   ### Assemble subplots into final plot
   phy_plot + qual_heatmap + quant_heatmap + plot_layout(nrow = 1, widths = c(4,2,2)) &
