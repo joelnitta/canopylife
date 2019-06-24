@@ -44,6 +44,9 @@ plan <- drake_plan(
     gather(species, abundance, -site) %>%
     spread(site, abundance),
   
+  # PPGI taxonomy
+  ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
+  
   # Format trait data for SI.
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
@@ -183,6 +186,13 @@ plan <- drake_plan(
     pca_results = pca_results, 
     habit_colors = habit_colors, 
     traits = fern_traits
+  ),
+  
+  # Make plot of traits with tree
+  traits_with_tree = plot_traits_on_tree(
+    traits = fern_traits,
+    phy = phy,
+    ppgi = ppgi
   ),
   
   # Make community diversity scatter plots

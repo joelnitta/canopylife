@@ -1309,7 +1309,6 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   
 }
 
-
 #' Make scatterplot for two variables by growth
 #' habit
 #'
@@ -1351,8 +1350,7 @@ make_scatterplot_by_habit <- function (model_fits, model_summaries,
     theme(legend.position = "none")
 }
 
-#' Make boxplot for one variable by growth
-#' habit
+#' Make boxplot for one variable by growth habit
 #'
 #' @param t_test_results Results of running t-test on the
 #' response variable;
@@ -1397,5 +1395,328 @@ make_boxplot_by_habit <- function (t_test_results, plot_data, y_var,
     ) +
     jntools::standard_theme() +
     theme(legend.position = "none")
+  
+}
+
+#' Plot sporophyte and gametophyte traits on phylogenetic tree
+#'
+#' @param traits Dataframe with traits of fern sporophytes and gametophytes
+#' including growth habit and others
+#' @param phy Phylogeny
+#'
+#' @return ggplot object
+#' 
+plot_traits_on_tree <- function (traits, phy, ppgi) {
+  
+  # Subset and transform traits
+  traits <-
+    traits %>%
+    # Don't need gameto trait data source
+    select(-gameto_source) %>%
+    # Remove if NA for more than half the traits
+    mutate(num_na = rowSums(is.na(.))) %>%
+    filter(num_na < (ncol(.) - 1) * 0.5) %>% # minus one b/c of species name
+    # Convert morphotype to binary trait
+    # make binary morph category: 0 is noncordate, 1 is cordate
+    mutate(morphotype = case_when(
+      morphotype == "cordate" ~ "1",
+      TRUE ~ "0"
+    )) %>%
+    # Only keep species in tree
+    match_traits_and_tree(phy = phy, "traits") %>%
+    # Transform traits
+    transform_traits(
+      trans_select = c("dissection", "stipe", "length", 
+                       "width", "rhizome", "pinna"),
+      scale_select = c("sla", "dissection", "stipe", "length", 
+                       "width", "rhizome", "pinna")
+    )
+  
+  # For phylogeny, only keep species in traits
+  phy <- match_traits_and_tree(traits, phy, "tree")
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
+  
+  ### Set up color palette
+  # define my palette of colors to choose from
+  # list of qualitative colors from color brewer
+  qualcols <- brewer.pal(9, "Set1")
+  
+  # not enough colors in set1, so add paired set as well
+  pairedcols <- brewer.pal(8, "Paired")
+  
+  # use shades for present / absent
+  qual_palette <- c(
+    qualcols[c(3,7)], #habit: green, brown
+    pairedcols[c(1,2)], #morphotype: dark and light blue
+    pairedcols[c(4,3)], #gemmae: dark and light green
+    pairedcols[c(6,5)], #glands: red and pink
+    pairedcols[c(8,7)], #hairs: dark and light orange
+    "grey95") %>%
+    set_names(., c(
+      "epiphytic", "terrestrial",
+      "noncordate", "cordate",
+      "gemmae_present", "gemmae_absent",
+      "glands_present", "glands_absent",
+      "hairs_present", "hairs_absent",
+      "(Missing)"
+    ))
+  
+  ### Format data: qualitative traits
+  
+  # Get y-axis order of tips when plotting tree
+  phy_order <- ggtree(phy) %>% extract2("data") %>% select(species = label, phy_order = y)
+  
+  # Make tibble of qualitative traits in long format with
+  # trait and species as factors (species in phy order)
+  qual_traits <- traits %>%
+    select(species, habit, morphotype, glands, hairs, gemmae) %>%
+    mutate_all(as.character) %>%
+    mutate_at(
+      vars(morphotype),
+      ~ str_replace(., "0", "noncordate") %>%
+        str_replace(., "1", "cordate")
+    ) %>%
+    mutate_at(
+      vars(glands, hairs, gemmae),
+      ~ str_replace(., "0", "absent") %>%
+        str_replace(., "1", "present")
+    ) %>%
+    mutate(
+      glands = case_when(!is.na(glands) ~ paste0("glands_", glands)),
+      hairs = case_when(!is.na(hairs) ~ paste0("hairs_", hairs)),
+      gemmae = case_when(!is.na(gemmae) ~ paste0("gemmae_", gemmae))
+    ) %>%
+    gather(trait, value, -species) %>%
+    # reorder species by phylo order when plotting tree
+    left_join(phy_order) %>%
+    mutate(
+      species = fct_reorder(species, phy_order),
+      trait = factor(trait, levels = c("habit", "morphotype", "gemmae", "glands", "hairs")),
+      value = factor(value, levels = c("epiphytic", "terrestrial",
+                                       "noncordate", "cordate",
+                                       "gemmae_present", "gemmae_absent",
+                                       "glands_present", "glands_absent",
+                                       "hairs_present", "hairs_absent"
+      )) %>%
+        fct_explicit_na()
+    )
+  
+  # Make tibble of quantitative traits in long format
+  quant_traits <-
+    traits %>%
+    select(species, habit, c("sla", "dissection", "stipe", "rhizome", "pinna")) %>%
+    gather(trait, value, -species, -habit) %>%
+    # reorder species by phylo order when plotting tree
+    left_join(phy_order) %>%
+    mutate(species = fct_reorder(species, phy_order))
+  
+  ### Format data: phylogenetic tree
+  
+  # First make table of tips with taxonomic info added.
+  # This will be used to make data for plotting families
+  # as bars and labeled nodes in the tree.
+  phy_tax_data <-
+    ggtree(phy) %>% extract2("data") %>%
+    rename(species = label) %>%
+    mutate(genus = str_split(species, "_") %>% map_chr(1)) %>%
+    left_join(
+      select(ppgi, genus, family)
+    ) %>%
+    mutate(
+      family = case_when(
+        genus == "Amphineuron" ~ "Thelypteridaceae",
+        genus == "Wibelia" ~ "Davalliaceae",
+        genus == "Humata" ~ "Davalliaceae",
+        genus == "Belvisia" ~ "Polypodiaceae",
+        TRUE ~ family
+      )
+    )
+  
+  # Make tibble of fern families to plot along y-axis.
+  # Order must match tips of tree.
+  family_bars_data <-
+    phy_tax_data %>%
+    remove_missing() %>%
+    group_by(family) %>%
+    summarize(
+      start = min(y),
+      end = max(y),
+      count = n()
+    ) %>%
+    mutate(
+      size_class = case_when(
+        count > 5 ~ 3,
+        count > 2 ~ 2,
+        TRUE ~ 1
+      )
+    ) %>%
+    ungroup() %>%
+    mutate(
+      family = fct_reorder(family, end)
+    ) %>%
+    rowwise() %>%
+    mutate(
+      mid = mean(c(start, end))
+    ) %>%
+    arrange(family) %>%
+    ungroup() %>%
+    mutate(
+      rownum = 1:nrow(.),
+      is_odd = case_when(
+        (rownum %% 2) != 0 ~ "yes",
+        (rownum %% 2) == 0 ~ "no"
+      )) %>%
+    select(-rownum) %>%
+    mutate(
+      start = start-0.5,
+      end = end+0.5)
+  
+  ### Subplots 1: Heatmap plot of trait values
+  
+  qual_heatmap <-
+    ggplot(qual_traits, aes(trait, species)) +
+    geom_raster(aes(fill = value)) +
+    scale_fill_manual(
+      values = qual_palette,
+      breaks = names(qual_palette),
+      labels = names(qual_palette) %>%
+        str_to_sentence() %>%
+        str_replace_all("_", " ")) +
+    scale_x_discrete(
+      position = "top",
+      breaks = qual_traits$trait,
+      labels = str_to_sentence(qual_traits$trait)) +
+    guides(fill = guide_legend(
+      title = "Traits",
+      nrow = 2,
+      title.position = "top")) +
+    jntools::blank_y_theme() +
+    theme(
+      legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 32/.pt),
+      axis.title.x = element_blank()
+    )
+  
+  # Don't use frond length or width, as these are correlated with stipe length
+  quant_heatmap <-
+    ggplot(quant_traits) +
+    geom_raster(aes(trait, species, fill = value)) +
+    scale_y_discrete(position = "right") +
+    jntools::blank_y_theme() +
+    scale_x_discrete(
+      position = "top",
+      breaks= c("sla", "dissection", "stipe", "rhizome", "pinna"),
+      labels= c("SLA", "Dissection", "Stipe length", "Rhizome diam.", "Pinna num.")) +
+    scale_fill_viridis(
+      option = "B",
+      breaks = c(1, 5),
+      labels = c("Low", "High")) +
+    labs(fill = "Relative Trait Value") +
+    guides(fill = guide_colorbar(title.position = "top")) +
+    theme(
+      legend.position = "bottom",
+      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 32/.pt),
+      axis.title.x = element_blank()
+    )
+  
+  ### Subplot 2: Phylogenetic tree
+  
+  # Make named vector of nodes to label
+  # node is the most common recent ancestor of
+  # the group we want to label, and the name
+  # of the vector is the text to print for that node.
+  nodes_to_label <-
+    c(
+      A = phy_tax_data %>%
+        filter(family == "Aspleniaceae") %>%
+        pull(species) %>%
+        getMRCA(phy, .),
+      
+      E = phy_tax_data %>%
+        filter(genus == "Elaphoglossum") %>%
+        pull(species) %>%
+        getMRCA(phy, .),
+      
+      H = phy_tax_data %>%
+        filter(genus == "Hymenophyllum") %>%
+        pull(species) %>%
+        getMRCA(phy, .),
+      
+      P = phy_tax_data %>%
+        filter(family == "Polypodiaceae") %>%
+        pull(species) %>%
+        getMRCA(phy, .),
+      
+      V = phy_tax_data %>%
+        filter(genus %in% c("Haplopteris", "Antrophyum")) %>%
+        pull(species) %>%
+        getMRCA(phy, .)
+      
+    ) %>% sort
+  
+  # Convert named vector into dataframe based on
+  # original tip data
+  nodes_to_label_df <-
+    phy_tax_data %>%
+    filter(node %in% nodes_to_label) %>%
+    mutate(species = names(nodes_to_label))
+  
+  # Plot tree
+  # first convert underscores in tip labels to space
+  phy_for_plotting <- phy
+  phy_for_plotting$tip.label <- str_replace_all(phy_for_plotting$tip.label, "_", " ")
+  
+  phy_plot <- ggtree(phy_for_plotting) +
+    # Expand y scale so the tips line up with the heatmap
+    scale_y_continuous(expand = c(0,0),
+                       # KEY: Extend to 0.5 past the number of tips
+                       limits = c(0, 0.5 + length(phy$tip.label))) +
+    # Expand x scale so there's no empty space next to heatmap
+    scale_x_continuous(expand = c(0,0)) +
+    # Probably not necessary, but if we we're using tip labels
+    # would include so they don't get chopped off past plotting region.
+    coord_cartesian(clip = "off") +
+    # Label epiphytic clades with green labels.
+    geom_label(
+      data = nodes_to_label_df,
+      aes(label = species),
+      fill = qual_palette[["epiphytic"]]) +
+   # Add tip labels
+    geom_tiplab(size = 2, fontface = "italic") +
+    # Add timescale in millions of years
+    geom_treescale(width = 50, offset = 1, x = 0 , y = 50) +
+    theme(plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "in"))
+  
+  ### Subplot 3: Family names as a barplot
+  
+  family_bars <-
+    ggplot(family_bars_data, aes(ymin = start, ymax = end, xmin = 1, xmax =1.5)) +
+    geom_rect(aes(fill = is_odd)) +
+    geom_text(aes(x = 1.01, y = mid, label = family, hjust = 0, size = size_class)) +
+    scale_x_continuous(expand = c(0,0)) +
+    scale_y_continuous(expand = c(0,0),
+                       limits = c(0, 0.5 + length(phy$tip.label))) +
+    scale_fill_manual(
+      values = c(
+        "yes" = "grey50",
+        "no" = "grey70"
+      )
+    ) +
+    coord_cartesian(clip = "off") +
+    jntools::blank_x_theme() +
+    jntools::blank_y_theme() +
+    theme(legend.position = "none")
+  
+  ### Assemble subplots into final plot
+  
+  phy_plot + qual_heatmap + quant_heatmap + family_bars + plot_layout(nrow = 1, widths = c(4,2,2,3)) &
+    theme(
+      panel.grid.major = element_blank(),
+      panel.grid.minor = element_blank(),
+      panel.background = element_rect(fill = "transparent",colour = NA),
+      plot.background = element_rect(fill = "transparent",colour = NA)
+    )
   
 }
