@@ -1424,13 +1424,14 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     )) %>%
     # Only keep species in tree
     match_traits_and_tree(phy = phy, "traits") %>%
-    # Transform traits
-    transform_traits(
-      trans_select = c("dissection", "stipe", "length", 
-                       "width", "rhizome", "pinna"),
-      scale_select = c("sla", "dissection", "stipe", "length", 
-                       "width", "rhizome", "pinna")
-    )
+    # Transform and rescale traits
+    # SLA is already between 0 and 1, so don't log-transform.
+    # Instead of scaling between min and max range, rescale between 0 and 1.
+    transform_traits(trans_select = c("dissection", "stipe", "length", 
+                                      "width", "rhizome", "pinna"),
+                     scale_traits = FALSE) %>%
+    mutate_at(vars(dissection, sla, stipe, length, width, rhizome, pinna),
+              ~rescale(., c(0,1)))
   
   # For phylogeny, only keep species in traits
   phy <- match_traits_and_tree(traits, phy, "tree")
@@ -1577,7 +1578,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
   
   qual_heatmap <-
     ggplot(qual_traits, aes(trait, species)) +
-    geom_raster(aes(fill = value)) +
+    geom_tile(aes(fill = value)) +
     scale_fill_manual(
       values = qual_palette,
       breaks = names(qual_palette),
@@ -1595,31 +1596,44 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     jntools::blank_y_theme() +
     theme(
       legend.position = "bottom",
-      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 32/.pt),
-      axis.title.x = element_blank()
+      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 24/.pt),
+      axis.title.x = element_blank(),
+      legend.text = element_text(size = 20/.pt),
+      legend.title = element_text(size = 20/.pt)
     )
-  
+
   # Don't use frond length or width, as these are correlated with stipe length
   quant_heatmap <-
     ggplot(quant_traits) +
-    geom_raster(aes(trait, species, fill = value)) +
-    scale_y_discrete(position = "right") +
-    jntools::blank_y_theme() +
+    geom_tile(aes(trait, species, fill = value)) +
+    scale_y_discrete(
+      position = "right",
+      labels = function(x) str_replace_all(x, "_", " ")) +
+    # jntools::blank_y_theme() +
     scale_x_discrete(
       position = "top",
       breaks= c("sla", "dissection", "stipe", "rhizome", "pinna"),
       labels= c("SLA", "Dissection", "Stipe length", "Rhizome diam.", "Pinna num.")) +
     scale_fill_viridis(
       option = "B",
-      breaks = c(1, 5),
+      breaks = c(0, 1),
       labels = c("Low", "High")) +
-    labs(fill = "Relative Trait Value") +
+    labs(
+      y = "",
+      fill = "Relative Trait Value") +
     guides(fill = guide_colorbar(title.position = "top")) +
     theme(
       legend.position = "bottom",
-      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 32/.pt),
-      axis.title.x = element_blank()
+      axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 24/.pt),
+      axis.title.x = element_blank(),
+      axis.text.y = element_text(face = "italic", size = 12/.pt),
+      legend.text = element_text(size = 20/.pt),
+      legend.title = element_text(size = 20/.pt)
     )
+  
+  # Extract legend
+  quant_legend <- cowplot::get_legend(quant_heatmap)
+  quant_heatmap <- quant_heatmap + theme(legend.position = "none")
   
   ### Subplot 2: Phylogenetic tree
   
@@ -1664,11 +1678,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     mutate(species = names(nodes_to_label))
   
   # Plot tree
-  # first convert underscores in tip labels to space
-  phy_for_plotting <- phy
-  phy_for_plotting$tip.label <- str_replace_all(phy_for_plotting$tip.label, "_", " ")
-  
-  phy_plot <- ggtree(phy_for_plotting) +
+  phy_plot <- ggtree(phy) +
     # Expand y scale so the tips line up with the heatmap
     scale_y_continuous(expand = c(0,0),
                        # KEY: Extend to 0.5 past the number of tips
@@ -1682,12 +1692,19 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     geom_label(
       data = nodes_to_label_df,
       aes(label = species),
-      fill = qual_palette[["epiphytic"]]) +
+      fill = qual_palette[["epiphytic"]],
+      size = 2,
+      label.padding = unit(0.1, "lines")) +
    # Add tip labels
-    geom_tiplab(size = 2, fontface = "italic") +
+    # geom_tiplab(size = 2, fontface = "italic") +
     # Add timescale in millions of years
-    geom_treescale(width = 50, offset = 1, x = 0 , y = 50) +
-    theme(plot.margin = margin(t = 0, r = 2, b = 0, l = 0, unit = "in"))
+    geom_treescale(width = 50, offset = 1, x = 0 , y = 50)
+  
+  # Add quantitative legend to tree plot to save space
+  # Manually tweak x and y values to get in right spot.
+  # phy_plot <-
+  # cowplot::ggdraw(phy_plot) +
+  #   cowplot::draw_plot(quant_legend, x = -0.38, y = 0.25)
   
   ### Subplot 3: Family names as a barplot
   
@@ -1710,13 +1727,13 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     theme(legend.position = "none")
   
   ### Assemble subplots into final plot
-  
-  phy_plot + qual_heatmap + quant_heatmap + family_bars + plot_layout(nrow = 1, widths = c(4,2,2,3)) &
+  phy_plot + qual_heatmap + quant_heatmap + plot_layout(nrow = 1, widths = c(4,2,2)) &
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_rect(fill = "transparent",colour = NA),
-      plot.background = element_rect(fill = "transparent",colour = NA)
+      plot.background = element_rect(fill = "transparent",colour = NA),
+      plot.margin = margin(t = 0, r = 0, b = 0, l = -0.025, unit = "in")
     )
-  
+
 }
