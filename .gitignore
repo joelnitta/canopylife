@@ -7,6 +7,10 @@ old
 tmp
 .secret
 
+# Raw input
+references_raw.bib
+references_raw_selected.bib
+
 # Output
 *.docx
 *.doc
