@@ -7,11 +7,13 @@ old
 tmp
 .secret
 
+# Output
 *.docx
 *.doc
 *.pdf
-!traits.pdf
 *.html
+*_cache/
+*_files/
 
 # latex compile files
 *.synctex.gz
