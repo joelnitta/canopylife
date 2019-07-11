@@ -5,7 +5,10 @@
 .drake
 old
 tmp
+.secret
 
+*.docx
+*.doc
 *.pdf
 !traits.pdf
 *.html
