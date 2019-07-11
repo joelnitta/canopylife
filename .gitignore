@@ -22,3 +22,7 @@ tmp
 *.rtf
 *.aux
 *.log
+
+# packrat
+packrat/*
+!packrat/packrat.lock
