@@ -282,11 +282,21 @@ extract_model_fits <- function (supported_models) {
     unnest
 }
 
-# Extract model summaries
-extract_model_summaries <- function (supported_models) {
+# Extract model parameter summaries (slope, intersect, etc)
+extract_model_parameter_summaries <- function (supported_models) {
   supported_models %>%
     mutate(
       summary = map(model, tidy)
+    ) %>%
+    select(var, model_type, summary) %>%
+    unnest
+}
+
+# Extract model summaries (pvalue, rsquared of model)
+extract_model_summaries <- function (supported_models) {
+  supported_models %>%
+    mutate(
+      summary = map(model, glance)
     ) %>%
     select(var, model_type, summary) %>%
     unnest

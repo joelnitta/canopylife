@@ -17,6 +17,10 @@ plan <- drake_plan(
     # make sure binary traits are coded as character
     mutate_at(vars(glands, hairs, gemmae), as.character),
   
+  # - Also make "strict" trait dataset by excluding species with 
+  # gameto traits only known from taxonomy
+  fern_traits_strict = filter(fern_traits, gameto_source != "T"),
+  
   # Site data
   moorea_sites = mooreaferns::sites %>%
     as_tibble %>%
@@ -70,6 +74,11 @@ plan <- drake_plan(
     supported_models = climate_models
   ),
   
+  # Get summaries of supported model parameters.
+  climate_model_parameter_summaries = extract_model_parameter_summaries(
+    supported_models = climate_models
+  ),
+  
   # Get summaries of supported models.
   climate_model_summaries = extract_model_summaries(
     supported_models = climate_models
@@ -97,10 +106,24 @@ plan <- drake_plan(
     phy = phy
   ),
   
+  # - also run for "strict" trait dataset
+  phylosig_binary_traits_strict = analyze_binary_phylosig(
+    traits = fern_traits_strict,
+    phy = phy
+  ),
+  
   # Correlated evolution ----
   correlated_evo_test = list(
     as.list(c("morphotype", "glands", "hairs", "gemmae")),
     traits = list(fern_traits),
+    phy = list(phy)
+  ) %>%
+    pmap_dfr(test_corr_evo),
+  
+  # - also run for "strict" trait dataset
+  correlated_evo_test_strict = list(
+    as.list(c("morphotype", "glands", "hairs", "gemmae")),
+    traits = list(fern_traits_strict),
     phy = list(phy)
   ) %>%
     pmap_dfr(test_corr_evo),
@@ -119,6 +142,7 @@ plan <- drake_plan(
   ),
   
   # Trait community diversity ----
+  # (includes quantitative, i.e., sporophyte, traits only)
   func_div_epi = analyze_fd_by_habit(
     traits = fern_traits,
     comm = comm,
@@ -134,6 +158,7 @@ plan <- drake_plan(
   func_div = bind_rows(func_div_epi, func_div_ter),
   
   # Models ----
+  # (includes quantitative, i.e., sporophyte, traits only)
   
   # Merge all diversity metrics.
   diversity_data = list(comm_struc, func_div, grand_mean_climate, moorea_sites) %>% 
@@ -229,6 +254,11 @@ plan <- drake_plan(
   combined_cwm_plots = combine_cwm_plots(
     args = args, 
     scatterplots = comm_div_scatterplots, 
-    boxplots = comm_div_boxplots)
+    boxplots = comm_div_boxplots),
+  
+  # Write out MS ----
+  ms = rmarkdown::render(
+    knitr_in("ms/manuscript.Rmd"),
+    quiet = TRUE)
   
 )
