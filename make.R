@@ -19,5 +19,8 @@ pkgconfig::set_config("drake::strings_in_dots" = "literals")
 source("code/functions.R")
 source("code/plan.R")
 
+# Set seed for reproducibility.
+set.seed(1954)
+
 # Make plan.
 make(plan)
