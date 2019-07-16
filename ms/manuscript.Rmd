@@ -241,7 +241,7 @@ Although several other studies have addressed the relationship of functional tra
 
 The sporophyte traits that differed most strongly between epiphytic and terrestrial taxa were related to plant size, including stipe and frond length, frond width, and rhizome diameter. Stipe length in particular differed strongly between epiphytes and terrestrial species (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)). Stipe length may be a critical trait controlling whole leaf hydraulic conductance; since ferns have resistive stipes in general, species growing in water-limited habitats are expected to decrease stipe length to minimize resistance [@WatkinsJr.2010]. Our results support previous non-phylogenetically controlled studies that found a prevalence of short stipes in epiphytic ferns [@WatkinsJr.2010; Creese2011]. However, given that many of these size-related traits scale together in ferns [@Arcand2008; Creese2011], careful experimental manipulations are needed to distinguish the role (or lack thereof) of each in epiphytic growth.
 
-```{r sla-numbers}
+```{r sla-numbers, results = "hide"}
 loadd(fern_traits)
 
 # First smallest SLA: Humata_anderssonii
