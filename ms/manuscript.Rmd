@@ -50,6 +50,25 @@ format_pval <- function (x) {
   )
 }
 
+# Load analysis results
+loadd(climate_plot)
+loadd(combined_comm_div_plots)
+loadd(combined_cwm_plots)
+loadd(comm)
+loadd(correlated_evo_test)
+loadd(correlated_evo_test)
+loadd(diversity_data)
+loadd(fern_traits)
+loadd(model_summaries)
+loadd(pca_plot)
+loadd(pca_results)
+loadd(phylosig_binary_traits)
+loadd(phylosig_binary_traits)
+loadd(phylosig_cont_traits)
+loadd(pic_results)
+loadd(t_test_results)
+loadd(traits_with_tree)
+
 ```
 
 <!-- FOR CONVERSION TO MS WORD ONLY: remove page numbers -->
@@ -172,7 +191,7 @@ Code to replicate all analyses, figures, and this manuscript are available at ht
 #   )
 
 
-# There were significant interaction effects between growth habit and elevation on all microclimatic variables except for minimum temperature (Table S1). Slope and intercept for variables related to temperature were very similar between epiphytic and terrestrial dataloggers, but differed more strongly for those related to humidity (Table S1, Figure \@ref(fig:climate). Minimum RH increased `r min_RH_epi_slope %>% signif(2) %>% multiply_by(100) %>% percent()` per \SI{100}{\meter} elevation for epiphytic dataloggers, but only `r min_RH_ter_slope %>% signif(2) %>% multiply_by(100) %>% percent()` for terrestrial dataloggers (linear model, $\rval^2 = \Sexpr{get_result(slopes.results, "r.squared", "min_RH")}$, $\pval = \Sexpr{get_result(slopes.results, "pval", "min_RH", TRUE)}$). The Mt. Rotui \SI{830}{\meter} plot was a clear outlier, with greater mean temperature and lower minimum RH relative to other plots at similar elevation (outliers in  \fig \ref{fig:climate} at \circa \SI{800}{\meter}). Mt. Rotui is a solitary peak located between Cook's Bay and Oponohu Bay. It is more isolated with greater exposure than the other two mountains where the rest of the plots were established, which are part of a mountain complex on the interior of the island (J. Nitta, pers. obs.).
+# There were significant interaction effects between growth habit and elevation on all microclimatic variables except for minimum temperature (Table S1). Slope and intercept for variables related to temperature were very similar between epiphytic and terrestrial dataloggers, but differed more strongly for those related to humidity (Table S1, Figure \@ref(fig:climate). Minimum RH increased `r min_RH_epi_slope %>% signif(2) %>% multiply_by(100) %>% percent()` per \SI{100}{\meter} elevation for epiphytic dataloggers, but only `r min_RH_ter_slope %>% signif(2) %>% multiply_by(100) %>% percent()` for terrestrial dataloggers (linear model, $\rval^2^ = \Sexpr{get_result(slopes.results, "r.squared", "min_RH")}$, $\pval = \Sexpr{get_result(slopes.results, "pval", "min_RH", TRUE)}$). The Mt. Rotui \SI{830}{\meter} plot was a clear outlier, with greater mean temperature and lower minimum RH relative to other plots at similar elevation (outliers in  \fig \ref{fig:climate} at \circa \SI{800}{\meter}). Mt. Rotui is a solitary peak located between Cook's Bay and Oponohu Bay. It is more isolated with greater exposure than the other two mountains where the rest of the plots were established, which are part of a mountain complex on the interior of the island (J. Nitta, pers. obs.).
 
 ```
 
@@ -180,7 +199,6 @@ Code to replicate all analyses, figures, and this manuscript are available at ht
 
 ```{r pca-numbers}
 # Extract summary stats for mention in text
-loadd(pca_results)
 
 # Cumulative amount of variance explained by first two axes, standard PCA
 pca_std_cum_var <-
@@ -204,7 +222,6 @@ Terrestrial and epiphytic species are partly differentiated in trait space, occu
 ### Phylogenetic Signal
 
 ```{r physig-numbers}
-loadd(phylosig_binary_traits)
 habit_d <- phylosig_binary_traits %>% filter(trait == "habit") %>% pull(D) %>% round_t(2)
 hairs_d <- phylosig_binary_traits %>% filter(trait == "hairs") %>% pull(D) %>% round_t(2)
 gemmae_d <- phylosig_binary_traits %>% filter(trait == "gemmae") %>% pull(D) %>% round_t(2)
@@ -217,17 +234,79 @@ Most measured traits showed some degree of phylogenetic signal, but the strength
 ### Correlation of Traits with Growth Habit
 
 ```{r corr-numbers}
-loadd(pic_results)
 stipe_pval <- pic_results %>% filter(trait == "stipe") %>% pull(p.value) %>% signif(2)
 width_pval <- pic_results %>% filter(trait == "width") %>% pull(p.value) %>% signif(2)
 dissection_pval <- pic_results %>% filter(trait == "dissection") %>% pull(p.value) %>% signif(2)
-
-loadd(correlated_evo_test)
 morphotype_pval <- correlated_evo_test %>% filter(trait == "morphotype") %>% pull(pval) %>% signif(2)
-
 ```
 
 Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (\tab \@ref(tab:pics)). Epiphytic species tend to have smaller values for all traits (\tab \@ref(tab:pics); contrasts were made by subtracting epiphytic from terrestrial values). Short stipe length in particular appears to be strongly correlated with epiphytic growth (phylogenetically independent contrasts, \pval = `r stipe_pval`), as well as frond width (\pval = `r width_pval`) and degree of laminae dissection (\pval = `r dissection_pval`). For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval = `r morphotype_pval`; \tab \@ref(tab:corr-evo)). Quantitatively similar results were obtained using PGLMMs, except that no significant relationship was observed between rhizome diameter and growth habit, whereas SLA did show a significant relationship with growth habit (REF SUPP TABLE).
+
+### Functional and Phylogenetic Diversity
+
+```{r comm-div-numbers}
+# Format model summaries for printing
+model_summ_print <-
+  model_summaries %>%
+  mutate(r = round_t(r.squared, 2), 
+         p = format_pval(p.value))
+
+# Format t-test results for printing
+t_test_results_print <-
+  t_test_results %>%
+  mutate(p = format_pval(p.value))
+
+# Define simple function for extracting value of interest from
+# diversity model results
+get_mod_result <- function(resp_var_select, habit_select, 
+                           indep_var_select, value) {
+  model_summ_print %>% 
+    filter(
+      resp_var == resp_var_select, 
+      habit == habit_select, 
+      indep_var == indep_var_select) %>% 
+    pull(!!enquo(value))
+}
+
+# Make tibble of abundances
+abundances <-
+  comm %>%
+  mutate(abundance = 
+           comm %>%
+           select_if(is.numeric) %>%
+           rowSums()
+  ) %>%
+  select(species, abundance)
+
+# Join this with trait data
+traits_with_abun <- left_join(
+  fern_traits, abundances
+)
+
+# Get total number of epiphytic and terrestrial species observed in all plots
+n_epi <- traits_with_abun %>% filter(abundance > 0, habit == "epiphytic") %>% 
+  pull(species) %>% n_distinct
+n_ter <- traits_with_abun %>% filter(abundance > 0, habit == "terrestrial") %>% 
+  pull(species) %>% n_distinct
+
+# Calculate mean richness by growth habit
+mean_rich <-
+  diversity_data %>%
+  group_by(habit) %>%
+  summarize(
+    mean_rich = mean(ntaxa) %>% round_t(1),
+    sd_rich = sd(ntaxa) %>% round_t(1)
+  ) %>%
+  mutate(stat = glue("{mean_rich} ± {sd_rich}"))
+```
+
+On a single-trait basis, distribution of community-weighted mean values (CWMs) showed significant correlation with elevation for some traits, but no significant relationship was detected for any traits with minimum RH (\fig \@ref(fig:cwm-div)). 
+Specific leaf area decreased with elevation for epiphytic (linear model, \rval^2^ = `r get_mod_result("sla", "epiphytic", "el", "r")`, \pval = `r get_mod_result("sla", "epiphytic", "el", "p")`) and terrestrial (linear model, \rval^2^ = `r get_mod_result("sla", "terrestrial", "el", "r")`, \pval = `r get_mod_result("sla", "terrestrial", "el", "p")`) communities. 
+Degree of lamina dissection decreased with elevation in epiphytes (linear model, \rval^2^ = `r get_mod_result("dissection", "epiphytic", "el", "r")`, \pval = `r get_mod_result("dissection", "epiphytic", "el", "p")`), but not terrestrial communities. 
+Stipe length showed a small, but significant, increase with elevation for epiphytic communities (linear model, \rval^2^ = `r get_mod_result("stipe", "epiphytic", "el", "r")`, \pval = `r get_mod_result("stipe", "epiphytic", "el", "p")`). 
+Rhizome diameter decreased with elevation for terrestrial communities (linear model, \rval^2^ = `r get_mod_result("rhizome", "terrestrial", "el", "r")`, \pval = `r get_mod_result("rhizome", "terrestrial", "el", "p")`), but increased slightly in epiphytes (linear model, \rval^2^ = `r get_mod_result("rhizome", "epiphytic", "el", "r")`, \pval = `r get_mod_result("rhizome", "epiphytic", "el", "p")`).
+
+We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial species. Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species}per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "ntaxa") %>% pull(p)`; \fig \@ref(fig:comm-div)). Species richness increased linearly with elevation and minimum RH for epiphytes, but not terrestrial communities (\fig \@ref(fig:comm-div)). Trait richness (FRic) was lower in epiphytic vs. terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FRic") %>% pull(p)`), whereas functional diversity (FDiv) was lower in terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FDiv") %>% pull(p)`), and functional evenness (FEve) did not differ between the two. FEve decreased with elevation, but not minimum RH, in terrestrial communities (\fig \@ref(fig:comm-div)). Epiphytic communities showed a trend of increasing trait richness along the environmental gradient, with greater FRic at high elevations (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "el", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "el", "p")`) and plots with greater minimum RH (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "min_RH", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "min_RH", "p")`). Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "mntd.obs.z") %>% pull(p)`) but not MPD (\pval = `r t_test_results_print %>% filter(resp_var == "mpd.obs.z") %>% pull(p)`; \fig \@ref(fig:comm-div)). No significant trend was detected in phylogenetic community structure with environment in either terrestrial or epiphytic communities (\fig \@ref(fig:comm-div)). 
 
 ## Discussion
 
@@ -242,8 +321,6 @@ Although several other studies have addressed the relationship of functional tra
 The sporophyte traits that differed most strongly between epiphytic and terrestrial taxa were related to plant size, including stipe and frond length, frond width, and rhizome diameter. Stipe length in particular differed strongly between epiphytes and terrestrial species (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)). Stipe length may be a critical trait controlling whole leaf hydraulic conductance; since ferns have resistive stipes in general, species growing in water-limited habitats are expected to decrease stipe length to minimize resistance [@WatkinsJr.2010]. Our results support previous non-phylogenetically controlled studies that found a prevalence of short stipes in epiphytic ferns [@WatkinsJr.2010; Creese2011]. However, given that many of these size-related traits scale together in ferns [@Arcand2008; Creese2011], careful experimental manipulations are needed to distinguish the role (or lack thereof) of each in epiphytic growth.
 
 ```{r sla-numbers, results = "hide"}
-loadd(fern_traits)
-
 # First smallest SLA: Humata_anderssonii
 smallest_sla_1 <- fern_traits %>% arrange(sla) %>% slice(1) %>% pull(sla) %>% signif(3)
 assert_that(fern_traits %>% arrange(sla) %>% slice(1) %>% pull(species) == "Humata_anderssonii")
@@ -251,7 +328,6 @@ assert_that(fern_traits %>% arrange(sla) %>% slice(1) %>% pull(species) == "Huma
 # Second smallest SLA: Ctenopterella_blechnoides
 smallest_sla_2 <- fern_traits %>% arrange(sla) %>% slice(2) %>% pull(sla) %>% signif(3)
 assert_that(fern_traits %>% arrange(sla) %>% slice(2) %>% pull(species) == "Ctenopterella_blechnoides")
-
 ```
 
 Surprisingly, SLA was only slightly lower in epiphytes relative to terrestrial species (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics). Specific leaf area is an important part of the leaf economic spectrum, which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans [@Wright2004a]. We hypothesized that epiphytes would have lower SLA, given their more extreme growing conditions. Indeed, the species with the lowest SLA values were epiphytes (\eg, *Davallia anderssonii* Mett. ex Kuhn, \SI{`r smallest_sla_1`} {\square\meter\per\kilo\gram}; *Ctenopterella blechnoides* (Grev.) Parris, \SI{`r smallest_sla_2`} {\square\meter\per\kilo\gram}), but this relationship was not significant across the dataset (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)). The tradeoffs posited in the leaf economics spectrum have been most thoroughly documented in global studies including the widest possible range of taxa and environments, and do not always hold up in local studies [@Petter2016]. For example, @Zhu2016 did not find a significant relationship between SLA and leaf life span in a survey of 16 ferns across a disturbance (light) gradient in China. It is possible that other small-scale effects (\eg, microclimate) obscure this pattern in local studies such as ours and that of @Zhu2016. This is supported by the strong, parallel relationship in CWM values of SLA with elevation in both epiphytes and terrestrial species (\fig \@ref(fig:cwm-div)).
@@ -344,7 +420,6 @@ traits_used %>%
 \pagebreak
 
 ```{r phylosig-cont}
-loadd(phylosig_cont_traits)
 phylosig_cont_traits %>%
   mutate_at(vars(kval, lambda), ~round_t(., 2)) %>%
   mutate(lambda_pval = format_pval(lambda_pval)) %>%
@@ -355,7 +430,6 @@ phylosig_cont_traits %>%
 \pagebreak
 
 ```{r phylosig-binary}
-loadd(phylosig_binary_traits)
 phylosig_binary_traits %>%
   mutate(D = round_t(D, 2)) %>%
   column_to_rownames("trait") %>%
@@ -365,8 +439,6 @@ phylosig_binary_traits %>%
 \pagebreak
 
 ```{r pics}
-loadd(pic_results)
-
 pic_results %>%
   mutate_at(vars(estimate, std.error, statistic), ~round_t(., 2)) %>%
   mutate(p.value = format_pval(p.value)) %>%
@@ -380,9 +452,6 @@ All trait contrasts were made by subtracting epiphytic values from terrestrial v
 \pagebreak
 
 ```{r corr-evo}
-
-loadd(correlated_evo_test)
-
 correlated_evo_test %>%
   mutate(pval = format_pval(pval)) %>%
   mutate_if(is.numeric, ~round_t(., 1)) %>%
@@ -403,35 +472,30 @@ knitr::include_graphics(here("images/Figure_3_1_traits_lowres.pdf"))
 \pagebreak
 
 ```{r climate, fig.height = 4, fig.width = 6, fig.cap = "Microclimatic variables."}
-loadd(climate_plot)
 climate_plot
 ```
 
 \pagebreak
 
 ```{r pca, fig.height = 6, fig.width = 6, fig.cap = "Trait PCA."}
-loadd(pca_plot)
 pca_plot
 ```
 
 \pagebreak
 
 ```{r tree, fig.height = 8, fig.width = 6, fig.cap = "Traits on tree."}
-loadd(traits_with_tree)
 traits_with_tree
 ```
 
 \pagebreak
 
 ```{r cwm-div, fig.height = 8, fig.width = 6, fig.cap = "Community-weighted means."}
-loadd(combined_cwm_plots)
 combined_cwm_plots
 ```
 
 \pagebreak
 
 ```{r comm-div, fig.height = 8, fig.width = 6, fig.cap = "Community diversity metrics."}
-loadd(combined_comm_div_plots)
 combined_comm_div_plots
 ```
 
