@@ -175,12 +175,24 @@ plan <- drake_plan(
   
   # Run linear models on each combination of variables for
   # terrestrial and epiphytic communities separately.
+  
+  # - Extract model parameter summaries (pval, intersect 
+  # for each part of model)
+  model_parameter_summaries = map2_df(
+    .x = args$indep_vars, 
+    .y = args$resp_vars, 
+    ~ tidy_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
+  ),
+
+  # - Extract overall model summaries (pval, rsquared
+  # for overall model)
   model_summaries = map2_df(
     .x = args$indep_vars, 
     .y = args$resp_vars, 
-    ~ run_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
+    ~ glance_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
   ),
   
+  # Extract predicted model fits
   model_fits = map2_df(
     .x = args$indep_vars, 
     .y = args$resp_vars, 
@@ -226,7 +238,7 @@ plan <- drake_plan(
     .y = args$resp_vars, 
     ~ make_scatterplot_by_habit(
       model_fits, 
-      model_summaries, 
+      model_parameter_summaries, 
       x_var = .x, 
       y_var = .y,
       habit_colors = habit_colors)

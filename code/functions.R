@@ -925,7 +925,7 @@ analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terr
 # Models ----
 
 #' Run a linear model on terrestrial and epiphytic species
-#' separately.
+#' separately and tidy the output parameters.
 #'
 #' @param data Input data. Must include column for "habit"
 #' (growth habit, either epiphtyic or terrestrial).
@@ -941,7 +941,7 @@ analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terr
 #' rep("epiphtyic", 0.5*nrow(mtcars)))
 #' )
 #' run_lm_by_habit(mtcars_hab, "mpg", "wt")
-run_lm_by_habit <- function (data, indep_var, resp_var) {
+tidy_lm_by_habit <- function (data, indep_var, resp_var) {
   
   resp_var_enq <- enquo(resp_var)
   indep_var_enq <- enquo(indep_var)
@@ -961,6 +961,44 @@ run_lm_by_habit <- function (data, indep_var, resp_var) {
       TRUE ~ term
     ))
 }
+
+#' Run a linear model on terrestrial and epiphytic species
+#' separately and extract overall statistics (p value and
+#' r-squared).
+#'
+#' @param data Input data. Must include column for "habit"
+#' (growth habit, either epiphtyic or terrestrial).
+#' @param indep_var Independent variable in data
+#' @param resp_var Response variable in data
+#'
+#' @return Dataframe; model summary
+#'
+#' @examples
+#' # A rather ridiculous example
+#' mtcars_hab <- mutate(mtcars, habit = c(
+#' rep("terrestrial", 0.5*nrow(mtcars)), 
+#' rep("epiphtyic", 0.5*nrow(mtcars)))
+#' )
+#' glance_lm_by_habit(mtcars_hab, "mpg", "wt")
+glance_lm_by_habit <- function (data, indep_var, resp_var) {
+  
+  resp_var_enq <- enquo(resp_var)
+  indep_var_enq <- enquo(indep_var)
+  
+  data %>%
+    select(y = !!resp_var_enq, x = !!indep_var_enq, habit) %>%
+    nest(-habit) %>%
+    mutate(
+      resp_var = resp_var,
+      indep_var = indep_var,
+      model = map(data, ~lm(y ~ x, data = .)),
+      summ = map(model, glance)
+    ) %>%
+    select(-model, -data) %>%
+    unnest
+}
+
+
 
 #' Get linear model fits on terrestrial and epiphytic species
 #' separately.
