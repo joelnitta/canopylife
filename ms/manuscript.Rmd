@@ -38,18 +38,6 @@ conflict_prefer("expand", "tidyr")
 conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 
-# Function for rounding with trailing zeros
-round_t <- function (x, digits) round(x, digits) %>% sprintf(glue::glue("%.{digits}f"), .)
-
-# Function for formatting p-values: round to 3 digits,
-# or just say "< 0.001"
-format_pval <- function (x) {
-  case_when(
-    x < 0.001 ~ "< 0.001",
-    TRUE ~ round(x, 3) %>% as.character()
-  )
-}
-
 # Load analysis results
 loadd(climate_plot)
 loadd(combined_comm_div_plots)
@@ -195,6 +183,8 @@ Code to replicate all analyses, figures, and this manuscript are available at ht
 
 ```
 
+Mean and standard deviation of temperature and relative humidity were retained after excluding variables with correlation coefficients >0.9.
+
 ### Principal Components Analysis of Trait Data
 
 ```{r pca-numbers}
@@ -300,13 +290,14 @@ mean_rich <-
   mutate(stat = glue("{mean_rich} ± {sd_rich}"))
 ```
 
+<!-- NEED TO UPDATE TO REFLECT mean_RH instead of min_RH -->
 On a single-trait basis, distribution of community-weighted mean values (CWMs) showed significant correlation with elevation for some traits, but no significant relationship was detected for any traits with minimum RH (\fig \@ref(fig:cwm-div)). 
 Specific leaf area decreased with elevation for epiphytic (linear model, \rval^2^ = `r get_mod_result("sla", "epiphytic", "el", "r")`, \pval = `r get_mod_result("sla", "epiphytic", "el", "p")`) and terrestrial (linear model, \rval^2^ = `r get_mod_result("sla", "terrestrial", "el", "r")`, \pval = `r get_mod_result("sla", "terrestrial", "el", "p")`) communities. 
 Degree of lamina dissection decreased with elevation in epiphytes (linear model, \rval^2^ = `r get_mod_result("dissection", "epiphytic", "el", "r")`, \pval = `r get_mod_result("dissection", "epiphytic", "el", "p")`), but not terrestrial communities. 
 Stipe length showed a small, but significant, increase with elevation for epiphytic communities (linear model, \rval^2^ = `r get_mod_result("stipe", "epiphytic", "el", "r")`, \pval = `r get_mod_result("stipe", "epiphytic", "el", "p")`). 
 Rhizome diameter decreased with elevation for terrestrial communities (linear model, \rval^2^ = `r get_mod_result("rhizome", "terrestrial", "el", "r")`, \pval = `r get_mod_result("rhizome", "terrestrial", "el", "p")`), but increased slightly in epiphytes (linear model, \rval^2^ = `r get_mod_result("rhizome", "epiphytic", "el", "r")`, \pval = `r get_mod_result("rhizome", "epiphytic", "el", "p")`).
 
-We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial species. Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species}per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "ntaxa") %>% pull(p)`; \fig \@ref(fig:comm-div)). Species richness increased linearly with elevation and minimum RH for epiphytes, but not terrestrial communities (\fig \@ref(fig:comm-div)). Trait richness (FRic) was lower in epiphytic vs. terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FRic") %>% pull(p)`), whereas functional diversity (FDiv) was lower in terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FDiv") %>% pull(p)`), and functional evenness (FEve) did not differ between the two. FEve decreased with elevation, but not minimum RH, in terrestrial communities (\fig \@ref(fig:comm-div)). Epiphytic communities showed a trend of increasing trait richness along the environmental gradient, with greater FRic at high elevations (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "el", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "el", "p")`) and plots with greater minimum RH (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "min_RH", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "min_RH", "p")`). Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "mntd.obs.z") %>% pull(p)`) but not MPD (\pval = `r t_test_results_print %>% filter(resp_var == "mpd.obs.z") %>% pull(p)`; \fig \@ref(fig:comm-div)). No significant trend was detected in phylogenetic community structure with environment in either terrestrial or epiphytic communities (\fig \@ref(fig:comm-div)). 
+We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial species. Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species}per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "ntaxa") %>% pull(p)`; \fig \@ref(fig:comm-div)). Species richness increased linearly with elevation and minimum RH for epiphytes, but not terrestrial communities (\fig \@ref(fig:comm-div)). Trait richness (FRic) was lower in epiphytic vs. terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FRic") %>% pull(p)`), whereas functional diversity (FDiv) was lower in terrestrial communities (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "FDiv") %>% pull(p)`), and functional evenness (FEve) did not differ between the two. FEve decreased with elevation, but not minimum RH, in terrestrial communities (\fig \@ref(fig:comm-div)). Epiphytic communities showed a trend of increasing trait richness along the environmental gradient, with greater FRic at high elevations (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "el", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "el", "p")`) and plots with greater minimum RH (linear model, \rval^2^ = `r get_mod_result("FRic", "epiphytic", "mean_RH", "r")`, \pval = `r get_mod_result("FRic", "epiphytic", "mean_RH", "p")`). Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD (two-sided \tval-test, \pval = `r t_test_results_print %>% filter(resp_var == "mntd.obs.z") %>% pull(p)`) but not MPD (\pval = `r t_test_results_print %>% filter(resp_var == "mpd.obs.z") %>% pull(p)`; \fig \@ref(fig:comm-div)). No significant trend was detected in phylogenetic community structure with environment in either terrestrial or epiphytic communities (\fig \@ref(fig:comm-div)). 
 
 ## Discussion
 

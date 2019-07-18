@@ -160,11 +160,9 @@ get_daily_means <- function (climate_raw) {
   climate_raw %>%
     group_by(site, date, habit) %>%
     summarize(
-      max_temp = max(temp),
       mean_temp = mean(temp),
       min_temp = min(temp),
       sd_temp = sd(temp),
-      max_RH = max(RH),
       mean_RH = mean(RH),
       min_RH = min(RH),
       sd_RH = sd(RH)
@@ -188,11 +186,9 @@ get_grand_means <- function(daily_means) {
   daily_means %>%
     group_by(site, habit) %>%
     summarize(
-      max_temp = mean(max_temp),
       mean_temp = mean(mean_temp),
       min_temp = mean(min_temp),
       sd_temp = mean(sd_temp),
-      max_RH = mean(max_RH),
       mean_RH = mean(mean_RH),
       min_RH = mean(min_RH),
       sd_RH = mean(sd_RH)
@@ -242,7 +238,7 @@ select_climate_vars <- function (climate_data) {
   # Drop variables correlated > 0.9 and check what the results look like
   climate_corr_select <-
     climate_corr_all %>%
-    corrr::focus(-max_temp, -min_temp, -min_RH, mirror = TRUE)
+    corrr::focus(-min_temp, -min_RH, mirror = TRUE)
   
   # Double-check that we've dropped any correlations > 0.9
   # and keep these as the final variables for analysis.
@@ -271,7 +267,7 @@ make_climate_models <- function (climate_data, site_data) {
     # REMOVE OUTLIER: Mt Rotui exposed slope
     filter(is_outlier == "no") %>%
     # Reformat data into nested set by variable (mean and SD of temp and RH)
-    select(site, habit, el, mean_temp, sd_temp, min_RH, sd_RH) %>%
+    select(-lat, -long, -is_outlier) %>%
     gather(var, value, -site, -habit, -el) %>%
     nest(-var)
   
@@ -1186,23 +1182,99 @@ match_comm_and_tree <- function (comm, phy, return = c("comm", "tree")) {
   
 }
 
+# Function for rounding with trailing zeros
+round_t <- function (x, digits) {
+  round(x, digits) %>% sprintf(glue::glue("%.{digits}f"), .)
+}
+
+# Function for formatting p-values: round to 3 digits,
+# or just say "< 0.001"
+format_pval <- function (x, equals_sign = FALSE) {
+  case_when(
+    x < 0.001 ~ "< 0.001",
+    isTRUE(equals_sign) ~ paste("=", round(x, 3) %>% as.character()),
+    TRUE ~ round(x, 3) %>% as.character()
+  )
+}
+
 # Plotting ----
 
-make_climate_plot <- function (climate_data, site_data, 
+#' Make a single climate plot
+#'
+#' @param yval Name of y variable
+#' @param xval Name of x variable
+#' @param ylab Label for y axis
+#' @param xlab Label for x axis
+#' @param single_line Logical; should a single trend line be used?
+#' @param r_upper Logical; should the R-squared value be printed
+#' in the upper-right? (FALSE means it will be printed in the
+#' lower-right).
+#' @param climate_data Grand mean daily climate values
+#' @param site_data Site data with elevation
+#' @param fits Model fits
+#' @param summaries Model summaries
+#' @param habit_colors Colors to use for growth habit
+#' @param alpha_val Transparency value to set for outlier points
+#' not included in model
+#'
+#' @return ggplot object
+make_climate_plot <- function (yval, xval = "el", ylab, xlab = "Elevation (m)",
+                               single_line = TRUE,
+                               r_upper = TRUE,
+                               climate_data, site_data, 
                                fits, summaries, 
-                               habit_colors, alpha_val = 0.6) {
+                               habit_colors, alpha_val = 0.5) {
   
+  yval_sym <- sym(yval)
+  xval_sym <- sym(xval)
+  
+  # Merge climate and site data
   climate_site_data <- left_join(climate_data, site_data)
   
-  mean_temp_fits <-
-    fits %>%
-    filter(var == "mean_temp") %>%
-    rename(mean_temp = value)
+  # Reformat model summaries for printing
+  summaries <- summaries %>%
+    mutate(
+      r.squared = round_t(r.squared, 2),
+      p.value = format_pval(p.value, equals_sign = TRUE))
   
-  # mean temp subplot
-  a <- ggplot(climate_site_data, aes(x = el)) +
-    geom_line(data = mean_temp_fits, aes(y = .fitted)) +
-    geom_point(aes(y = mean_temp, alpha = is_outlier, color = habit)) +
+  # Mean temp subplot
+  fits <-
+    fits %>%
+    filter(var == yval)
+  
+  r2 <- summaries %>%
+    filter(var == yval) %>%
+    pull(r.squared)
+  
+  # Location of color aesthetic depends on if
+  # we are plotting two lines or one.
+  if(isTRUE(single_line)) {
+    plot <- ggplot(climate_site_data, aes(x = !!xval_sym)) +
+      geom_line(data = fits, aes(y = .fitted)) +
+      geom_point(aes(y = !!yval_sym, alpha = is_outlier, color = habit))
+  } else {
+    plot <- ggplot(climate_site_data, aes(x = !!xval_sym, color = habit)) +
+      geom_line(data = fits, aes(y = .fitted)) +
+      geom_point(aes(y = !!yval_sym, alpha = is_outlier))
+  }
+  
+  # Set location of where to print R-squared
+  if (isTRUE(r_upper)) {
+    plot <- plot +
+      annotate("text", x = Inf, y = Inf, 
+               label = glue::glue("italic(R) ^ 2 == {r2}"),
+               hjust = 1.1, vjust = 1.2,
+               parse = TRUE)
+  } else {
+    plot <- plot +
+      annotate("text", x = Inf, y = -Inf, 
+               label = glue::glue("italic(R) ^ 2 == {r2}"),
+               hjust = 1.1, vjust = -0.2,
+               parse = TRUE)
+  }
+
+  # Add the rest of the plot details
+  plot +
     scale_color_manual(
       values = habit_colors
     ) +
@@ -1210,73 +1282,67 @@ make_climate_plot <- function (climate_data, site_data,
       values = c("yes" = alpha_val, "no" = 1.0)
     ) +
     labs(
-      y = "Mean temp. (°C)",
-      x = "Elevation (m)"
+      y = ylab,
+      x = xlab
     ) +
     standard_theme()
+
+}
+
+#' Make a 4-part climate plot
+#'
+#' @param climate_data Grand mean daily climate values
+#' @param site_data Site data with elevation
+#' @param fits Model fits
+#' @param summaries Model summaries
+#' @param habit_colors Colors to use for growth habit
+#' @param alpha_val Transparency value to set for outlier points
+#' not included in model
+#'
+#' @return ggplot object
+#' 
+make_four_part_climate_plot <- function (climate_data, site_data, 
+                               fits, summaries, 
+                               habit_colors) {
   
-  sd_temp_fits <-
-    fits %>%
-    filter(var == "sd_temp") %>%
-    rename(sd_temp = value)
+  a <- make_climate_plot(
+      climate_data = climate_data,
+      yval = "mean_temp",
+      ylab = "Mean temp. (°C)",
+      site_data = site_data,
+      fits = fits, 
+      summaries = summaries, 
+      habit_colors = habit_colors)
   
-  # SD temp subplot
-  b <- ggplot(climate_site_data, aes(x = el)) +
-    geom_line(data = sd_temp_fits, aes(y = .fitted)) +
-    geom_point(aes(y = sd_temp, alpha = is_outlier, color = habit)) +
-    scale_color_manual(
-      values = habit_colors
-    ) +
-    scale_alpha_manual(
-      values = c("yes" = alpha_val, "no" = 1.0)
-    ) +
-    labs(
-      y = "SD Temp. (°C)",
-      x = "Elevation (m)"
-    ) +
-    standard_theme()
+  b <- make_climate_plot(
+      climate_data = climate_data,
+      yval = "sd_temp",
+      ylab = "SD Temp. (°C)",
+      site_data = site_data,
+      fits = fits, 
+      summaries = summaries, 
+      habit_colors = habit_colors)
   
-  min_RH_fits <-
-    fits %>%
-    filter(var == "min_RH") %>%
-    rename(min_RH = value)
+  c <- make_climate_plot(
+      climate_data = climate_data,
+      yval = "mean_RH",
+      ylab = "Mean rel. hum. (%)",
+      single_line = FALSE,
+      r_upper = FALSE,
+      site_data = site_data,
+      fits = fits, 
+      summaries = summaries, 
+      habit_colors = habit_colors)
   
-  # min RH subplot
-  c <- ggplot(climate_site_data, aes(x = el, color = habit)) +
-    geom_line(data = min_RH_fits, aes(y = .fitted)) +
-    geom_point(aes(y = min_RH, alpha = is_outlier)) +
-    scale_color_manual(
-      values = habit_colors
-    ) +
-    scale_alpha_manual(
-      values = c("yes" = alpha_val, "no" = 1.0)
-    ) +
-    labs(
-      y = "Min. RH (%)",
-      x = "Elevation (m)"
-    ) +
-    standard_theme()
-  
-  sd_RH_fits <-
-    fits %>%
-    filter(var == "sd_RH") %>%
-    rename(sd_RH = value)
-  
-  # SD RH subplot
-  d <- ggplot(climate_site_data, aes(x = el, color = habit)) +
-    geom_line(data = sd_RH_fits, aes(y = .fitted)) +
-    geom_point(aes(y = sd_RH, alpha = is_outlier)) +
-    scale_color_manual(
-      values = habit_colors
-    ) +
-    scale_alpha_manual(
-      values = c("yes" = alpha_val, "no" = 1.0)
-    ) +
-    labs(
-      y = "SD RH (%)",
-      x = "Elevation (m)"
-    ) +
-    standard_theme()
+  d <- make_climate_plot(
+      climate_data = climate_data,
+      yval = "sd_RH",
+      ylab = "SD rel. hum. (%)",
+      single_line = FALSE,
+      site_data = site_data,
+      fits = fits, 
+      summaries = summaries, 
+      habit_colors = habit_colors)
   
   a <- a + blank_x_theme() 
   b <- b + blank_x_theme() 
@@ -1511,13 +1577,13 @@ combine_cwm_plots <- function (args, scatterplots, boxplots) {
   cwm_plots <- plot_list %>%
     # Subset to traits that were use to calculate community-weighted means.
     filter(resp_vars %in% c("length", "width", "dissection", "pinna", "sla", "rhizome")) %>%
-    mutate(indep_vars = factor(indep_vars, levels = c("min_RH", "el", "habit"))) %>%
+    mutate(indep_vars = factor(indep_vars, levels = c("mean_RH", "el", "habit"))) %>%
     arrange(resp_vars, indep_vars)
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
   for(i in 1:nrow(cwm_plots)) {
-    if(cwm_plots$indep_vars[[i]] != "min_RH") {
+    if(cwm_plots$indep_vars[[i]] != "mean_RH") {
       cwm_plots$plot[[i]] <- cwm_plots$plot[[i]] + theme(axis.title.y = element_blank())
     }
     if(cwm_plots$resp_vars[[i]] != "width") {
@@ -1572,13 +1638,13 @@ combine_comm_div_plots <- function (args, scatterplots, boxplots) {
       levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic"))) %>%
     mutate(indep_vars = factor(
       indep_vars, 
-      levels = c("min_RH", "el", "habit"))) %>%
+      levels = c("mean_RH", "el", "habit"))) %>%
     arrange(resp_vars, indep_vars)
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
   for(i in 1:nrow(div_plots)) {
-    if(div_plots$indep_vars[[i]] != "min_RH") {
+    if(div_plots$indep_vars[[i]] != "mean_RH") {
       div_plots$plot[[i]] <- div_plots$plot[[i]] + theme(axis.title.y = element_blank())
     }
     if(div_plots$resp_vars[[i]] != "FRic") {

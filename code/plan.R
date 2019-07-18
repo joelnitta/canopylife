@@ -67,9 +67,10 @@ plan <- drake_plan(
   
   # Make full set of climate models including
   # each climate var by elevation, growth habit, and
-  # their interaction, then choose the best model for each.
+  # their interaction, then choose the best model for each
+  # (doesn't include single outlier site)
   climate_models = make_climate_models(
-    climate_data = grand_mean_climate, 
+    climate_data = grand_mean_climate_select, 
     site_data = moorea_sites
   ),
   
@@ -165,7 +166,7 @@ plan <- drake_plan(
   # (includes quantitative, i.e., sporophyte, traits only)
   
   # Merge all diversity metrics.
-  diversity_data = list(comm_struc, func_div, grand_mean_climate, moorea_sites) %>% 
+  diversity_data = list(comm_struc, func_div, grand_mean_climate_select, moorea_sites) %>% 
     reduce(left_join) %>%
     mutate(habit = fct_relevel(habit, c("terrestrial", "epiphytic"))),
   
@@ -174,7 +175,7 @@ plan <- drake_plan(
     resp_vars = c(
       "ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic",
       "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome"), 
-    indep_vars = c("el", "min_RH")
+    indep_vars = c("el", "mean_RH")
   )),
   
   # Run linear models on each combination of variables for
@@ -215,8 +216,8 @@ plan <- drake_plan(
     set_names(levels(moorea_climate_raw$habit)),
   
   # Make climate plot.
-  climate_plot = make_climate_plot(
-    climate_data = grand_mean_climate,
+  climate_plot = make_four_part_climate_plot(
+    climate_data = grand_mean_climate_select,
     site_data = moorea_sites,
     fits = climate_model_fits, 
     summaries = climate_model_summaries, 
