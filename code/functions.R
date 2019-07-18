@@ -206,7 +206,56 @@ get_grand_means <- function(daily_means) {
     )
 }
 
-#' Make climate models
+#' Check for correlation between climate variables
+#' and retain non-correlated ones
+#'
+#' @param climate_data Grand means of climate variables
+#' by site
+#'
+#' @return Grand means of climate variables subsetted
+#' to only those that are correlated less than 0.9
+#' 
+select_climate_vars <- function (climate_data) {
+  
+  # Calculate total correlation for all climatic variables
+  climate_corr_all <-
+    climate_data %>%
+    filter(is_outlier == "no") %>%
+    select_if(is.numeric) %>%
+    corrr::correlate()
+  
+  # Mean and min temp are correlated, but not with SD.
+  temp_corr <-
+    climate_corr_all %>%
+    corrr::focus(contains("temp"), mirror = TRUE)
+  
+  # (mean and min RH) and (min and SD RH) are correlated.
+  rh_corr <-
+    climate_corr_all %>%
+    corrr::focus(contains("RH"), mirror = TRUE)
+  
+  # None of the temp vars are correlated with Rel. Hum.
+  temp_rh_corr <-
+    climate_corr_all %>%
+    corrr::focus(contains("RH"))
+  
+  # Drop variables correlated > 0.9 and check what the results look like
+  climate_corr_select <-
+    climate_corr_all %>%
+    corrr::focus(-max_temp, -min_temp, -min_RH, mirror = TRUE)
+  
+  # Double-check that we've dropped any correlations > 0.9
+  # and keep these as the final variables for analysis.
+  selected_climate_vars <-
+  climate_corr_select %>%
+    assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname")) %>%
+    pull(rowname)
+  
+  climate_data %>%
+    select(site, habit, selected_climate_vars, is_outlier)
+}
+
+#' Make climate models and choose the best one using AIC
 #'
 #' @param climate_data 
 #' @param site_data 
@@ -240,36 +289,21 @@ make_climate_models <- function (climate_data, site_data) {
     select(-data) %>%
     gather(model_type, model, -var)
   
-  # Run analysis of variance on each interaction model and filter to only
-  # the significant parts of the model. Use this to determine which of the
-  # possible set of models is best.
-  aov_results <-
-    data_for_modeling %>%
-    # Construct a linear model for each variable, and pull out summaries
-    mutate(
-      model = map(data, ~aov(value ~ el * habit, .)),
-      summary = map(model, tidy)
-    ) %>%
-    select(var, summary) %>%
-    unnest() %>%
-    # Filter to only features of model that are significant
-    filter(p.value < 0.05) %>%
-    select(var, term) %>%
-    group_by(var) %>%
-    summarize(
-      term = paste(unique(term), collapse = " * ")
-    ) %>%
-    mutate(
-      model_type = case_when(
-        term == "el" ~ "el_only",
-        term == "el * habit" ~ "interaction",
-        term == "habit" ~ "habit_only"
-      )
-    ) %>%
-    select(var, model_type)
+  # Calculate the AIC for each model
+  aic_results <- all_models %>% 
+    mutate(glance = map(model, glance)) %>%
+    select(var, model_type, glance) %>%
+    unnest %>%
+    arrange(var, AIC)
   
-  # Based on the AOV results, filter to only the best models.
-  left_join(aov_results, all_models) 
+  # Choose the best model by lowest AIC
+  aic_results %>%
+    group_by(var) %>%
+    arrange(var, AIC) %>%
+    slice(1) %>%
+    select(var, model_type) %>%
+    left_join(all_models) %>%
+    ungroup
 }
 
 # Extract model fits

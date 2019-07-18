@@ -61,6 +61,10 @@ plan <- drake_plan(
   
   # Climate analysis ----
   
+  # Subset climate variables to only those with correlation
+  # coefficients less than 0.9
+  grand_mean_climate_select = select_climate_vars(grand_mean_climate),
+  
   # Make full set of climate models including
   # each climate var by elevation, growth habit, and
   # their interaction, then choose the best model for each.
