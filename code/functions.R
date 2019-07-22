@@ -2048,3 +2048,60 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     )
 
 }
+
+#' Make a heatmap of importance scores
+#'
+#' @param important_div_vars Importance scores output from 
+#' FSSgam::fit.model.set()
+#'
+#' @return GGplot object
+#' 
+make_heatmap <- function(important_div_vars) {
+  
+  # Reformat data for plotting
+  plot_data <-
+    important_div_vars %>%
+    gather(indep_var, value, -resp_var) %>%
+    # Specify levels of indep and resp vars so they show up along
+    # the axes in the right order
+    mutate(
+      indep_var = factor(
+        indep_var, 
+        levels = c("habit", "temp_max", "temp_mean", 
+                   "temp_sd", "vpd_mean", "vpd_min", "vpd_sd")),
+      resp_var = factor(
+        resp_var, 
+        levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", 
+                   "FDiv", "FEve", "FRic",
+                   "dissection", "sla", "stipe", "pinna"))
+    ) %>%
+    # Reformat the names of the indep and resp vars so they
+    # look pretty
+    mutate(
+      indep_var = lvls_revalue(
+        indep_var, 
+        new_levels = c("Habit", "Max. temp.", "Mean temp.", 
+                       "SD Temp.", "Mean VPD", "Min. VPD", "SD VPD")),
+      resp_var = lvls_revalue(
+        resp_var, 
+        new_levels = c("Richness", "MPD", "MNTD", 
+                       "FDiv", "FEve", "FRic",
+                       "Dissection", "SLA", "Stipe length", "Pinna no.")) %>%
+        fct_rev()
+    )
+  
+  # Make heatmap
+  ggplot(plot_data, aes(x = indep_var, y = resp_var, fill = value)) +
+    geom_tile() +
+    scale_fill_scico(
+      palette = "bilbao", 
+      breaks = c(0, 0.25, 0.5, 0.75, 1.0), 
+      limits = c(0, 1.0)) +
+    labs(
+      x = "Predictor",
+      y = "Response",
+      fill = "Importance"
+    ) +
+    jntools::standard_theme() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+}

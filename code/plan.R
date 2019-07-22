@@ -327,9 +327,12 @@ plan <- drake_plan(
     scatterplots = div_scatterplots, 
     boxplots = div_boxplots),
   
+  # Make heatmap of importance scores.
+  importance_heatmap = make_heatmap(important_div_vars),
+  
   # Write out MS ----
-  # ms = rmarkdown::render(
-  #   knitr_in("ms/manuscript.Rmd"),
-  #   quiet = TRUE)
+  ms = rmarkdown::render(
+    knitr_in("ms/manuscript.Rmd"),
+    quiet = TRUE)
   
 )
