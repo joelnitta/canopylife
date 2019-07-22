@@ -3,7 +3,7 @@ plan <- drake_plan(
   
   # Load data ----
   
-  # Trait data
+  ### Trait data ###
   # - Raw specific leaf area (SLA) measurments,
   # includes multiple measures per specimen
   sla_raw = mooreaferns::sla.raw %>% as_tibble,
@@ -21,12 +21,12 @@ plan <- drake_plan(
   # gameto traits only known from taxonomy
   fern_traits_strict = filter(fern_traits, gameto_source != "T"),
   
-  # Site data with elevation
+  ### Site data with elevation ###
   moorea_sites = mooreaferns::sites %>%
     as_tibble %>%
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
-  # Climate data
+  ### Climate data ###
   # - Raw climate data (rel. humidity and temperature every 15 min.)
   # - Also calculate vapor pressure deficit (VPD) from temp and RH
   moorea_climate_raw = mooreaferns::moorea_climate %>% 
@@ -37,11 +37,11 @@ plan <- drake_plan(
   daily_mean_climate = get_daily_means(moorea_climate_raw),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
-  # Phylogeny
+  ### Phylogeny ###
   phy = mooreaferns::fern_tree,
   
-  # Community data for ferns of Moorea only 
-  # with rows as species and sites as columns
+  ### Community data for ferns of Moorea ###
+  # (with rows as species and sites as columns)
   comm = mooreaferns::sporocomm %>%
     rownames_to_column("site") %>%
     as_tibble %>%
@@ -49,10 +49,10 @@ plan <- drake_plan(
     gather(species, abundance, -site) %>%
     spread(site, abundance),
   
-  # PPGI taxonomy
+  ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
   
-  # Format trait data for SI.
+  ### Format trait data for SI ###
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
     sla_raw = sla_raw,
@@ -62,6 +62,7 @@ plan <- drake_plan(
   
   # Climate analysis ----
   
+  ### Prepare data ###
   # Subset climate variables to only those with correlation
   # coefficients less than 0.9,
   # and add elevation.
@@ -88,12 +89,12 @@ plan <- drake_plan(
     colnames() %>%
     rlang::set_names(),
   
-  # Run ANCOVA
+  ### Run ANCOVA ###
   climate_ancova_results = run_ancova(
     data = climate_trans_no_outlier, 
     resp_vars = climate_vars),
   
-  #### Make models for plotting climate ###
+  ### Make linear models ###
   
   # - Make full set of climate models including
   # each climate var by elevation, growth habit, and
@@ -176,7 +177,8 @@ plan <- drake_plan(
   ),
   
   # Trait community diversity ----
-  # (includes quantitative, i.e., sporophyte, traits only)
+  # (includes quantitative, i.e., sporophyte, traits only).
+  # Run separately for epiphytes and terrestrial then combine.
   func_div_epi = analyze_fd_by_habit(
     traits = fern_traits,
     comm = comm,
@@ -191,7 +193,7 @@ plan <- drake_plan(
   
   func_div = bind_rows(func_div_epi, func_div_ter),
   
-  # Modeling ----
+  # Modeling community diversity ----
   
   ### Prepare diversity data (response variables) ###
   
@@ -255,7 +257,7 @@ plan <- drake_plan(
   # - Get summaries of best models.
   div_el_model_summaries = extract_model_summaries(supported_models = div_el_models),
   
-  ### Run t-tests ###
+  ### Run t-tests by growth habit ###
   div_t_test_results = map_df(
     resp_vars,
     ~ run_t_test_by_habit(
