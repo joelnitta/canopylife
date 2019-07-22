@@ -21,13 +21,14 @@ plan <- drake_plan(
   # gameto traits only known from taxonomy
   fern_traits_strict = filter(fern_traits, gameto_source != "T"),
   
-  # Site data
+  # Site data with elevation
   moorea_sites = mooreaferns::sites %>%
     as_tibble %>%
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
   # Climate data
   # - Raw climate data (rel. humidity and temperature every 15 min.)
+  # - Also calculate vapor pressure deficit (VPD) from temp and RH
   moorea_climate_raw = mooreaferns::moorea_climate %>% 
     as_tibble %>% 
     reformat_raw_climate,
@@ -62,32 +63,60 @@ plan <- drake_plan(
   # Climate analysis ----
   
   # Subset climate variables to only those with correlation
-  # coefficients less than 0.9
-  grand_mean_climate_select = select_climate_vars(grand_mean_climate),
+  # coefficients less than 0.9,
+  # and add elevation.
+  climate_select = select_climate_vars(grand_mean_climate) %>%
+    left_join(select(moorea_sites, site, el)),
   
-  # Make full set of climate models including
+  # Make three versions of climate data for further analysis:
+  # - Square-root transform selected variables
+  # so they have a more normal distribution.
+  climate_trans = climate_select %>%
+    mutate_at(vars(temp_sd, vpd_mean, vpd_min, vpd_sd), sqrt),
+  
+  # - Remove the outliers, but don't transform.
+  climate_no_outlier = climate_select %>%
+    filter(is_outlier == "no"),
+  
+  # - Remove outliers and transform.
+  climate_trans_no_outlier = climate_trans %>%
+    filter(is_outlier == "no"),
+  
+  # - Make vector of climate variables for modeling
+  climate_vars = climate_select %>%
+    select(-site, -habit, -el, -is_outlier) %>%
+    colnames() %>%
+    rlang::set_names(),
+  
+  # Run ANCOVA
+  climate_ancova_results = run_ancova(
+    data = climate_trans_no_outlier, 
+    resp_vars = climate_vars),
+  
+  #### Make models for plotting climate ###
+  
+  # - Make full set of climate models including
   # each climate var by elevation, growth habit, and
-  # their interaction, then choose the best model for each
-  # (doesn't include single outlier site)
-  climate_models = make_climate_models(
-    climate_data = grand_mean_climate_select, 
-    site_data = moorea_sites
-  ),
+  # their interaction, then choose the best model for each.
+  # Exclude single outlier site, but use untransformed
+  # data so the fits can be plotted.
+  climate_models = choose_habit_elevation_models(
+    data = climate_trans_no_outlier,
+    resp_vars = climate_vars),
   
-  # Extract fits of supported models.
-  climate_model_fits = extract_model_fits(
-    supported_models = climate_models
-  ),
+  # - Extract fits of best models.
+  # Transform fit of square-rooted variables back for plotting.
+  climate_model_fits = extract_model_fits(climate_models) %>%
+    mutate(.fitted = case_when(
+      var %in% c("temp_sd", "vpd_mean", "vpd_min", "vpd_sd") ~ .fitted^2,
+      TRUE ~ .fitted)
+    ),
   
-  # Get summaries of supported model parameters.
-  climate_model_parameter_summaries = extract_model_parameter_summaries(
-    supported_models = climate_models
-  ),
+  # - Get summaries of best model parameters.
+  climate_model_parameters = extract_model_parameters(climate_models),
   
-  # Get summaries of supported models.
-  climate_model_summaries = extract_model_summaries(
-    supported_models = climate_models
-  ),
+  # - Get summaries of best models.
+  climate_model_summaries = extract_model_summaries(climate_models),
   
   # Principal components analysis ----
   pca_results = run_trait_PCA(
@@ -162,53 +191,70 @@ plan <- drake_plan(
   
   func_div = bind_rows(func_div_epi, func_div_ter),
   
-  # Models ----
-  # (includes quantitative, i.e., sporophyte, traits only)
+  # Modeling ----
   
-  # Merge all diversity metrics.
-  diversity_data = list(comm_struc, func_div, grand_mean_climate_select, moorea_sites) %>% 
-    reduce(left_join) %>%
-    mutate(habit = fct_relevel(habit, c("terrestrial", "epiphytic"))),
+  ### Prepare diversity data (response variables) ###
   
-  # Make list of arguments (dep. var. and indep. var.) for linear models.
-  args = cross_df(list(
-    resp_vars = c(
-      "ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic",
-      "stipe", "length", "width", "dissection", "pinna", "sla", "rhizome"), 
-    indep_vars = c("el", "mean_RH")
-  )),
+  # - Combine diversity metrics into single dataframe
+  div_metrics_all = left_join(comm_struc, func_div) %>%
+    select(site, habit,
+           ntaxa, mpd.obs.z, mntd.obs.z, 
+           FRic, FEve, FDiv,
+           dissection, sla, stipe, length, width, rhizome, pinna),
   
-  # Run linear models on each combination of variables for
-  # terrestrial and epiphytic communities separately.
+  # - Subset diversity metrics to only those with correlation
+  # coefficients less than 0.9, and add elevation and outlier status.
+  div_metrics_select = select_div_metrics(div_metrics_all) %>%
+    left_join(select(moorea_sites, site, el)) %>%
+    mutate(
+      is_outlier = case_when(
+        site == "Rotui_800m_slope" ~ "yes",
+        TRUE ~ "no"
+      )
+    ),
   
-  # - Extract model parameter summaries (pval, intersect 
-  # for each part of model)
-  model_parameter_summaries = map2_df(
-    .x = args$indep_vars, 
-    .y = args$resp_vars, 
-    ~ tidy_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
-  ),
-
-  # - Extract overall model summaries (pval, rsquared
-  # for overall model)
-  model_summaries = map2_df(
-    .x = args$indep_vars, 
-    .y = args$resp_vars, 
-    ~ glance_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
-  ),
+  ### Run full-subset analysis using GAMs ###
   
-  # Extract predicted model fits
-  model_fits = map2_df(
-    .x = args$indep_vars, 
-    .y = args$resp_vars, 
-    ~ fit_lm_by_habit(diversity_data, indep_var = .x, resp_var = .y)
-  ),
+  # - Merge all diversity metrics and climate data for GAMs
+  # (transformed version of climate, but including outlier)
+  div_climate_trans = inner_join(div_metrics_select, climate_trans),
   
-  # Run t-test on community diversity metrics by growth habit.
-  t_test_results = map_df(
-    args$resp_vars %>% set_names(.) %>% unique,
-    ~ run_t_test_by_habit(diversity_data, .)),
-
+  # - Make named vector of response variables to test
+  resp_vars = div_metrics_select %>%
+    select(-site, -habit, -el, -is_outlier) %>% 
+    colnames %>% rlang::set_names(),
+  
+  # - Run full-subsets model analysis.
+  fss_div_results = purrr::map(
+    resp_vars, 
+    ~ test_full_subset_canopy_mods(
+      data = div_climate_trans,
+      indep_vars = climate_vars,
+      resp_var = .)
+    ),
+  
+  # - Extract table of importance of each environmental variable.
+  important_div_vars = get_important_vars(fss_div_results),
+  
+  # - Extract table of best-fit models.
+  best_fit_div_models = get_best_fss_mods(fss_div_results),
+  
+  ### Run linear models of diversity metrics by elevation ###
+  
+  # - Make full set of models including each diversity metric 
+  # by elevation, growth habit, and
+  # their interaction, then choose the best model for each.
+  div_el_models = choose_habit_elevation_models(div_metrics_select, resp_vars),
+  
+  # - Extract fits of best models.
+  div_el_model_fits = extract_model_fits(div_el_models),
+  
+  # - Get summaries of best model parameters.
+  div_el_model_parameter_summaries = extract_model_parameters(div_el_models),
+  
+  # - Get summaries of best models.
+  div_el_model_summaries = extract_model_summaries(supported_models = div_el_models),
+  
   # Plots ----
   
   # Set color scheme: epiphytes in green, terrestrial in brown.
@@ -216,9 +262,9 @@ plan <- drake_plan(
     set_names(levels(moorea_climate_raw$habit)),
   
   # Make climate plot.
-  climate_plot = make_four_part_climate_plot(
-    climate_data = grand_mean_climate_select,
-    site_data = moorea_sites,
+  climate_plot = make_climate_plot(
+    data = climate_select,
+    resp_vars = climate_vars,
     fits = climate_model_fits, 
     summaries = climate_model_summaries, 
     habit_colors = habit_colors),
@@ -238,14 +284,15 @@ plan <- drake_plan(
   ),
   
   # Make community diversity scatterplots.
-  comm_div_scatterplots = map2(
-    .x = args$indep_vars, 
-    .y = args$resp_vars, 
+  comm_div_scatterplots = map(
+    resp_vars, 
     ~ make_scatterplot_by_habit(
-      model_fits, 
-      model_parameter_summaries, 
-      x_var = .x, 
-      y_var = .y,
+      div_data = div_metrics_select, 
+      site_data = moorea_sites,
+      model_fits = div_el_model_fits, 
+      model_summaries = div_el_model_parameter_summaries, 
+      x_var = "el", 
+      y_var = .,
       habit_colors = habit_colors)
   ),
   

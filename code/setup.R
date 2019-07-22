@@ -21,6 +21,8 @@ library(magrittr)
 library(viridis)
 library(cowplot)
 library(corrr)
+library(plantecophys)
+library(FSSgam)
 library(tidyverse)
 
 conflict_prefer("filter", "dplyr")

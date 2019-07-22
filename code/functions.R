@@ -146,7 +146,8 @@ reformat_raw_climate <- function (moorea_climate_raw) {
         str_detect(site,  "ter") ~ "terrestrial"
       ),
       habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
-      site = str_remove_all(site, "_epi|_ter")
+      site = str_remove_all(site, "_epi|_ter"),
+      vpd = plantecophys::RHtoVPD(RH, temp)
     )
 }
 
@@ -159,13 +160,14 @@ reformat_raw_climate <- function (moorea_climate_raw) {
 get_daily_means <- function (climate_raw) {
   climate_raw %>%
     group_by(site, date, habit) %>%
-    summarize(
-      mean_temp = mean(temp),
-      min_temp = min(temp),
-      sd_temp = sd(temp),
-      mean_RH = mean(RH),
-      min_RH = min(RH),
-      sd_RH = sd(RH)
+    summarize_at(
+      vars(temp, RH, vpd),
+      list(
+        max = ~ max(., na.rm = TRUE),
+        mean = ~ mean(., na.rm = TRUE),
+        min = ~ min(., na.rm = TRUE),
+        sd = ~ sd(., na.rm = TRUE)
+      )
     ) %>%
     ungroup() %>%
     mutate(
@@ -185,14 +187,7 @@ get_daily_means <- function (climate_raw) {
 get_grand_means <- function(daily_means) {
   daily_means %>%
     group_by(site, habit) %>%
-    summarize(
-      mean_temp = mean(mean_temp),
-      min_temp = mean(min_temp),
-      sd_temp = mean(sd_temp),
-      mean_RH = mean(mean_RH),
-      min_RH = mean(min_RH),
-      sd_RH = mean(sd_RH)
-    ) %>%
+    summarize_if(is.numeric, ~ mean(., na.rm = TRUE)) %>%
     ungroup() %>%
     mutate(
       is_outlier = case_when(
@@ -216,11 +211,11 @@ select_climate_vars <- function (climate_data) {
   # Calculate total correlation for all climatic variables
   climate_corr_all <-
     climate_data %>%
-    filter(is_outlier == "no") %>%
+    # filter(is_outlier == "no") %>%
     select_if(is.numeric) %>%
     corrr::correlate()
   
-  # Mean and min temp are correlated, but not with SD.
+  # Mean and min temp are correlated
   temp_corr <-
     climate_corr_all %>%
     corrr::focus(contains("temp"), mirror = TRUE)
@@ -230,17 +225,24 @@ select_climate_vars <- function (climate_data) {
     climate_corr_all %>%
     corrr::focus(contains("RH"), mirror = TRUE)
   
-  # None of the temp vars are correlated with Rel. Hum.
+  # max VPD and sd VPD are correlated.
+  vpd_corr <-
+    climate_corr_all %>%
+    corrr::focus(contains("vpd"), mirror = TRUE)
+  
+  # VPD and rel. hum. are almost all correlated.
   temp_rh_corr <-
     climate_corr_all %>%
-    corrr::focus(contains("RH"))
+    corrr::focus(contains("vpd"))
   
-  # Drop variables correlated > 0.9 and check what the results look like
+  # Drop RH entirely since VPD is a more direct measure of drying
+  # intensity and almost all RH / VPD measures are correlated.
+  # Drop other variables correlated > 0.9.
   climate_corr_select <-
     climate_corr_all %>%
-    corrr::focus(-min_temp, -min_RH, mirror = TRUE)
+    corrr::focus(-contains("RH"), -temp_min, -vpd_max, mirror = TRUE)
   
-  # Double-check that we've dropped any correlations > 0.9
+  # Double-check that no correlations > 0.9 remain,
   # and keep these as the final variables for analysis.
   selected_climate_vars <-
   climate_corr_select %>%
@@ -253,21 +255,25 @@ select_climate_vars <- function (climate_data) {
 
 #' Make climate models and choose the best one using AIC
 #'
-#' @param climate_data 
-#' @param site_data 
+#' Combines response_data and site_data datsets, runs a set of linear
+#' models testing for the effect of elevation, growth habit, or their
+#' interaction on each response variable. Chooses the best model
+#' by lowest AIC.
+#'
+#' @param data Dataframe containing response variables,
+#' also must contain "site", "habit", and "el" columns.
+#' @param resp_vars Vector of response variables in data
+#' to use. Defaults to column names of data
 #'
 #' @return Dataframe.
-make_climate_models <- function (climate_data, site_data) {
+choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
   
-  # Make dataset for modeling. Each row is a nested dataset for a single
+  # Reformat data into nested set by variable (mean and SD of temp and RH)
+  # Each row is a nested dataset for a single
   # climate variable so it will be easier to loop over them.
-  data_for_modeling <- 
-    # Combine grand climate means and site data into 'diversity data'
-    left_join(climate_data, site_data) %>%
-    # REMOVE OUTLIER: Mt Rotui exposed slope
-    filter(is_outlier == "no") %>%
-    # Reformat data into nested set by variable (mean and SD of temp and RH)
-    select(-lat, -long, -is_outlier) %>%
+  data <- 
+    data %>%
+    select(site, habit, el, resp_vars) %>%
     gather(var, value, -site, -habit, -el) %>%
     nest(-var)
   
@@ -275,7 +281,7 @@ make_climate_models <- function (climate_data, site_data) {
   # by elevation only, by growth habit only, and by the interaction of
   # growth habit and elevation.
   all_models <-
-    data_for_modeling %>%
+    data %>%
     # Construct a linear model for each variable
     mutate(
       interaction = map(data, ~lm(value ~ el * habit, .)),
@@ -313,7 +319,7 @@ extract_model_fits <- function (supported_models) {
 }
 
 # Extract model parameter summaries (slope, intersect, etc)
-extract_model_parameter_summaries <- function (supported_models) {
+extract_model_parameters <- function (supported_models) {
   supported_models %>%
     mutate(
       summary = map(model, tidy)
@@ -952,7 +958,79 @@ analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terr
     as_tibble
   
 }
+
+#' Check for correlation between diversity metrics
+#' and retain non-correlated ones
+#'
+#' @param div_data All diversity metrics
+#'
+#' @return Diversity metrics subsetted
+#' to only those that are correlated less than 0.9
+#' 
+select_div_metrics <- function (div_data) {
+  
+  # Calculate total correlation for all variables
+  corr_all <-
+    div_data %>%
+    select(-site, -habit) %>%
+    corrr::correlate()
+  
+  # Check for correlations > 0.9
+  # (comment-out when not inspecting or will cause error)
+  # corr_all %>%
+  # assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname"))
+  
+  # Only trait values are correlated:
+  # stipe, length, width, and rhizome are all correlated with each other
+  cwm_corr <-
+  corr_all %>%
+    corrr::focus(stipe, length, width, rhizome, mirror = TRUE)
+  
+  # Drop length, width, and rhizome.
+  # Keep only stipe length since it has the best hypothesis
+  # for functional significance
+  div_corr_select <-
+    corr_all %>%
+    corrr::focus(-length, -width, -rhizome, mirror = TRUE)
+  
+  # Double-check that no correlations > 0.9 remain,
+  # and keep these as the final variables for analysis.
+  selected_div_vars <-
+    div_corr_select %>%
+    assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname")) %>%
+    pull(rowname)
+  
+  div_data %>%
+    select(site, habit, selected_div_vars)
+}
+
+
 # Models ----
+
+#' Run ANCOVA on climate data
+#' 
+#' The ANCOVA includes growth habit (factor with two levels) with
+#' elevation as covariate
+#'
+#' @param data Dataframe including site names, growth habit
+#' (epiphytic or terrestrial), elevatoin, and climate (response) variables
+#' @param resp_vars Vector of response variables to test
+#'
+#' @return Dataframe
+#' 
+run_ancova <- function(data, resp_vars) {
+  # Conduct ANCOVA
+  data %>%
+    select(site, habit, el, resp_vars) %>%
+    gather(variable, value, -site, -habit, -el) %>%
+    nest(-variable) %>%
+    mutate(
+      cov_model = map(data, ~aov(value ~ habit * el, .)),
+      summary = map(cov_model, broom::tidy)
+    ) %>%
+    select(variable, summary) %>%
+    unnest
+}
 
 #' Run a linear model on terrestrial and epiphytic species
 #' separately and tidy the output parameters.
@@ -1085,6 +1163,93 @@ run_t_test_by_habit <- function (data, resp_var) {
     select(resp_var, everything())
 }
 
+#' Test a set of models specifically designed for the canopy life project
+#'
+#' @param data Dataframe including diversity metrics (MPD, MNTD, richness,
+#' community-weighted means, etc), independent climate variables, and columns
+#' for "site" and "habit".
+#' @param resp_var Response variable of interest to fit models
+#' @param indep_vars Vector of independent variables.
+#'
+#' @return List: output of FSSgam::fit.model.set
+#' 
+test_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
+  
+  # Subset data to the response variable and indep variables
+  # of interest
+  resp_var <- enquo(resp_var)
+  
+  diversity_data_select <- select(data, response := !!resp_var, site, habit, indep_vars) %>%
+    # Make sure site and habit are factors
+    mutate(
+      site = as.factor(site),
+      habit = as.factor(habit)) %>%
+    # gam needs a data.frame, not a tibble
+    as.data.frame()
+  
+  pred_vars_cont <- 
+    diversity_data_select %>%
+    dplyr::select(-response, -site, -habit) %>% colnames
+  
+  # Define basic model with random effect.
+  # Set k = 3 to avoid over-fitting.
+  basic_model <- gam(
+    response ~ s(site,bs="re"), 
+    family = gaussian(), 
+    data = diversity_data_select)
+  
+  # Make full model set
+  model.set <- FSSgam::generate.model.set(
+    use.dat = as.data.frame(diversity_data_select),
+    test.fit = basic_model,
+    pred.vars.cont = pred_vars_cont,
+    pred.vars.fact = "habit",
+    k = 3,
+    null.terms="s(site,bs='re')")
+  
+  # Fit model set
+  FSSgam::fit.model.set(model.set, max.models = 600, parallel = TRUE)
+  
+}
+
+#' Extract importance of each indep var for a set of models
+#'
+#' @param fssgam_results Results of running FSSgam::fit.model.set()
+#' on a list of models
+#'
+#' @return Tibble
+#' 
+get_important_vars <- function(fssgam_results) {
+  
+  importance_location <- list("variable.importance", "aic", "variable.weights.raw")
+  
+  map_df(fssgam_results, 
+                       ~ pluck(., !!!importance_location) %>% as.list %>% as_tibble,
+                       .id = "resp_var")
+  
+}
+
+#' Get the best models for each dependent variable for a set of models
+#'
+#' Goodness of model fit assessed with AICc. The best-fitting models
+#' within delta AICc of 3 are kept.
+#'
+#' @param fssgam_results Results of running FSSgam::fit.model.set()
+#' on a list of models
+#'
+#' @return Tibble
+#' 
+get_best_fss_mods <- function(fssgam_results) {
+  
+  map_df(fssgam_results, 
+         ~ pluck(., "mod.data.out") %>%
+           as_tibble %>% filter(delta.AICc <= 3) %>% 
+           arrange(delta.AICc),
+         .id = "resp_var") %>%
+    select(resp_var, modname, AICc, r2 = r2.vals, delta_AICc = delta.AICc) %>%
+    arrange(resp_var, AICc)
+  
+}
 
 # Misc ----
 
@@ -1209,8 +1374,9 @@ format_pval <- function (x, equals_sign = FALSE) {
 #' @param r_upper Logical; should the R-squared value be printed
 #' in the upper-right? (FALSE means it will be printed in the
 #' lower-right).
-#' @param climate_data Grand mean daily climate values
-#' @param site_data Site data with elevation
+#' @param data Dataset used to plot points. Must include columns "el" for
+#' elevation, "is_outlier" for outliers, "habit" for growth habit,
+#' and response variable of interest.
 #' @param fits Model fits
 #' @param summaries Model summaries
 #' @param habit_colors Colors to use for growth habit
@@ -1218,59 +1384,89 @@ format_pval <- function (x, equals_sign = FALSE) {
 #' not included in model
 #'
 #' @return ggplot object
-make_climate_plot <- function (yval, xval = "el", ylab, xlab = "Elevation (m)",
+#' @example
+#' make_elevation_scatterplot(
+#'   yval = "vpd_mean",
+#'   data = climate_select,
+#'   fits = climate_model_fits, 
+#'   summaries = climate_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+#' make_elevation_scatterplot(
+#'   yval = "ntaxa",
+#'   data = div_metrics_select,
+#'   fits = div_el_model_fits, 
+#'   summaries = div_el_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+make_elevation_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                                single_line = TRUE,
                                r_upper = TRUE,
-                               climate_data, site_data, 
+                               data, 
                                fits, summaries, 
                                habit_colors, alpha_val = 0.5) {
   
   yval_sym <- sym(yval)
   xval_sym <- sym(xval)
   
-  # Merge climate and site data
-  climate_site_data <- left_join(climate_data, site_data)
-  
   # Reformat model summaries for printing
   summaries <- summaries %>%
-    mutate(
-      r.squared = round_t(r.squared, 2),
-      p.value = format_pval(p.value, equals_sign = TRUE))
+    mutate(r.squared = round_t(r.squared, 2))
   
-  # Mean temp subplot
-  fits <-
-    fits %>%
-    filter(var == yval)
+  # Subset model fits and summaries to response variable of interest
+  fits <- filter(fits, var == yval)
+  summaries <- filter(summaries, var == yval)
   
-  r2 <- summaries %>%
-    filter(var == yval) %>%
-    pull(r.squared)
+  # Extract r2 and p values
+  r2 <- pull(summaries, r.squared)
+  p <- pull(summaries, p.value)
   
-  # Location of color aesthetic depends on if
-  # we are plotting two lines or one.
-  if(isTRUE(single_line)) {
-    plot <- ggplot(climate_site_data, aes(x = !!xval_sym)) +
-      geom_line(data = fits, aes(y = .fitted)) +
-      geom_point(aes(y = !!yval_sym, alpha = is_outlier, color = habit))
+  # Set number of asterisks for printing with r2
+  asterisk <- case_when(
+    p < 0.001 ~ "***",
+    p < 0.01 ~ "**",
+    p < 0.05 ~ "*",
+    TRUE ~ ""
+  )
+  
+  # Need to wrap r2 plus asterisks in quotes for passing to 
+  # ggplot::annotate with parse=TRUE so it won't error on the
+  # asterisks
+  r2 <- paste0('"', r2, asterisk, '"')
+
+  # Extract model type: does the dependent variable depend on elevation
+  # only, growth habit only, the interaction of both, or none?
+  model_type <- pull(summaries, model_type)
+  
+  # Plot lines only for models with a significant elevation effect
+  if(model_type == "el_only") {
+    plot <- ggplot(data, aes(x = !!xval_sym))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + geom_point(aes(y = !!yval_sym, alpha = is_outlier, color = habit))
+  } else if(model_type == "interaction") {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + geom_point(aes(y = !!yval_sym, alpha = is_outlier))
   } else {
-    plot <- ggplot(climate_site_data, aes(x = !!xval_sym, color = habit)) +
-      geom_line(data = fits, aes(y = .fitted)) +
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit)) +
       geom_point(aes(y = !!yval_sym, alpha = is_outlier))
   }
   
   # Set location of where to print R-squared
-  if (isTRUE(r_upper)) {
-    plot <- plot +
-      annotate("text", x = Inf, y = Inf, 
-               label = glue::glue("italic(R) ^ 2 == {r2}"),
-               hjust = 1.1, vjust = 1.2,
-               parse = TRUE)
-  } else {
-    plot <- plot +
-      annotate("text", x = Inf, y = -Inf, 
-               label = glue::glue("italic(R) ^ 2 == {r2}"),
-               hjust = 1.1, vjust = -0.2,
-               parse = TRUE)
+  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
+    if (isTRUE(r_upper)) {
+      plot <- plot +
+        annotate("text", x = Inf, y = Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = 1.2,
+                 parse = TRUE)
+    } else {
+      plot <- plot +
+        annotate("text", x = Inf, y = -Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = -0.2,
+                 parse = TRUE)
+    }
   }
 
   # Add the rest of the plot details
@@ -1289,10 +1485,13 @@ make_climate_plot <- function (yval, xval = "el", ylab, xlab = "Elevation (m)",
 
 }
 
-#' Make a 4-part climate plot
+#' Make a multipart climate plot
+#' 
+#' Loops response variables over make_elevation_scatterplot().
 #'
-#' @param climate_data Grand mean daily climate values
-#' @param site_data Site data with elevation
+#' @param data Data needed for plotting raw points
+#' @param resp_vars Vector of response variables (y-axis variable).
+#' A single sub-plot will be generated for each.
 #' @param fits Model fits
 #' @param summaries Model summaries
 #' @param habit_colors Colors to use for growth habit
@@ -1301,54 +1500,59 @@ make_climate_plot <- function (yval, xval = "el", ylab, xlab = "Elevation (m)",
 #'
 #' @return ggplot object
 #' 
-make_four_part_climate_plot <- function (climate_data, site_data, 
+make_climate_plot <- function (data, resp_vars,
                                fits, summaries, 
-                               habit_colors) {
+                               habit_colors, alpha_val = 0.5) {
   
-  a <- make_climate_plot(
-      climate_data = climate_data,
-      yval = "mean_temp",
-      ylab = "Mean temp. (°C)",
-      site_data = site_data,
-      fits = fits, 
-      summaries = summaries, 
-      habit_colors = habit_colors)
+  # Make tibble for looping individual plot function.
+  # Each column is an argument for make_elevation_scatterplot()
+  plotting_data <- tibble(
+    # Use factor here so we can specify the order of the subplots
+    yval = factor(resp_vars, 
+                  levels = c("temp_max", "temp_mean", "temp_sd", 
+                             "vpd_min", "vpd_mean", "vpd_sd")),
+    ylab = case_when(
+      yval == "temp_max" ~ "Max. temp. (°C)",
+      yval == "temp_mean" ~ "Mean temp. (°C)",
+      yval == "temp_sd" ~ "SD temp. (°C)",
+      yval == "vpd_min" ~ "Min. VPD (kPa)",
+      yval == "vpd_mean" ~ "Mean VPD (kPa)",
+      yval == "vpd_sd" ~ "SD VPD (kPa)",
+    ),
+    data = list(data),
+    fits = list(fits), 
+    summaries = list(summaries)
+  ) %>%
+    # Sort into preferred order by yval, then convert back to character
+    arrange(yval) %>%
+    mutate(yval = as.character(yval))
   
-  b <- make_climate_plot(
-      climate_data = climate_data,
-      yval = "sd_temp",
-      ylab = "SD Temp. (°C)",
-      site_data = site_data,
-      fits = fits, 
-      summaries = summaries, 
-      habit_colors = habit_colors)
+  # Make plots as a column of the tibble
+  plots_tibble <-
+    plotting_data %>%
+    mutate(
+      plot = pmap(
+        list(yval = yval, 
+             ylab = ylab, 
+             data = data, 
+             fits = fits, 
+             summaries = summaries, 
+             habit_colors = list(habit_colors),
+             alpha_val = alpha_val),
+        make_elevation_scatterplot)
+    )
   
-  c <- make_climate_plot(
-      climate_data = climate_data,
-      yval = "mean_RH",
-      ylab = "Mean rel. hum. (%)",
-      single_line = FALSE,
-      r_upper = FALSE,
-      site_data = site_data,
-      fits = fits, 
-      summaries = summaries, 
-      habit_colors = habit_colors)
+  # Can't use map with ggplot `+`, so tweak as needed in a loop.
+  for(i in 1:3) {
+    plots_tibble$plot[[i]] <- plots_tibble$plot[[i]] + theme(axis.title.x = element_blank())
+  }
   
-  d <- make_climate_plot(
-      climate_data = climate_data,
-      yval = "sd_RH",
-      ylab = "SD rel. hum. (%)",
-      single_line = FALSE,
-      site_data = site_data,
-      fits = fits, 
-      summaries = summaries, 
-      habit_colors = habit_colors)
-  
-  a <- a + blank_x_theme() 
-  b <- b + blank_x_theme() 
-  
-  a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
-    theme(legend.position = "none")
+  # Combine plots into single output
+  wrap_plots(plots_tibble$plot, ncol = 3, nrow = 2) & theme(
+    legend.position = "none"# ,
+    # Tweak margins to remove whitespace between plots
+    # plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+  )
 }
 
 
@@ -1470,23 +1674,36 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
 #' to distinguish growth habit
 #'
 #' @return ggplot object
-make_scatterplot_by_habit <- function (model_fits, model_summaries, 
+make_scatterplot_by_habit <- function (model_fits, model_summaries,
+                                       div_data, site_data,
                                        x_var, y_var,
                                        habit_colors) {
   
+  x_var_enq <- enquo(x_var)
+  
+  # Combine diversity metrics and site metadata (with elevation)
+  # into single dataset of raw points to plot
+  point_data <- left_join(div_data, site_data)
+  
+  # Subset model summaries and fits to dataset of interest
   model_summaries <-
     model_summaries %>%
     filter(term != "(Intercept)") %>%
-    rename(indep_var = term)
+    rename(indep_var = term, dep_var = var)
+  
+  model_fits <-
+    model_fits %>%
+    filter(var == y_var) %>%
+    rename(dep_var )
   
   plot_data <- 
     left_join(
       model_fits, model_summaries 
-    ) %>% filter(resp_var == y_var, indep_var == x_var)
+    ) %>% filter(var == y_var, indep_var == x_var)
   
-  ggplot(plot_data, aes(x = indep_val, color = habit)) +
+  ggplot(plot_data, aes(x = !!x_var_enq, color = habit)) +
     geom_line(data = filter(plot_data, p.value < 0.05), aes(y = .fitted)) +
-    geom_point(aes(y = resp_val)) +
+    geom_point(aes(y = value)) +
     labs(
       y = y_var,
       x = x_var
