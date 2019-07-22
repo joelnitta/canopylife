@@ -229,7 +229,7 @@ plan <- drake_plan(
   # - Run full-subsets model analysis.
   fss_div_results = purrr::map(
     resp_vars, 
-    ~ test_full_subset_canopy_mods(
+    ~ run_full_subset_canopy_mods(
       data = div_climate_trans,
       indep_vars = climate_vars,
       resp_var = .)

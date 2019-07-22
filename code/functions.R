@@ -253,91 +253,6 @@ select_climate_vars <- function (climate_data) {
     select(site, habit, selected_climate_vars, is_outlier)
 }
 
-#' Make climate models and choose the best one using AIC
-#'
-#' Combines response_data and site_data datsets, runs a set of linear
-#' models testing for the effect of elevation, growth habit, or their
-#' interaction on each response variable. Chooses the best model
-#' by lowest AIC.
-#'
-#' @param data Dataframe containing response variables,
-#' also must contain "site", "habit", and "el" columns.
-#' @param resp_vars Vector of response variables in data
-#' to use. Defaults to column names of data
-#'
-#' @return Dataframe.
-choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
-  
-  # Reformat data into nested set by variable (mean and SD of temp and RH)
-  # Each row is a nested dataset for a single
-  # climate variable so it will be easier to loop over them.
-  data <- 
-    data %>%
-    select(site, habit, el, resp_vars) %>%
-    gather(var, value, -site, -habit, -el) %>%
-    nest(-var)
-  
-  # Make all combinations of models including each climate variable
-  # by elevation only, by growth habit only, and by the interaction of
-  # growth habit and elevation.
-  all_models <-
-    data %>%
-    # Construct a linear model for each variable
-    mutate(
-      interaction = map(data, ~lm(value ~ el * habit, .)),
-      habit_only = map(data, ~lm(value ~ habit, .)),
-      el_only = map(data, ~lm(value ~ el, .))
-    ) %>%
-    select(-data) %>%
-    gather(model_type, model, -var)
-  
-  # Calculate the AIC for each model
-  aic_results <- all_models %>% 
-    mutate(glance = map(model, glance)) %>%
-    select(var, model_type, glance) %>%
-    unnest %>%
-    arrange(var, AIC)
-  
-  # Choose the best model by lowest AIC
-  aic_results %>%
-    group_by(var) %>%
-    arrange(var, AIC) %>%
-    slice(1) %>%
-    select(var, model_type) %>%
-    left_join(all_models) %>%
-    ungroup
-}
-
-# Extract model fits
-extract_model_fits <- function (supported_models) {
-  supported_models %>%
-    mutate(
-      fits = map(model, augment)
-    ) %>%
-    select(var, model_type, fits) %>%
-    unnest
-}
-
-# Extract model parameter summaries (slope, intersect, etc)
-extract_model_parameters <- function (supported_models) {
-  supported_models %>%
-    mutate(
-      summary = map(model, tidy)
-    ) %>%
-    select(var, model_type, summary) %>%
-    unnest
-}
-
-# Extract model summaries (pvalue, rsquared of model)
-extract_model_summaries <- function (supported_models) {
-  supported_models %>%
-    mutate(
-      summary = map(model, glance)
-    ) %>%
-    select(var, model_type, summary) %>%
-    unnest
-}
-
 # PCA ----
 
 #' Transform traits
@@ -1007,6 +922,92 @@ select_div_metrics <- function (div_data) {
 
 # Models ----
 
+
+#' Make climate models and choose the best one using AIC
+#'
+#' Combines response_data and site_data datsets, runs a set of linear
+#' models testing for the effect of elevation, growth habit, or their
+#' interaction on each response variable. Chooses the best model
+#' by lowest AIC.
+#'
+#' @param data Dataframe containing response variables,
+#' also must contain "site", "habit", and "el" columns.
+#' @param resp_vars Vector of response variables in data
+#' to use. Defaults to column names of data
+#'
+#' @return Dataframe.
+choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
+  
+  # Reformat data into nested set by variable (mean and SD of temp and RH)
+  # Each row is a nested dataset for a single
+  # climate variable so it will be easier to loop over them.
+  data <- 
+    data %>%
+    select(site, habit, el, resp_vars) %>%
+    gather(var, value, -site, -habit, -el) %>%
+    nest(-var)
+  
+  # Make all combinations of models including each climate variable
+  # by elevation only, by growth habit only, and by the interaction of
+  # growth habit and elevation.
+  all_models <-
+    data %>%
+    # Construct a linear model for each variable
+    mutate(
+      interaction = map(data, ~lm(value ~ el * habit, .)),
+      habit_only = map(data, ~lm(value ~ habit, .)),
+      el_only = map(data, ~lm(value ~ el, .))
+    ) %>%
+    select(-data) %>%
+    gather(model_type, model, -var)
+  
+  # Calculate the AIC for each model
+  aic_results <- all_models %>% 
+    mutate(glance = map(model, glance)) %>%
+    select(var, model_type, glance) %>%
+    unnest %>%
+    arrange(var, AIC)
+  
+  # Choose the best model by lowest AIC
+  aic_results %>%
+    group_by(var) %>%
+    arrange(var, AIC) %>%
+    slice(1) %>%
+    select(var, model_type) %>%
+    left_join(all_models) %>%
+    ungroup
+}
+
+# Extract model fits
+extract_model_fits <- function (supported_models) {
+  supported_models %>%
+    mutate(
+      fits = map(model, augment)
+    ) %>%
+    select(var, model_type, fits) %>%
+    unnest
+}
+
+# Extract model parameter summaries (slope, intersect, etc)
+extract_model_parameters <- function (supported_models) {
+  supported_models %>%
+    mutate(
+      summary = map(model, tidy)
+    ) %>%
+    select(var, model_type, summary) %>%
+    unnest
+}
+
+# Extract model summaries (pvalue, rsquared of model)
+extract_model_summaries <- function (supported_models) {
+  supported_models %>%
+    mutate(
+      summary = map(model, glance)
+    ) %>%
+    select(var, model_type, summary) %>%
+    unnest
+}
+
 #' Run ANCOVA on climate data
 #' 
 #' The ANCOVA includes growth habit (factor with two levels) with
@@ -1061,7 +1062,7 @@ run_t_test_by_habit <- function (data, resp_var) {
 #'
 #' @return List: output of FSSgam::fit.model.set
 #' 
-test_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
+run_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
   
   # Subset data to the response variable and indep variables
   # of interest
