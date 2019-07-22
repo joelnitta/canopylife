@@ -284,45 +284,42 @@ plan <- drake_plan(
   ),
   
   # Make community diversity scatterplots.
-  comm_div_scatterplots = map(
+  div_scatterplots = map(
     resp_vars, 
-    ~ make_scatterplot_by_habit(
-      div_data = div_metrics_select, 
-      site_data = moorea_sites,
-      model_fits = div_el_model_fits, 
-      model_summaries = div_el_model_parameter_summaries, 
-      x_var = "el", 
-      y_var = .,
+    ~ make_elevation_scatterplot(
+      data = div_metrics_select,
+      fits = div_el_model_fits, 
+      summaries = div_el_model_summaries, 
+      yval = .,
       habit_colors = habit_colors)
   ),
   
   # Make community diversity boxplots.
-  comm_div_boxplots = map(
-    args$resp_vars %>% unique %>% set_names(.), 
-    ~ make_boxplot_by_habit(
-      t_test_results, 
-      diversity_data,
-      y_var = ., 
-      habit_colors = habit_colors) 
+  div_boxplots = map(
+    resp_vars, 
+    ~ make_elevation_boxplot(
+      data = div_metrics_select,
+      fits = div_el_model_fits, 
+      summaries = div_el_model_summaries, 
+      yval = .,
+      habit_colors = habit_colors)
   ),
   
   # Combine community diversity scatterplots
   # and boxplots into final figure.
   combined_comm_div_plots = combine_comm_div_plots(
-    args = args, 
-    scatterplots = comm_div_scatterplots, 
-    boxplots = comm_div_boxplots),
+    scatterplots = div_scatterplots, 
+    boxplots = div_boxplots),
   
   # Combine community-weighted means scatterplots
   # and boxplots into final figure.
   combined_cwm_plots = combine_cwm_plots(
-    args = args, 
-    scatterplots = comm_div_scatterplots, 
-    boxplots = comm_div_boxplots),
+    scatterplots = div_scatterplots, 
+    boxplots = div_boxplots),
   
   # Write out MS ----
-  ms = rmarkdown::render(
-    knitr_in("ms/manuscript.Rmd"),
-    quiet = TRUE)
+  # ms = rmarkdown::render(
+  #   knitr_in("ms/manuscript.Rmd"),
+  #   quiet = TRUE)
   
 )

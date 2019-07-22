@@ -1193,7 +1193,7 @@ test_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
   
   # Define basic model with random effect.
   # Set k = 3 to avoid over-fitting.
-  basic_model <- gam(
+  basic_model <- mgcv::gam(
     response ~ s(site,bs="re"), 
     family = gaussian(), 
     data = diversity_data_select)
@@ -1364,7 +1364,7 @@ format_pval <- function (x, equals_sign = FALSE) {
 
 # Plotting ----
 
-#' Make a single climate plot
+#' Make a single elevation scatterplot
 #'
 #' @param yval Name of y variable
 #' @param xval Name of x variable
@@ -1484,6 +1484,130 @@ make_elevation_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "
     standard_theme()
 
 }
+
+#' Make a single elevation boxplot
+#'
+#' @param yval Name of y variable
+#' @param xval Name of x variable
+#' @param ylab Label for y axis
+#' @param xlab Label for x axis
+#' @param single_line Logical; should a single trend line be used?
+#' @param r_upper Logical; should the R-squared value be printed
+#' in the upper-right? (FALSE means it will be printed in the
+#' lower-right).
+#' @param data Dataset used to plot points. Must include columns "el" for
+#' elevation, "is_outlier" for outliers, "habit" for growth habit,
+#' and response variable of interest.
+#' @param fits Model fits
+#' @param summaries Model summaries
+#' @param habit_colors Colors to use for growth habit
+#' @param alpha_val Transparency value to set for outlier points
+#' not included in model
+#'
+#' @return ggplot object
+#' @example
+#' make_elevation_scatterplot(
+#'   yval = "vpd_mean",
+#'   data = climate_select,
+#'   fits = climate_model_fits, 
+#'   summaries = climate_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+#' make_elevation_boxplot(
+#'   yval = "FDiv",
+#'   data = div_metrics_select,
+#'   fits = div_el_model_fits, 
+#'   summaries = div_el_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+make_elevation_boxplot <- function (yval, xval = "el", ylab = yval, xlab = "Growth habit",
+                                        single_line = TRUE,
+                                        r_upper = TRUE,
+                                        data, 
+                                        fits, summaries, 
+                                        habit_colors, alpha_val = 0.5) {
+  
+  yval_sym <- sym(yval)
+  xval_sym <- sym(xval)
+  
+  # Reformat model summaries for printing
+  summaries <- summaries %>%
+    mutate(r.squared = round_t(r.squared, 2))
+  
+  # Subset model fits and summaries to response variable of interest
+  fits <- filter(fits, var == yval)
+  summaries <- filter(summaries, var == yval)
+  
+  # Extract r2 and p values
+  r2 <- pull(summaries, r.squared)
+  p <- pull(summaries, p.value)
+  
+  # Set number of asterisks for printing with r2
+  asterisk <- case_when(
+    p < 0.001 ~ "***",
+    p < 0.01 ~ "**",
+    p < 0.05 ~ "*",
+    TRUE ~ ""
+  )
+  
+  # Need to wrap r2 plus asterisks in quotes for passing to 
+  # ggplot::annotate with parse=TRUE so it won't error on the
+  # asterisks
+  # r2 <- paste0('"', r2, asterisk, '"')
+  
+  # Extract model type: does the dependent variable depend on elevation
+  # only, growth habit only, the interaction of both, or none?
+  model_type <- pull(summaries, model_type)
+  
+  # Make basic boxplot
+  plot <- ggplot(data, aes(x = habit))
+  plot <- plot + geom_boxplot(aes(y = !!yval_sym, color = habit))
+  
+  # Add asterisk for t-test result between the bars only if they
+  # differ by habit only
+  if(model_type == "habit_only" & p < 0.05) { 
+    plot <- plot + 
+      annotate(
+        "text", label = asterisk, size = 5, fontface = "bold",
+        x = 1.5, 
+        y = Inf,
+        vjust = 2.0, hjust = 0.5)
+  }
+  
+  # Set location of where to print R-squared
+  if(model_type == "habit_only" & p < 0.05) {
+    if (isTRUE(r_upper)) {
+      plot <- plot +
+        annotate("text", x = Inf, y = Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = 1.2,
+                 parse = TRUE)
+    } else {
+      plot <- plot +
+        annotate("text", x = Inf, y = -Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = -0.2,
+                 parse = TRUE)
+    }
+  }
+  
+  # Add the rest of the plot details
+  plot +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    scale_alpha_manual(
+      values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = ylab,
+      x = xlab
+    ) +
+    standard_theme()
+  
+}
+
+
 
 #' Make a multipart climate plot
 #' 
@@ -1771,109 +1895,118 @@ make_boxplot_by_habit <- function (t_test_results, plot_data, y_var,
 #' @param boxplots List of boxplots
 #'
 #' @return ggplot object
-combine_cwm_plots <- function (args, scatterplots, boxplots) {
+combine_cwm_plots <- function (scatterplots, boxplots) {
   
   # Combine scatterplots and boxplots into tibble
-  plot_list <- 
-    bind_rows(
-      mutate(args, plot = scatterplots), 
-      args %>%
-        select(resp_vars) %>%
-        unique() %>%
-        mutate(
-          plot = boxplots,
-          indep_vars = "habit")
+  plots_df <- bind_rows(
+    tibble(
+      resp_var = names(scatterplots),
+      plot = as.list(scatterplots),
+      plot_type = "scatter"
+    ),
+    tibble(
+      resp_var = names(boxplots),
+      plot = as.list(boxplots),
+      plot_type = "box"
     )
+  )
   
-  # Sort plots by response and indep var.
-  # Goal is to have three-column multipart plot,
-  # with the x-axes of each column matching up.
-  # Order by response var., then indep var.
+  # Sort plots by response and plot type
   # so that patchwork::wrap_plots will output them in the
   # correct order.
-  cwm_plots <- plot_list %>%
-    # Subset to traits that were use to calculate community-weighted means.
-    filter(resp_vars %in% c("length", "width", "dissection", "pinna", "sla", "rhizome")) %>%
-    mutate(indep_vars = factor(indep_vars, levels = c("mean_RH", "el", "habit"))) %>%
-    arrange(resp_vars, indep_vars)
+  plots_df <- plots_df %>%
+    filter(resp_var %in% 
+             c("dissection", "sla", "stipe", "pinna")) %>%
+    mutate(resp_var = factor(
+      resp_var, 
+      levels = c("dissection", "sla", "stipe", "pinna"))) %>%
+    mutate(plot_type = factor(
+      plot_type, 
+      levels = c("scatter", "box"))) %>%
+    arrange(resp_var, plot_type)
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
-  for(i in 1:nrow(cwm_plots)) {
-    if(cwm_plots$indep_vars[[i]] != "mean_RH") {
-      cwm_plots$plot[[i]] <- cwm_plots$plot[[i]] + theme(axis.title.y = element_blank())
-    }
-    if(cwm_plots$resp_vars[[i]] != "width") {
-      cwm_plots$plot[[i]] <- cwm_plots$plot[[i]] + 
+  for(i in 1:nrow(plots_df)) {
+    if(plots_df$resp_var[[i]] != "pinna") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.x = element_blank(),
           axis.text.x = element_blank())
     }
+    if(plots_df$plot_type[[i]] == "box") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank())
+    }
   }
   
   # Combine plots into single output
-  wrap_plots(cwm_plots$plot, ncol = 3) & theme(
+  wrap_plots(plots_df$plot, ncol = 2) & theme(
+    legend.position = "none",
     # Tweak margins to remove whitespace between plots
     plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
   )
+  
 }
 
 #' Combine functional diveristy plots into final figure
 #'
-#' @param args Dataframe of independent and dependent variables
-#' used to make scatterplots
 #' @param scatterplots List of scatterplots
 #' @param boxplots List of boxplots
 #'
 #' @return ggplot object
-combine_comm_div_plots <- function (args, scatterplots, boxplots) {
+combine_comm_div_plots <- function (scatterplots, boxplots) {
   
   # Combine scatterplots and boxplots into tibble
-  plot_list <- 
-    bind_rows(
-      mutate(args, plot = scatterplots), 
-      args %>%
-        select(resp_vars) %>%
-        unique() %>%
-        mutate(
-          plot = boxplots,
-          indep_vars = "habit")
+  plots_df <- bind_rows(
+    tibble(
+      resp_var = names(scatterplots),
+      plot = as.list(scatterplots),
+      plot_type = "scatter"
+    ),
+    tibble(
+      resp_var = names(boxplots),
+      plot = as.list(boxplots),
+      plot_type = "box"
     )
+  )
   
-  # Sort plots by response and indep var.
-  # Goal is to have three-column multipart plot,
-  # with the x-axes of each column matching up.
-  # Order by response var., then indep var.
+  # Sort plots by response and plot type
   # so that patchwork::wrap_plots will output them in the
   # correct order.
-  div_plots <- plot_list %>%
-    # Subset to traits that were use to calculate community-weighted means.
-    filter(resp_vars %in% 
+  plots_df <- plots_df %>%
+    filter(resp_var %in% 
              c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic")) %>%
-    mutate(resp_vars = factor(
-      resp_vars, 
+    mutate(resp_var = factor(
+      resp_var, 
       levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic"))) %>%
-    mutate(indep_vars = factor(
-      indep_vars, 
-      levels = c("mean_RH", "el", "habit"))) %>%
-    arrange(resp_vars, indep_vars)
+    mutate(plot_type = factor(
+      plot_type, 
+      levels = c("scatter", "box"))) %>%
+    arrange(resp_var, plot_type)
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
-  for(i in 1:nrow(div_plots)) {
-    if(div_plots$indep_vars[[i]] != "mean_RH") {
-      div_plots$plot[[i]] <- div_plots$plot[[i]] + theme(axis.title.y = element_blank())
-    }
-    if(div_plots$resp_vars[[i]] != "FRic") {
-      div_plots$plot[[i]] <- div_plots$plot[[i]] + 
+  for(i in 1:nrow(plots_df)) {
+    if(plots_df$resp_var[[i]] != "FRic") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.x = element_blank(),
           axis.text.x = element_blank())
     }
+    if(plots_df$plot_type[[i]] == "box") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.y = element_blank(),
+          axis.text.y = element_blank())
+    }
   }
   
   # Combine plots into single output
-  wrap_plots(div_plots$plot, ncol = 3) & theme(
+  wrap_plots(plots_df$plot, ncol = 2) & theme(
+    legend.position = "none",
     # Tweak margins to remove whitespace between plots
     plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
   )

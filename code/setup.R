@@ -23,6 +23,7 @@ library(cowplot)
 library(corrr)
 library(plantecophys)
 library(FSSgam)
+library(mgcv)
 library(tidyverse)
 
 conflict_prefer("filter", "dplyr")
