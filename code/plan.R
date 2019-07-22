@@ -255,6 +255,15 @@ plan <- drake_plan(
   # - Get summaries of best models.
   div_el_model_summaries = extract_model_summaries(supported_models = div_el_models),
   
+  ### Run t-tests ###
+  div_t_test_results = map_df(
+    resp_vars,
+    ~ run_t_test_by_habit(
+      resp_var = .,
+      data = div_metrics_select
+    )
+  ),
+  
   # Plots ----
   
   # Set color scheme: epiphytes in green, terrestrial in brown.
@@ -286,7 +295,7 @@ plan <- drake_plan(
   # Make community diversity scatterplots.
   div_scatterplots = map(
     resp_vars, 
-    ~ make_elevation_scatterplot(
+    ~ make_scatterplot(
       data = div_metrics_select,
       fits = div_el_model_fits, 
       summaries = div_el_model_summaries, 
@@ -297,10 +306,9 @@ plan <- drake_plan(
   # Make community diversity boxplots.
   div_boxplots = map(
     resp_vars, 
-    ~ make_elevation_boxplot(
+    ~ make_boxplot(
       data = div_metrics_select,
-      fits = div_el_model_fits, 
-      summaries = div_el_model_summaries, 
+      summaries = div_t_test_results, 
       yval = .,
       habit_colors = habit_colors)
   ),

@@ -1159,8 +1159,8 @@ run_t_test_by_habit <- function (data, resp_var) {
   epi_vals <- data %>% filter(habit == "epiphytic") %>% pull(!!resp_var)
   t.test(x = ter_vals, y = epi_vals, alternative = "two.sided", na.action="na.omit") %>%
     tidy %>%
-    mutate(resp_var := !!resp_var) %>%
-    select(resp_var, everything())
+    mutate(var := !!resp_var) %>%
+    select(var, everything())
 }
 
 #' Test a set of models specifically designed for the canopy life project
@@ -1364,7 +1364,7 @@ format_pval <- function (x, equals_sign = FALSE) {
 
 # Plotting ----
 
-#' Make a single elevation scatterplot
+#' Make a single scatterplot
 #'
 #' @param yval Name of y variable
 #' @param xval Name of x variable
@@ -1385,21 +1385,21 @@ format_pval <- function (x, equals_sign = FALSE) {
 #'
 #' @return ggplot object
 #' @example
-#' make_elevation_scatterplot(
+#' make_scatterplot(
 #'   yval = "vpd_mean",
 #'   data = climate_select,
 #'   fits = climate_model_fits, 
 #'   summaries = climate_model_summaries, 
 #'   habit_colors = habit_colors
 #' )
-#' make_elevation_scatterplot(
+#' make_scatterplot(
 #'   yval = "ntaxa",
 #'   data = div_metrics_select,
 #'   fits = div_el_model_fits, 
 #'   summaries = div_el_model_summaries, 
 #'   habit_colors = habit_colors
 #' )
-make_elevation_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
+make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                                single_line = TRUE,
                                r_upper = TRUE,
                                data, 
@@ -1485,64 +1485,40 @@ make_elevation_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "
 
 }
 
-#' Make a single elevation boxplot
+#' Make a single boxplot
 #'
 #' @param yval Name of y variable
 #' @param xval Name of x variable
 #' @param ylab Label for y axis
 #' @param xlab Label for x axis
-#' @param single_line Logical; should a single trend line be used?
-#' @param r_upper Logical; should the R-squared value be printed
-#' in the upper-right? (FALSE means it will be printed in the
-#' lower-right).
 #' @param data Dataset used to plot points. Must include columns "el" for
 #' elevation, "is_outlier" for outliers, "habit" for growth habit,
 #' and response variable of interest.
-#' @param fits Model fits
-#' @param summaries Model summaries
+#' @param t_summaries Results of t-test for response variable
+#' between growth habit types.
 #' @param habit_colors Colors to use for growth habit
-#' @param alpha_val Transparency value to set for outlier points
-#' not included in model
-#'
+#' 
 #' @return ggplot object
 #' @example
-#' make_elevation_scatterplot(
-#'   yval = "vpd_mean",
-#'   data = climate_select,
-#'   fits = climate_model_fits, 
-#'   summaries = climate_model_summaries, 
-#'   habit_colors = habit_colors
-#' )
-#' make_elevation_boxplot(
-#'   yval = "FDiv",
+#' make_boxplot(
+#'   yval = "ntaxa",
 #'   data = div_metrics_select,
-#'   fits = div_el_model_fits, 
-#'   summaries = div_el_model_summaries, 
+#'   summaries = div_t_test_results, 
 #'   habit_colors = habit_colors
 #' )
-make_elevation_boxplot <- function (yval, xval = "el", ylab = yval, xlab = "Growth habit",
-                                        single_line = TRUE,
-                                        r_upper = TRUE,
-                                        data, 
-                                        fits, summaries, 
-                                        habit_colors, alpha_val = 0.5) {
+make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
+                          data, summaries, 
+                          habit_colors) {
   
   yval_sym <- sym(yval)
-  xval_sym <- sym(xval)
   
-  # Reformat model summaries for printing
-  summaries <- summaries %>%
-    mutate(r.squared = round_t(r.squared, 2))
-  
-  # Subset model fits and summaries to response variable of interest
-  fits <- filter(fits, var == yval)
+  # Subset summaries to response variable of interest
   summaries <- filter(summaries, var == yval)
   
-  # Extract r2 and p values
-  r2 <- pull(summaries, r.squared)
+  # Extract p value
   p <- pull(summaries, p.value)
   
-  # Set number of asterisks for printing with r2
+  # Set number of asterisks for printing
   asterisk <- case_when(
     p < 0.001 ~ "***",
     p < 0.01 ~ "**",
@@ -1550,54 +1526,18 @@ make_elevation_boxplot <- function (yval, xval = "el", ylab = yval, xlab = "Grow
     TRUE ~ ""
   )
   
-  # Need to wrap r2 plus asterisks in quotes for passing to 
-  # ggplot::annotate with parse=TRUE so it won't error on the
-  # asterisks
-  # r2 <- paste0('"', r2, asterisk, '"')
-  
-  # Extract model type: does the dependent variable depend on elevation
-  # only, growth habit only, the interaction of both, or none?
-  model_type <- pull(summaries, model_type)
-  
-  # Make basic boxplot
-  plot <- ggplot(data, aes(x = habit))
-  plot <- plot + geom_boxplot(aes(y = !!yval_sym, color = habit))
-  
+  # Make basic boxplot by habit
   # Add asterisk for t-test result between the bars only if they
-  # differ by habit only
-  if(model_type == "habit_only" & p < 0.05) { 
-    plot <- plot + 
-      annotate(
-        "text", label = asterisk, size = 5, fontface = "bold",
-        x = 1.5, 
-        y = Inf,
-        vjust = 2.0, hjust = 0.5)
-  }
-  
-  # Set location of where to print R-squared
-  if(model_type == "habit_only" & p < 0.05) {
-    if (isTRUE(r_upper)) {
-      plot <- plot +
-        annotate("text", x = Inf, y = Inf, 
-                 label = glue::glue("italic(R) ^ 2 == {r2}"),
-                 hjust = 1.1, vjust = 1.2,
-                 parse = TRUE)
-    } else {
-      plot <- plot +
-        annotate("text", x = Inf, y = -Inf, 
-                 label = glue::glue("italic(R) ^ 2 == {r2}"),
-                 hjust = 1.1, vjust = -0.2,
-                 parse = TRUE)
-    }
-  }
-  
-  # Add the rest of the plot details
-  plot +
+  # differ by habit (will print nothing if not signif.)
+  ggplot(data, aes(x = habit)) +
+    geom_boxplot(aes(y = !!yval_sym, color = habit)) +
+    annotate(
+      "text", label = asterisk, size = 5, fontface = "bold",
+      x = 1.5, 
+      y = Inf,
+      vjust = 2.0, hjust = 0.5) +
     scale_color_manual(
       values = habit_colors
-    ) +
-    scale_alpha_manual(
-      values = c("yes" = alpha_val, "no" = 1.0)
     ) +
     labs(
       y = ylab,
@@ -1606,8 +1546,6 @@ make_elevation_boxplot <- function (yval, xval = "el", ylab = yval, xlab = "Grow
     standard_theme()
   
 }
-
-
 
 #' Make a multipart climate plot
 #' 
