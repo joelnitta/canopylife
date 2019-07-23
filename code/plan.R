@@ -333,6 +333,11 @@ plan <- drake_plan(
   # Write out MS ----
   ms = rmarkdown::render(
     knitr_in("ms/manuscript.Rmd"),
+    quiet = TRUE),
+  
+  # Write out supplemental information
+  si = rmarkdown::render(
+    knitr_in("si/SI.Rmd"),
     quiet = TRUE)
   
 )

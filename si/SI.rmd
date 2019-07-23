@@ -1,0 +1,132 @@
+---
+title: ""
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
+
+# Load analysis results
+loadd(trait_data_for_si)
+loadd(climate_ancova_results)
+loadd(phylosig_binary_traits_strict)
+loadd(correlated_evo_test_strict)
+loadd(best_fit_div_models)
+```
+
+***New Phytologist*** **Supporting Information**
+
+Article title: Life in the canopy: Phylogenetic filtering and morphological canalization in epiphytic ferns
+
+Authors: Joel H. Nitta, James E. Watkins, Jr., Ravahere Taputuarai, and Charles C. Davis
+
+Article acceptance date: 
+
+The following Supporting Information is available for this article:
+
+**Table S1** Trait values of ferns on Moorea, French Polynesia. Abbreviations: SLA, specific leaf area. For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen, etc.
+
+```{r}
+trait_data_for_si %>%
+  write_csv(here::here("si/Table_S1.csv"))
+```
+
+**Table S2** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate. Abbreviations: d.f., degrees of freedom; MS, mean squares.
+
+```{r climate-ancova}
+# Format and write out table as CSV file
+climate_ancova_results %>% 
+  mutate(
+    p.value = signif(p.value, 2) %>% format.pval(., digits = 1),
+    meansq = round_t(meansq, 2),
+    term = case_when(
+      term == "habit" ~ "Growth habit",
+      term == "el" ~ "Elevation",
+      term == "habit:el" ~ "Growth habit × elevation",
+      TRUE ~ term
+    )
+  ) %>%
+  select(`Response variable` = variable, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value) %>%
+  write_csv(here::here("si/Table_S2.csv"))
+
+```
+
+**Table S3** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. Abbreviations: P_rnd, probability of obtaining the observed value of *D* under random trait evolution; P_bm, probability of obtaining the observed value of *D* under simulation of trait evolution by Brownian motion.
+
+```{r phylosig-binary-strict}
+# Format and write out table as CSV file
+phylosig_binary_traits_strict %>%
+  mutate(D = round_t(D, 2)) %>%
+  mutate(trait = factor(
+    trait, 
+    levels = c("habit", "gemmae", "glands", "hairs","morphotype"))) %>%
+  mutate(trait = lvls_revalue(
+    trait,
+    new_levels = c("Epiphytic growth", "Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
+  arrange(trait) %>%
+  select(Trait = trait, `Number of presences` = num_present, `Number of absences` = num_absent, D,
+         P_rnd = prob_random, P_bm = prob_brownian) %>%
+  write_csv(here::here("si/Table_S3.csv"))
+```
+
+**Table S4** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. Abbreviations: LL, log likelihood.
+
+```{r corr-evo-strict}
+# Format and write out table as CSV file
+correlated_evo_test_strict %>%
+  mutate(trait = factor(
+    trait, 
+    levels = c("gemmae", "glands", "hairs","morphotype"))) %>%
+  mutate(trait = lvls_revalue(
+    trait,
+    new_levels = c("Gemmae", "Glands", "Hairs", "Morphotype"))) %>%
+  arrange(trait) %>%
+  select(
+    Trait = trait,
+    `LL (independent model)` = logL_indep,
+    `LL (dependent model)` = logL_dep,
+    `Likelihood ratio` = likelihood_ratio,
+    `P` = pval
+  ) %>%
+  write_csv(here::here("si/Table_S4.csv"))
+```
+
+**Table S5** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown. Abbreviations: FDiv, functional diversity; FEve, functional evenness; FRic, functional richness; MPD, mean phylogenetic distance; MNTD, mean nearest taxon distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion. Values of MPD and MNTD are the standard effect sizes calculated from comparison of observed values with null distribution (see Methods). Trait names refer to community-weighted mean values (see Methods).
+
+```{r best-fit-mods}
+# Format and write out table as CSV file
+best_fit_div_models %>%
+  mutate(resp_var = factor(
+        resp_var, 
+        levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", 
+                   "FDiv", "FEve", "FRic",
+                   "dissection", "sla", "stipe", "pinna"))) %>%
+  mutate(
+    resp_var = lvls_revalue(
+        resp_var, 
+        new_levels = c("Richness", "MPD", "MNTD", 
+                       "FDiv", "FEve", "FRic",
+                       "Dissection", "SLA", "Stipe length", "Pinna no.")) 
+  ) %>%
+  arrange(resp_var, delta_AICc) %>%
+  mutate(
+    modname = modname %>%
+      str_replace_all("\\+", " \\+ ") %>%
+      str_replace_all("\\.by\\.", " × ") %>%
+      str_replace_all("habit", "Growth habit") %>%
+      str_replace_all("temp_mean", "Mean temp.") %>%
+      str_replace_all("temp_sd", "SD temp.") %>%
+      str_replace_all("temp_max", "Max. temp.") %>%
+      str_replace_all("vpd_mean", "Mean VPD") %>%
+      str_replace_all("vpd_sd", "SD VPD") %>%
+      str_replace_all("vpd_min", "Min. VPD")
+  ) %>% 
+  select(
+    `Metric` = resp_var,
+    `Model` = modname,
+    AICc,
+    `R2` = r2,
+    delta_AICc
+  ) %>%
+  write_csv(here::here("si/Table_S5.csv"))
+```
