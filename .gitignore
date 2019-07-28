@@ -3,6 +3,7 @@
 *.RData
 .Ruserdata
 .drake
+.drake_history
 old
 tmp
 .secret
