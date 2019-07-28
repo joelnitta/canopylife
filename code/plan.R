@@ -67,7 +67,7 @@ plan <- drake_plan(
   # coefficients less than 0.9,
   # and add elevation.
   climate_select = select_climate_vars(grand_mean_climate) %>%
-    left_join(select(moorea_sites, site, el)),
+    left_join(moorea_sites),
   
   # Make three versions of climate data for further analysis:
   # - Square-root transform selected variables
@@ -85,7 +85,7 @@ plan <- drake_plan(
   
   # - Make vector of climate variables for modeling
   climate_vars = climate_select %>%
-    select(-site, -habit, -el, -is_outlier) %>%
+    select(-site, -habit, -el, -is_outlier, -lat, -long) %>%
     colnames() %>%
     rlang::set_names(),
   
@@ -207,7 +207,7 @@ plan <- drake_plan(
   # - Subset diversity metrics to only those with correlation
   # coefficients less than 0.9, and add elevation and outlier status.
   div_metrics_select = select_div_metrics(div_metrics_all) %>%
-    left_join(select(moorea_sites, site, el)) %>%
+    left_join(moorea_sites) %>%
     mutate(
       is_outlier = case_when(
         site == "Rotui_800m_slope" ~ "yes",
@@ -223,7 +223,7 @@ plan <- drake_plan(
   
   # - Make named vector of response variables to test
   resp_vars = div_metrics_select %>%
-    select(-site, -habit, -el, -is_outlier) %>% 
+    select(-site, -habit, -el, -is_outlier, -long, -lat) %>% 
     colnames %>% rlang::set_names(),
   
   # - Run full-subsets model analysis.
@@ -240,6 +240,23 @@ plan <- drake_plan(
   
   # - Extract table of best-fit models.
   best_fit_div_models = get_best_fss_mods(fss_div_results),
+  
+  # - Test for spatial autocorrelation in residuals with Moran's I.
+  best_fit_div_models_moran = mutate(
+      best_fit_div_models,
+      moran_test = map2(
+        .x = resp_var, .y = modname,
+        ~ check_moran_fss(
+          model_set = fss_div_results,
+          resp_var = .x,
+          best_mod = .y,
+          site_data = moorea_sites
+        )
+      )
+    ) %>%
+    unnest() %>%
+    select(resp_var, modname, AICc, r2, delta_AICc, 
+           morans_I = statistic, morans_I_pval = p.value),
   
   ### Run linear models of diversity metrics by elevation ###
   

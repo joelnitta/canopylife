@@ -1131,6 +1131,50 @@ get_best_fss_mods <- function(fssgam_results) {
   
 }
 
+# Spatial autocorrelation ----
+
+#' Check for spatial autocorrelation in residuals of models
+#' selected using full subsets analysis with Moran's I 
+#'
+#' @param model_set List of models; results of running full subsets analysis
+#' as a loop over response variables
+#' @param resp_var Response variable to select from models
+#' @param best_mod Name of best model
+#' @param site_data Dataframe with names and gps points (long, lat) 
+#' of sites.
+#'
+#' @return Nested tibble with results of running Moran's I test
+#' for spatial autocorrelation in residuals
+#' 
+check_moran_fss <- function (model_set, resp_var, best_mod, site_data) {
+  
+  # resp_var, best_mod must be character or will select wrong model (if factor)!
+  resp_var <- as.character(resp_var)
+  best_mod <- as.character(best_mod)
+  
+  # Extract best-fitting model residuals from fss results, and add long-lats.
+  model_fits <- model_set[[resp_var]][["success.models"]][[best_mod]] %>%
+    broom::augment() %>%
+    dplyr::left_join(site_data)
+  
+  # Convert to spatial dataframe
+  sp::coordinates(model_fits) <- c("long", "lat")
+  sp::proj4string(model_fits) <- sp::CRS("+proj=longlat +datum=WGS84 +no_defs")
+  
+  # Make distance matrix
+  dist_mat <- 1/as.matrix(dist(sp::coordinates(model_fits)))
+  diag(dist_mat) <- 0
+  # Some sites have the exact same GPS points; repalce Inf values for these with 0
+  dist_mat[is.infinite(dist_mat)] <- 0
+  
+  # Conduct Moran's test on the residuals.
+  # This will tell us if there is any remaining unexplained variation
+  # in the model fit that is due to spatial autocorrelation
+  # spdep::moran.test(model_fits$.resid, spdep::mat2listw(dist_mat)) %>% broom::tidy()
+  spdep::moran.mc(model_fits$.resid, spdep::mat2listw(dist_mat), 10000) %>% broom::tidy()
+}
+
+
 # Misc ----
 
 #' Match trait data and tree
