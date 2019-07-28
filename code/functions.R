@@ -928,7 +928,7 @@ select_div_metrics <- function (div_data) {
 #' Combines response_data and site_data datsets, runs a set of linear
 #' models testing for the effect of elevation, growth habit, or their
 #' interaction on each response variable. Chooses the best model
-#' by lowest AIC.
+#' by lowest corrected AIC.
 #'
 #' @param data Dataframe containing response variables,
 #' also must contain "site", "habit", and "el" columns.
@@ -938,16 +938,14 @@ select_div_metrics <- function (div_data) {
 #' @return Dataframe.
 choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
   
-  # Reformat data into nested set by variable (mean and SD of temp and RH)
-  # Each row is a nested dataset for a single
-  # climate variable so it will be easier to loop over them.
+  # Reformat data into nested set by response variable
   data <- 
     data %>%
     select(site, habit, el, resp_vars) %>%
     gather(var, value, -site, -habit, -el) %>%
     nest(-var)
   
-  # Make all combinations of models including each climate variable
+  # Make all combinations of models including each response variable
   # by elevation only, by growth habit only, and by the interaction of
   # growth habit and elevation.
   all_models <-
@@ -961,20 +959,13 @@ choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
     select(-data) %>%
     gather(model_type, model, -var)
   
-  # Calculate the AIC for each model
-  aic_results <- all_models %>% 
-    mutate(glance = map(model, glance)) %>%
-    select(var, model_type, glance) %>%
-    unnest %>%
-    arrange(var, AIC)
-  
-  # Choose the best model by lowest AIC
-  aic_results %>%
+  # Calculate the AICc for each model,
+  # and select model with lowest AICc
+  all_models %>% 
+    mutate(AICc = map_dbl(model, sme::AICc)) %>%
     group_by(var) %>%
-    arrange(var, AIC) %>%
+    arrange(var, AICc) %>%
     slice(1) %>%
-    select(var, model_type) %>%
-    left_join(all_models) %>%
     ungroup
 }
 
@@ -1004,7 +995,7 @@ extract_model_summaries <- function (supported_models) {
     mutate(
       summary = map(model, glance)
     ) %>%
-    select(var, model_type, summary) %>%
+    select(var, model_type, AICc, summary) %>%
     unnest
 }
 
