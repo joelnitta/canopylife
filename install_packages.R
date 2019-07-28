@@ -1,6 +1,6 @@
 # This script is meant to be called by `build_image.sh` to
 # install packages to the project library and make packrat/packrat.lock
-# It should be run from the rocker/verse:3.6.0 docker image.
+# It should be run from the rocker/geospatial:3.6.0 docker image.
 #
 # This only is meant for the *initial* creation of packrat.lock;
 # that file may be subsequently updated as packages are added/updated.
@@ -46,24 +46,32 @@ cran_packages <- c(
   "caper",
   "checkr",
   "conflicted",
+  "corrr",
   "cowplot",
   "drake",
   "future",
-  "gghighlight",
   "ggrepel",
   "ggridges",
   "glue",
   "here",
   "janitor",
   "kableExtra",
+  "knitr",
+  "mgcv",
   "phytools",
+  "plantecophys",
   "picante",
   "scico",
+  "sme",
+  "sp",
+  "spdep",
   "tictoc",
   "tidyverse",
   "vegan",
   "viridis",
-  "visNetwork"
+  "visNetwork",
+  "tinytex",
+  "tidyverse"
   )
 
 install.packages(cran_packages)
@@ -83,7 +91,8 @@ github_packages <- c(
   "joelnitta/jntools",
   "joelnitta/mooreaferns",
   "rstudio/gt",
-  "thomasp85/patchwork"
+  "thomasp85/patchwork",
+  "beckyfisher/FSSgam_package"
 )
 
 remotes::install_github(github_packages)
