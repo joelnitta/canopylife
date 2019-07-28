@@ -928,45 +928,78 @@ select_div_metrics <- function (div_data) {
 #' Combines response_data and site_data datsets, runs a set of linear
 #' models testing for the effect of elevation, growth habit, or their
 #' interaction on each response variable. Chooses the best model
-#' by lowest corrected AIC.
+#' by lowest corrected AIC. Also check's model residuals for
+#' spatial autocorrelation with Moran's I.
 #'
 #' @param data Dataframe containing response variables,
-#' also must contain "site", "habit", and "el" columns.
+#' also must contain "site", "habit", "el", "long",
+#' and "lat" columns.
 #' @param resp_vars Vector of response variables in data
 #' to use. Defaults to column names of data
 #'
 #' @return Dataframe.
-choose_habit_elevation_models <- function (data, resp_vars = colnames(data)) {
+choose_habit_elevation_models <- function (data, resp_vars) {
   
   # Reformat data into nested set by response variable
-  data <- 
+  data_long <- 
     data %>%
-    select(site, habit, el, resp_vars) %>%
-    gather(var, value, -site, -habit, -el) %>%
-    nest(-var)
+    select(site, habit, el, long, lat, resp_vars) %>%
+    gather(var, value, -site, -habit, -el, -long, -lat)
+  
+  # Convert to spatial dataframe
+  coordinates(data_long) <- c("long", "lat")
+  proj4string(data_long) <- CRS("+proj=longlat +datum=WGS84 +no_defs")
+  
+  # Can't nest a spatial dataframe, so use base split,
+  # then make into tibble by hand
+  data_list <- split(data_long, factor(data_long$var))
+  
+  # Make it into a tibble for looping
+  data_tibble <-
+    tibble(
+      var = names(data_list),
+      data = data_list
+    )
   
   # Make all combinations of models including each response variable
   # by elevation only, by growth habit only, and by the interaction of
   # growth habit and elevation.
   all_models <-
-    data %>%
+    data_tibble %>%
     # Construct a linear model for each variable
     mutate(
       interaction = map(data, ~lm(value ~ el * habit, .)),
       habit_only = map(data, ~lm(value ~ habit, .)),
-      el_only = map(data, ~lm(value ~ el, .))
+      el_only = map(data, ~lm(value ~ el, .)),
     ) %>%
-    select(-data) %>%
-    gather(model_type, model, -var)
+    gather(model_type, model, -var, -data)
   
   # Calculate the AICc for each model,
   # and select model with lowest AICc
-  all_models %>% 
+  all_models <-
+    all_models %>% 
     mutate(AICc = map_dbl(model, sme::AICc)) %>%
     group_by(var) %>%
     arrange(var, AICc) %>%
     slice(1) %>%
     ungroup
+  
+  # For each model, make a distance matrix,
+  # extract the residuals, and run Moran's I
+  all_models %>%
+    mutate(
+      dist_mat = map(
+        data, 
+        ~make_dist_mat(.) %>% spdep::mat2listw(.)),
+      residuals = map(model, residuals),
+      moran_results = map2(
+        .x = residuals,
+        .y = dist_mat,
+        ~spdep::moran.mc(.x, .y, 10000) %>% broom::tidy()
+      )
+    ) %>%
+    select(var, model_type, model, AICc, moran_results)
+  
 }
 
 # Extract model fits
@@ -1132,6 +1165,23 @@ get_best_fss_mods <- function(fssgam_results) {
 }
 
 # Spatial autocorrelation ----
+
+#' Make a distance matrix for testing spatial autocorrelation
+#'
+#' @param data Spatial data.frame
+#'
+#' @return Matrix
+#' 
+make_dist_mat <- function(data) {
+  # Make inverted distance matrix (so points far away have high values)
+  dist_mat <- 1/as.matrix(dist(sp::coordinates(data)))
+  # Set the diagonal (same site to same site) to zero
+  diag(dist_mat) <- 0
+  # Some sites have the exact same GPS points; 
+  # repalce Inf values for these with 0
+  dist_mat[is.infinite(dist_mat)] <- 0
+  return(dist_mat)
+}
 
 #' Check for spatial autocorrelation in residuals of models
 #' selected using full subsets analysis with Moran's I 

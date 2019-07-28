@@ -119,6 +119,12 @@ plan <- drake_plan(
   # - Get summaries of best models.
   climate_model_summaries = extract_model_summaries(climate_models),
   
+  # - Check for spatial autocorrelation in residuals.
+  climate_model_moran = climate_models %>%
+    select(-model) %>%
+    unnest %>%
+    select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
+  
   # Principal components analysis ----
   pca_results = run_trait_PCA(
     traits = fern_traits,
@@ -272,7 +278,13 @@ plan <- drake_plan(
   div_el_model_parameter_summaries = extract_model_parameters(div_el_models),
   
   # - Get summaries of best models.
-  div_el_model_summaries = extract_model_summaries(supported_models = div_el_models),
+  div_el_model_summaries = extract_model_summaries(div_el_models),
+  
+  # - Check for spatial autocorrelation in residuals.
+  div_el_model_moran = div_el_models %>%
+    select(-model) %>%
+    unnest %>%
+    select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
   
   ### Run t-tests by growth habit ###
   div_t_test_results = map_df(
