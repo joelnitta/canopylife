@@ -1042,23 +1042,19 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   
   ### Prepare data ###
   
-  # Keep only species in community with trait data
-  comm <- comm %>%
-    filter(species %in% traits$species)
-  
   # Add growth habit to community data
   comm <- left_join(
     comm,
     select(traits, species, habit)
     ) %>%
+    # Make sure habit isn't missing for any species
   assert(not_na, habit)
   
-  # check for mismatches/missing species between phy and comm
-  phy <- match_comm_and_tree(comm, phy, "tree")
-  comm <- match_comm_and_tree(comm, phy, "comm")
-  
-  # Make sure that worked
-  assert_that(isTRUE(all.equal(comm$species, phy$tip.label)))
+  # Make sure all species are in the phylogeny
+  # (but don't subset phylogeny to only species in Moorea
+  # communities - we want to use the species pool including
+  # both ferns of Moorea and Tahiti fro mpd, mntd).
+  assert_that(all(comm$species %in% phy$tip.label))
   
   # Split communities into epiphytic / terrestrial taxa, 
   # but keep together in a single dataframe so we can
@@ -1111,7 +1107,7 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
     cophenetic(phy), 
     null.model = "phylogeny.pool", 
     abundance.weighted = TRUE, 
-    runs = 999, iterations = 1000) %>%
+    runs = 999) %>%
     rownames_to_column("site") %>%
     as_tibble
   
@@ -1121,7 +1117,7 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
     cophenetic(phy), 
     null.model = "phylogeny.pool", 
     abundance.weighted = TRUE, 
-    runs = 999, iterations = 1000) %>%
+    runs = 999) %>%
     rownames_to_column("site") %>%
     as_tibble
   
