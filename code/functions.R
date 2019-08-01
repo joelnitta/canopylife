@@ -194,6 +194,12 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     clean_names() %>%
     select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source )
   
+  # For some reason Prosaptia subnuda is missing. Add this.
+  qual_traits <- bind_rows(
+    qual_traits,
+    tibble(species = "Prosaptia_subnuda", habit = 1)
+  )
+  
   # Format data sources to use names instead of number codes to minimize confusion
   # original scheme:
   #1 = lab obs.
@@ -286,7 +292,15 @@ make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
       morph_qual_raw
       ),
     full_join) %>% 
-    mutate(morphotype = factor(morphotype))
+    mutate(morphotype = factor(morphotype)) %>%
+    # Rename traits to simple version
+    rename(
+      stipe = stipe_length,
+      length = frond_length,
+      width = lamina_width,
+      rhizome = rhizome_dia,
+      pinna = pinna_pairs
+    )
   
 }
 
@@ -294,7 +308,7 @@ make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
 #'
 #' @param sla_raw Dataframe; raw measurements of specific leaf area, including 
 #' multiple measurments per specimen.
-#' @param morph_raw Dataframe; raw measurements of other continuous traits (frond length
+#' @param morph_cont_raw Dataframe; raw measurements of other continuous traits (frond length
 #' and width, rhizome diameter, etc).
 #' @param morph_qual_raw Dataframe; observations of qualitative traits
 #' 
@@ -373,7 +387,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     select(-source_1, -source_2)
   
   # Add in sources for measurements
-  meas_sources <- morph_raw %>% 
+  meas_sources <- morph_cont_raw %>% 
     # Rename sources according to abbreviations
     mutate(
       source = case_when(
@@ -2174,8 +2188,6 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
   # Subset and transform traits
   traits <-
     traits %>%
-    # Don't need gameto trait data source
-    select(-gameto_source) %>%
     # Remove if NA for more than half the traits
     mutate(num_na = rowSums(is.na(.))) %>%
     filter(num_na < (ncol(.) - 1) * 0.5) %>% # minus one b/c of species name
