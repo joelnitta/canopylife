@@ -502,6 +502,27 @@ process_raw_climate <- function (climate_raw_path) {
   
 }
 
+#' Process raw community matrix 
+#'
+#' @param community_matrix_path Path to community matrix of Nitta et al 2017
+#' @param species_list Vector of species to include
+#' @param moorea_sites Dataframe of sites on Moorea in this study
+#'
+#' @return Tibble (community data matrix)
+#' 
+process_community_matrix <- function (community_matrix_path, species_list, moorea_sites) {
+  read_csv(community_matrix_path) %>%
+    rename(site = X1) %>% 
+    gather(species, abundance, -site) %>%
+    filter(str_detect(site, "_S")) %>%
+    mutate(site = str_remove_all(site, "_S")) %>%
+    # Keep only sites on Moorea
+    filter(site %in% moorea_sites$site) %>%
+    # Keep only species in species list (ferns of Moorea)
+    filter(species %in% species_list) %>%
+    spread(site, abundance)
+}
+
 #' Calculate daily means in moorea climate data
 #'
 #' @param moorea_climate_raw Dataframe; raw climate measurements

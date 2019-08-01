@@ -16,6 +16,7 @@ plan <- drake_plan(
   
   ### Trait data ###
   # - Read in list of accepted species to use for this study
+  # i.e., ferns of Moorea (130 spp)
   species_list = read_csv("data/nitta_2017/species.csv") %>%
     clean_names() %>%
     filter(include == 1, tahiti_only == 0) %>%
@@ -74,21 +75,20 @@ plan <- drake_plan(
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
   ### Phylogeny ###
+  # Ferns on Moorea and Tahiti (146 species)
   phy = ape::read.tree(
     file_in("data/nitta_2017/treepl_Moorea_Tahiti.tre"
     )),
   
   ### Community data for ferns of Moorea ###
   # Including sporophyte only,
-  # with rows as species and sites as columns.
-  comm = read_csv(file_in("data/nitta_2017/all_plots.csv")) %>%
-    rename(site = X1) %>% 
-    gather(species, abundance, -site) %>%
-    filter(str_detect(site, "_S")) %>%
-    mutate(site = str_remove_all(site, "_S")) %>%
-    filter(site %in% moorea_sites$site) %>%
-    spread(site, abundance),
-  
+  # with rows as species and sites as columns (130 x 18).
+  # (17 sites with 1 column for species name)
+  comm = process_community_matrix(
+    file_in("data/nitta_2017/all_plots.csv"),
+    species_list,
+    moorea_sites),
+
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
   
