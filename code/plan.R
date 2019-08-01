@@ -1,8 +1,9 @@
 # Setup workflow plan
 plan <- drake_plan(
   
-  # Load data ----
+  # Data processing ----
   
+  ### Download pre-processed data ###
   # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
   nitta_2017_data = download_and_unzip_nitta_2017(
     dl_path = "data/nitta_2017_data_and_scripts.zip",
@@ -14,22 +15,47 @@ plan <- drake_plan(
     out4 = file_out("data/nitta_2017/species.csv")),
   
   ### Trait data ###
-  # - Raw specific leaf area (SLA) measurments,
-  # includes multiple measures per specimen
-  sla_raw = mooreaferns::sla.raw %>% as_tibble,
+  # - Read in list of accepted species to use for this study
+  species_list = read_csv("data/nitta_2017/species.csv") %>%
+    clean_names() %>%
+    filter(include == 1, tahiti_only == 0) %>%
+    pull(genus_sp),
   
-  # - Other raw trait data, includes one measure per specimen
-  morph_raw = mooreaferns::morph.raw %>% as_tibble,
+  # - Process raw specific leaf area (SLA) measurments
+  # (includes multiple measures per specimen).
+  # SLA is in sq m per kg
+  sla_raw = combine_raw_sla(
+    file_in("data_raw/SLA_measurements.csv"),
+    file_in("data_raw/filmy_SLA.csv"),
+    species_list
+  ),
   
-  # - Pre-processed trait data
-  fern_traits = mooreaferns::fern_traits %>% 
-    as_tibble %>%
-    # make sure binary traits are coded as character
-    mutate_at(vars(glands, hairs, gemmae), as.character),
+  # - Process raw continuous trait data
+  # (includes one measure per specimen,
+  #  multiple specimens per species).
+  # All measurements in cm, except number of pinna pairs.
+  morph_cont_raw = process_raw_cont_morph(
+    file_in("data_raw/morph_measurements.csv"),
+    species_list
+  ),
+  
+  # - Process raw qualitative trait data
+  # (includes one obsevation per specimen).
+  morph_qual_raw = process_raw_qual_morph(
+    file_in("data_raw/morph_qual_traits_2019-07-29.csv"),
+    species_list
+  ),
+  
+  # - Combine raw trait data into final trait matrix
+  fern_traits = make_trait_matrix (sla_raw, morph_cont_raw, morph_qual_raw) %>%
+    select(-source_1, -source_2),
   
   # - Also make "strict" trait dataset by excluding species with 
   # gameto traits only known from taxonomy
-  fern_traits_strict = filter(fern_traits, gameto_source != "T"),
+  fern_traits_strict = make_trait_matrix (sla_raw, morph_cont_raw, morph_qual_raw) %>%
+    mutate_at(vars(source_1, source_2), ~replace_na(., "none")) %>%
+    filter(source_1 != "T", source_2 != "T") %>%
+    select(-source_1, -source_2),
   
   ### Site data with elevation ###
   moorea_sites = read_csv(
@@ -66,17 +92,14 @@ plan <- drake_plan(
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
   
-  ### Format trait data for SI ###
+  ###  Format trait data for SI ###
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
-    sla_raw = sla_raw,
-    morph_raw = morph_raw,
-    fern_traits = fern_traits
+    sla_raw, morph_cont_raw, morph_qual_raw
   ),
   
   # Climate analysis ----
   
-  ### Prepare data ###
   # Subset climate variables to only those with correlation
   # coefficients less than 0.9,
   # and add elevation.

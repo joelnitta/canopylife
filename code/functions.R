@@ -1,4 +1,4 @@
-# Downloading data ----
+# Data processing ----
 
 #' Download Nitta et al 2017 Ecol Mono data zip file and 
 #' extract needed data files
@@ -34,37 +34,287 @@ download_and_unzip_nitta_2017 <- function (dl_path, unzip_path, ...) {
   
 }
 
-# Traits ----
+#' Combine raw SLA (specific leaf area) data from two different sources
+#'
+#' @param sla_punch_data_path Path to raw data containing mass from
+#' from weighing leaf punches.
+#' @param sla_filmy_data_path Path to raw data containing leaf area from 
+#' measuring leaf fragment images with ImageJ and masses of each fragment
+#' (mostly filmy ferns, because they were too small to take punches).
+#' @param species_list Vector of accepted species to include
+#'
+#' @return Tibble, with one measurement per row 
+#' of SLA (in sq m per kg). Some individuals were measured more than
+#' once.
+#'
+#' @examples
+combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_list) {
+  
+  ### Read in raw data
+  
+  # Read in masses measured from leaf punches of known diameter.
+  # - Size_of_punches is diameter in mm
+  # - Number_of_punches is the number of punches used for weighing.
+  # If only one punch was made this was entered as blank (NA) in the raw data.
+  # - Mass is mass of punch (or punches) in g
+  # - Specimen indicates Nitta collection number if associated with voucher specimen,
+  # or punch sample number for a field season if no voucher
+  sla_raw <- read_csv(sla_punch_data_path, col_types = "iccdcii") %>%
+    clean_names
+  
+  # Read masses measured from leaf fragments of various shapes,
+  # with area measured using ImageJ.
+  # (these are species that were too small to take leaf punches)
+  # Mostly filmy ferns, also includes some other random non-filmy ferns.
+  # Note this data includes SLA already calculated for each specimen.
+  sla_filmy <- read_csv(sla_filmy_data_path)  %>%
+    clean_names
+  
+  #### Subset data
+  # Get rid of species to exclude, only keep species in species list
+  # Nitta 2543 Ptisana salicina is in error, it should be Nitta 2544.
+  # Already have measurements for 2544 P. salicina, so it must have been measured twice.
+  # So exclude 2544 P. salicina
+  
+  sla_raw <- sla_raw %>%
+    mutate(notes = replace_na(notes, "none")) %>%
+    filter(!str_detect(notes, "exclude")) %>%
+    filter(species %in% species_list)
+  
+  sla_filmy <- sla_filmy %>%
+    mutate(notes = replace_na(notes, "none")) %>%
+    filter(!str_detect(notes, "exclude")) %>%
+    filter(species %in% species_list)
+  
+  # Add "Nitta_" to specimen collection numbers with vouchers,
+  # replace spaces with underscores
+  sla_raw <- sla_raw %>%
+    mutate(specimen = case_when(
+      str_detect(specimen, "sample") ~ specimen,
+      TRUE ~ paste0("Nitta_", specimen)
+    )) %>%
+    mutate(specimen = str_replace(specimen, " ", "_")) %>%
+    # Exclude 2544 P. salicina
+    filter(specimen != "Nitta_2544")
+  
+  sla_filmy <- sla_filmy %>%
+    mutate(specimen = case_when(
+      is.na(specimen) ~ NA_character_,
+      TRUE ~ paste0("Nitta_", specimen)
+    )) %>%
+    mutate(specimen = str_replace(specimen, " ", "_"))
+  
+  #### Calculate SLA
+  
+  # For hole punches, use area of punch
+  sla_raw <-
+    sla_raw %>%
+    mutate(
+      # If number of punches for a sample is NA,
+      # that means there was only one punch taken.
+      number_of_punches = case_when(
+        is.na(number_of_punches) ~ 1L,
+        TRUE ~ number_of_punches
+      ),
+      # Fix area of punches for samples:
+      # those with more than 2 punches should all be 2 mm diam
+      # (as it says in notes).
+      size_of_punches = case_when(
+        number_of_punches > 1 ~ 2L,
+        TRUE ~ size_of_punches
+      ),
+      # Calculate SLA based on measured area (in sq m per kg)
+      # (size_of_punches is punch diameter in mm)
+      sla = (((size_of_punches*0.05)^2*pi*number_of_punches)/mass)*0.1
+    )
+  
+  # For filmy ferns, calculate SLA based on measured area (in sq m per kg)
+  sla_filmy <-
+    sla_filmy %>%
+    mutate(
+      area_cm2 = as.numeric(area_cm2),
+      sla = (area_cm2/mass_g) * 0.1
+    )
+  
+  # Combine the raw data (mulitple observations per individual)
+  bind_rows(
+    select(sla_raw, specimen, species, sla),
+    select(sla_filmy, specimen, species, sla)
+  ) %>%
+    mutate(
+      specimen = str_replace_all(specimen, " ", "_")
+    )
+  
+}
+
+#' Process raw morphological measurements data
+#'
+#' @param raw_morph_path Data to raw data file with morphological
+#' measurements
+#' @param species_list Vector of accepted species to include
+#'
+#' @return Tibble, with one measurement per individual per row 
+#'
+process_raw_cont_morph <- function (raw_morph_path, species_list) {
+  read_csv(raw_morph_path, 
+    na = c("?", "n/a", "NA", "N/A")) %>%
+    clean_names() %>%
+    # Get rid of species not in accepted list
+    filter(species %in% species_list) %>%
+    select(-comments, -notes, -exclude) %>%
+    mutate(
+      # Standardize formatting of sources.
+      source = case_when(
+        str_detect(source, "meas") ~ "measurement",
+        TRUE ~ source
+      ),
+      # If specimen collection number was entered as a "1",
+      # this is actually missing (i.e., no voucher specimen
+      # made for that measurement).
+      specimen = case_when(
+        specimen == "1" ~ NA_character_,
+        specimen == "MISSING_COLL_NUM" ~ NA_character_,
+        TRUE ~ specimen
+      )
+    )
+}
+
+#' Process raw morphological qualitative trait data
+#'
+#' @param raw_morph_path Data to raw data file with morphological
+#' trait observations
+#' @param species_list Vector of accepted species to include
+#'
+#' @return Tibble, with one trait value per species
+#'
+process_raw_qual_morph <- function (raw_morph_path, species_list) {
+  
+  # Read in raw trait data
+  qual_traits <- read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
+    clean_names() %>%
+    select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source )
+  
+  # Format data sources to use names instead of number codes to minimize confusion
+  # original scheme:
+  #1 = lab obs.
+  #2 = Nayar and Kauar 1971 "Gametophytes of homosporous ferns" The Botanical Review [@Nayar1971]
+  #3 = Lloyd 1980 "Reproductive biology and gametophyte morphology of New World populations of Acrostichum aureum" AFJ [@Lloyd1980]
+  #4 = field obs.
+  #5 = genus/family level character (taxonomy)
+  #6 = Zhang et al 2008 "Gametophyte Morphology and Development of Six Chinese Species of Pteris (Pteridaceae)" AFJ [@Zhang2008]
+  #7 = Bierhorst 1967 "The gametophyte of Schizaea dichotoma" AJB [@Bierhorst1967]
+  #8 = Martin et al 2006 "Efficient induction of apospory and apogamy in vitro in silver fern (Pityrogramma calomelanos L.)" Plant Cell Reports [@Martin2006]
+  #9 = Tigerschiöld 1989 "Dehiscence of antheridia in thelypteroid ferns" Nordic Journal of Botany [@Tigerschiold1989]
+  #10 = Tigerschiöld 1990 "Gametophytes of some Ceylonese species of Thelypteridaceae" Nordic Journal of Botany [@Tigerschiold1990]
+  #11 = Atkinson 1975 "The gametophyte of five Old World thelypteroid ferns" Phytomorphology [@Atkinson1975]
+  #12 = Chen et al 2014 "First insights into the evolutionary history of the Davallia repens complex" Blumea [@Chen2014a]
+  qual_traits <-
+    qual_traits %>%
+    separate(source, c("source_1", "source_2"), ",", fill = "right") %>%
+    mutate_at(vars(source_1, source_2), ~str_remove_all(., " ") %>% as.numeric) %>%
+    mutate_at(vars(source_1, source_2), ~str_pad(., 2, "left", "0")) %>%
+    mutate_at(
+      vars(source_1, source_2),
+      list(~case_when(
+        . == "01" ~ "L", # lab observation
+        . == "02" ~ "Nayar1971",
+        . == "03" ~ "Lloyd1980",
+        . == "04" ~ "F", # field observation
+        . == "05" ~ "T", # based on taxonomy
+        . == "06" ~ "Zhang2008",
+        . == "07" ~ "Bierhorst1967",
+        . == "08" ~ "Martin2006",
+        . == "09" ~ "Tigerschiold1989",
+        . == "10" ~ "Tigerschiold1990",
+        . == "11" ~ "Atkinson1975",
+        . == "12" ~ "Chen2014a",
+        TRUE ~ as.character(.))
+      )
+    )
+  
+  # Make binary habit a factor
+  qual_traits <-
+    qual_traits %>%
+    mutate(habit = factor(habit)) %>%
+    mutate(habit = fct_recode(habit, terrestrial = "0", epiphytic = "1"))
+  
+  # keep only species in species list
+    qual_traits %>%
+    filter(species %in% species_list)
+  
+}
+
+#' Combine trait data into trait matrix
+#' (one row per species)
+#'
+#' @param sla_raw Raw SLA measurements
+#' @param morph_cont_raw Raw continuous trait measurements
+#' @param morph_qual_raw Qualitative trait observations
+#'
+#' @return Tibble
+#' 
+make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
+  
+  # Calculate means of continuous data for each species
+  morph_cont_mean <-
+    morph_cont_raw %>%
+    group_by(species) %>%
+    summarise_if(
+      is.numeric,
+      ~mean(., na.rm = TRUE)
+    )
+  
+  # Calculate grand mean SLA for each species
+  sla_grand_mean <-
+    sla_raw %>%
+    # Means by individual first
+    group_by(specimen, species) %>%
+    summarize(
+      sla = mean(sla, na.rm = TRUE)
+    ) %>%
+    # Then grand means by species
+    group_by(species) %>%
+    summarize(
+      sla = mean(sla, na.rm = TRUE)
+    ) 
+  
+  # Combine continuous and qualitative data
+  reduce(
+    list(
+      sla_grand_mean,
+      morph_cont_mean,
+      morph_qual_raw
+      ),
+    full_join) %>% 
+    mutate(morphotype = factor(morphotype))
+  
+}
 
 #' Process fern trait data for supp. info.
 #'
 #' @param sla_raw Dataframe; raw measurements of specific leaf area, including 
 #' multiple measurments per specimen.
-#' @param morph_raw Dataframe; raw measurements of other traits (frond length
+#' @param morph_raw Dataframe; raw measurements of other continuous traits (frond length
 #' and width, rhizome diameter, etc).
-#' @param fern_traits Dataframe; pre-processed trait data including one value 
-#' per species.
+#' @param morph_qual_raw Dataframe; observations of qualitative traits
+#' 
 #' @return data frame formatted for export as CSV to be included with SI.
-process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
+process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) {
   
   ### SLA ###
-  # Nitta 2543 Ptisana salicina is in error, it should be Nitta 2544.
-  # Already have measurements for 2544 P. salicina, so it must have been measured twice.
-  # So exclude 2544 P. salicina
   
   # Calculate mean SLA for each individual
   sla_mean <- 
     sla_raw %>%
-    filter(specimen != "Nitta_2544") %>%
     group_by(species, specimen) %>%
-    summarize(sla = mean(sla) , sd = sd(sla), n = n()) %>%
+    summarize(sla = mean(sla, na.rm = TRUE) , sd = sd(sla, na.rm = TRUE), n = n()) %>%
     ungroup()
   
   # Calculate grand mean for each species based on individual means
   sla_grand_mean <- 
     sla_mean %>%
     group_by(species) %>%
-    summarize(mean = mean(sla) , sd = sd(sla), n = n()) %>%
+    summarize(mean = mean(sla, na.rm = TRUE) , sd = sd(sla, na.rm = TRUE), n = n()) %>%
     mutate(trait = "sla")
   
   ### Other traits ###
@@ -72,8 +322,7 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
   # Includes only one measurment per individual but multiple individuals 
   # per species.
   morph_long <- 
-    morph_raw %>%
-    as_tibble %>%
+    morph_cont_raw %>%
     select (-source, -specimen) %>%
     gather(key = trait, value = measurement, -species) %>%
     mutate(trait = str_replace_all(trait, "\\.", "_")) %>%
@@ -118,21 +367,21 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
     spread(trait, print)
   
   ### Merge into final data table ###
-  morph_table <- 
-    fern_traits %>%
-    select(species, habit, dissection, morphotype, glands, hairs, gemmae, gameto_source) %>%
-    left_join(morph_mean)
+  morph_table <- full_join(morph_mean, morph_qual_raw) %>%
+    mutate(gameto_source = jntools::paste3(source_1, source_2) %>%
+             str_replace(" ", ", ")) %>%
+    select(-source_1, -source_2)
   
   # Add in sources for measurements
   meas_sources <- morph_raw %>% 
     # Rename sources according to abbreviations
     mutate(
       source = case_when(
-        source == "Ferns & Fern-Allies of South Pacific Islands" ~ "1",
-        source == "Pteridophytes of the Society Islands" ~ "2",
-        source == "Hawaii's Ferns and Fern Allies" ~ "3",
-        source == "Flora of New South Wales" ~ "4",
-        source == "Brownsey 1987" ~ "5",
+        source == "Ferns & Fern-Allies of South Pacific Islands" ~ "NMNS2008", 
+        source == "Pteridophytes of the Society Islands" ~ "Copeland1932",
+        source == "Hawaii's Ferns and Fern Allies" ~ "Palmer2003",
+        source == "Flora of New South Wales" ~ "FloraNSW2019",
+        source == "Brownsey 1987" ~ "Brownsey1987",
         source == "measurement" ~ "M"
       )
     ) %>%
@@ -140,7 +389,7 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
     arrange(species, source) %>%
     group_by(species) %>% 
     summarize(
-      source = paste(unique(source), collapse = ", ")
+      sporo_source = paste(unique(source), collapse = ", ")
     )
   
   # Add measurment sources and reformat column names/order
@@ -148,7 +397,6 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
     select(
       species,
       `growth habit` = habit,
-      dissection,
       morphotype,
       gemmae, 
       glands, 
@@ -161,12 +409,10 @@ process_trait_data_for_si <- function (sla_raw, morph_raw, fern_traits) {
       `stipe length (cm)` = stipe_length, 
       `rhizome diam. (cm)` = rhizome_dia, 
       SLA = sla, 
-      `sporophyte data source` = source
+      `sporophyte data source` = sporo_source
     )
   
 }
-
-# Climate ----
 
 #' Reformat Moorea climate data
 #' 
@@ -232,6 +478,8 @@ get_grand_means <- function(daily_means) {
       )
     )
 }
+
+# Climate ----
 
 #' Check for correlation between climate variables
 #' and retain non-correlated ones
