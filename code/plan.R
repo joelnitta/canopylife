@@ -3,6 +3,16 @@ plan <- drake_plan(
   
   # Load data ----
   
+  # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
+  nitta_2017_data = download_and_unzip_nitta_2017(
+    dl_path = "data/nitta_2017_data_and_scripts.zip",
+    unzip_path = "data/nitta_2017",
+    # Track data files used as input in analyses
+    out1 = file_out("data/nitta_2017/sites.csv"),
+    out2 = file_out("data/nitta_2017/treepl_Moorea_Tahiti.tre"),
+    out3 = file_out("data/nitta_2017/all_plots.csv"),
+    out4 = file_out("data/nitta_2017/species.csv")),
+  
   ### Trait data ###
   # - Raw specific leaf area (SLA) measurments,
   # includes multiple measures per specimen
@@ -22,8 +32,8 @@ plan <- drake_plan(
   fern_traits_strict = filter(fern_traits, gameto_source != "T"),
   
   ### Site data with elevation ###
-  moorea_sites = mooreaferns::sites %>%
-    as_tibble %>%
+  moorea_sites = read_csv(
+    file_in("data/nitta_2017/sites.csv")) %>%
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
   ### Climate data ###
@@ -38,16 +48,20 @@ plan <- drake_plan(
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
   ### Phylogeny ###
-  phy = mooreaferns::fern_tree,
+  phy = ape::read.tree(file_in(
+    "data/nitta_2017/treepl_Moorea_Tahiti.tre"
+  )),
   
   ### Community data for ferns of Moorea ###
-  # (with rows as species and sites as columns)
-  comm = mooreaferns::sporocomm %>%
-    rownames_to_column("site") %>%
-    as_tibble %>%
-    filter(site %in% moorea_sites$site) %>%
+  # Including sporophyte only,
+  # with rows as species and sites as columns.
+  comm = read_csv(file_in("data/nitta_2017/all_plots.csv")) %>%
+    rename(site = X1) %>% 
     gather(species, abundance, -site) %>%
-    spread(site, abundance),
+    filter(str_detect(site, "_S")) %>%
+    mutate(site = str_remove_all(site, "_S")) %>%
+    filter(site %in% moorea_sites$site) %>%
+    spread(site, abundance)
   
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
@@ -239,7 +253,7 @@ plan <- drake_plan(
       data = div_climate_trans,
       indep_vars = climate_vars,
       resp_var = .)
-    ),
+  ),
   
   # - Extract table of importance of each environmental variable.
   important_div_vars = get_important_vars(fss_div_results),
@@ -249,17 +263,17 @@ plan <- drake_plan(
   
   # - Test for spatial autocorrelation in residuals with Moran's I.
   best_fit_div_models_moran = mutate(
-      best_fit_div_models,
-      moran_test = map2(
-        .x = resp_var, .y = modname,
-        ~ check_moran_fss(
-          model_set = fss_div_results,
-          resp_var = .x,
-          best_mod = .y,
-          site_data = moorea_sites
-        )
+    best_fit_div_models,
+    moran_test = map2(
+      .x = resp_var, .y = modname,
+      ~ check_moran_fss(
+        model_set = fss_div_results,
+        resp_var = .x,
+        best_mod = .y,
+        site_data = moorea_sites
       )
-    ) %>%
+    )
+  ) %>%
     unnest() %>%
     select(resp_var, modname, AICc, r2, delta_AICc, 
            morans_I = statistic, morans_I_pval = p.value),
