@@ -683,7 +683,8 @@ transform_traits <- function (traits,
 #'
 #' @param traits Dataframe of pre-processed traits
 #' @param phy Phylogeny
-#' @param analysis 
+#' @param cont_traits Vector of names of continuous traits
+#' to include in the analysis 
 #'
 #' @return List of dataframes including
 #'   species_locs: Positions of species along PC axes
@@ -694,24 +695,23 @@ transform_traits <- function (traits,
 #' "standard" for standard PCA (not using phylogeny), 
 #' or "phylo" for PCA including phylogeny.
 #' 
-run_trait_PCA <- function (traits, phy) {
+run_trait_PCA <- function (traits, phy, 
+                           cont_traits = c("sla", "stipe", "length", "width", 
+                                           "rhizome", "pinna", "dissection")) {
   
   ### Data wrangling ###
   
-  # Make vector of continuous traits to include in PCA
-  cont_vars <- c(
-    "sla", "stipe", "length", "width", "rhizome", "pinna"
-  )
-  
   # Prepare trait data
   traits <- traits %>%
+    # Make sure all selected continuous traits are in the trait data
+    verify(all(cont_traits %in% colnames(.))) %>%
     # Log-transform and scale
     transform_traits() %>%
     # Subset to continuous traits
-    select(species, habit, sla, stipe, length, width, rhizome, pinna) %>%
+    select(species, habit, cont_traits) %>%
     # Keep only completely sampled species
     filter(complete.cases(.)) %>%
-    # Keep only species in phylogeny
+    # Keep only species in phylogeny, in phylogenetic order
     match_traits_and_tree(traits = ., phy = phy, "traits") 
   
   # Trim to only species with trait data
@@ -721,7 +721,7 @@ run_trait_PCA <- function (traits, phy) {
   assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
   
   # Both standard and phylo PCA expect data frames with row names
-  traits_df_for_pca <- select(traits, species, cont_vars) %>%
+  traits_df_for_pca <- select(traits, species, cont_traits) %>%
     as.data.frame
   rownames(traits_df_for_pca) <- traits_df_for_pca$species
   traits_df_for_pca$species <- NULL
