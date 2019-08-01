@@ -63,20 +63,20 @@ plan <- drake_plan(
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
   ### Climate data ###
-  # - Raw climate data (rel. humidity and temperature every 15 min.)
+  # - Process raw climate data (rel. humidity and temperature every 15 min.)
   # - Also calculate vapor pressure deficit (VPD) from temp and RH
-  moorea_climate_raw = mooreaferns::moorea_climate %>% 
-    as_tibble %>% 
-    reformat_raw_climate,
+  moorea_climate_raw = process_raw_climate(
+    file_in("data_raw/hobo_moorea_aorai_2-24-15.csv"
+    )),
   
-  # - Process climate data
+  # - Calculate mean climate variables
   daily_mean_climate = get_daily_means(moorea_climate_raw),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
   ### Phylogeny ###
-  phy = ape::read.tree(file_in(
-    "data/nitta_2017/treepl_Moorea_Tahiti.tre"
-  )),
+  phy = ape::read.tree(
+    file_in("data/nitta_2017/treepl_Moorea_Tahiti.tre"
+    )),
   
   ### Community data for ferns of Moorea ###
   # Including sporophyte only,
@@ -87,7 +87,7 @@ plan <- drake_plan(
     filter(str_detect(site, "_S")) %>%
     mutate(site = str_remove_all(site, "_S")) %>%
     filter(site %in% moorea_sites$site) %>%
-    spread(site, abundance)
+    spread(site, abundance),
   
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),

@@ -414,23 +414,78 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
   
 }
 
-#' Reformat Moorea climate data
-#' 
-#' @param moorea_climate_raw Dataframe; raw values with growth habit
-#' (terrestrial or epiphytic) coded in site name
-#' @return Dataframe; raw values with habit as a separate column.
-reformat_raw_climate <- function (moorea_climate_raw) {
-  moorea_climate_raw %>%
-    # Split out habit as separate column and set levels
+#' Filter raw climate data, also calculate VPD
+#'
+#' @param climate_raw_path Path to raw climate data measured with
+#' Hobo dataloggers (relative humidity and temperature) every 15 min
+#' on Moorea and Tahiti from 2012-07-18 to 2015-02-06
+#'
+#' @return Tibble
+process_raw_climate <- function (climate_raw_path) {
+  
+  # Read in raw data, includes all dataloggers from Moorea and Tahiti from
+  # 2012-07-18 to 2015-02-06
+  climate_raw <- read_csv(climate_raw_path)
+  
+  # Reformat data, filter out Tahiti sites (on Mt. Aorai)
+  # Split apart date into components
+  climate <- climate_raw %>%
     mutate(
-      habit = case_when(
-        str_detect(site, "epi") ~ "epiphytic",
-        str_detect(site,  "ter") ~ "terrestrial"
-      ),
-      habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
-      site = str_remove_all(site, "_epi|_ter"),
-      vpd = plantecophys::RHtoVPD(RH, temp)
-    )
+      day = lubridate::day(date) %>% as.numeric,
+      month = lubridate::month(date) %>% as.numeric,
+      year = lubridate::year(date) %>% as.numeric) %>%
+    filter(str_detect(site, "Aorai", negate = TRUE))
+  
+  # Split out set of days from 2013 to use for missing Tohiea 400 m ter data
+  tohiea_400m_2013 <- climate %>%
+    filter(date >= "2013-03-12" & date < "2013-07-06" & site == "Tohiea_400m_ter")
+  
+  # Replace the year 2013 with 2014 only for these dates in the Tohiea 400 m ter data
+  tohiea_400m_as_2014 <-
+    tohiea_400m_2013 %>%
+    mutate(year = year + 1) %>%
+    mutate(date = paste(year, month, day, sep = "-") %>% as.Date)
+  
+  # Do final filtering
+  climate_filtered <- climate %>%
+    # Remove bad Tohiea data from 2014
+    filter(!(date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter")) %>%
+    # Replace it with data from 2013
+    bind_rows(tohiea_400m_as_2014) %>%
+    # Subset to 2013-07-07 to 2014-07-05
+    # - 2012-07-18 = first day have dataloggers on Tohiea
+    # - 2013-07-06 = first day had all dataloggers set up on Moorea
+    filter(date >= "2013-07-07" & date <= "2014-07-05") %>%
+    # Delete all Rotui 600m epiphytic data 
+    # (failed very early, missing for almost entire survey period)
+    filter(site != "Rotui_600m_epi") %>%
+    # Delete all Mouaputa 800m epiphytic data (missing from 7/10/13-8/10/13, 
+    # then RH failed around 12/5/13, temp also looks suspicious)
+    filter(site != "Mouaputa_800m_epi") %>%
+    # Delete another chunk missing a lot of data, from 2013-11-19 to 2014-03-21
+    # ('2013-11-19'), as.Date('2014-03-21')
+    filter(!(date >= "2013-11-19" & date <= "2014-03-21")) %>%
+    # missing data for Tohiea_800m_ter: 
+    # 2014-06-15, 2014-06-16, 2014-06-19, 2014-06-20 (RH = 1%)
+    filter(
+      date != "2013-08-08", # RH = 1% at Tohiea_600m_ter
+      date != "2014-06-15",
+      date != "2014-06-16",
+      date != "2014-06-19",
+      date != "2014-06-20")
+  
+  # Reformat filtered data
+  climate_filtered %>%
+  mutate(
+    habit = case_when(
+      str_detect(site, "epi") ~ "epiphytic",
+      str_detect(site,  "ter") ~ "terrestrial"
+    ),
+    habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
+    site = str_remove_all(site, "_epi|_ter"),
+    vpd = plantecophys::RHtoVPD(RH, temp)
+  )
+  
 }
 
 #' Calculate daily means in moorea climate data
