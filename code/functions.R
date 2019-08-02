@@ -1227,11 +1227,11 @@ analyze_fd_by_habit <- function (traits, comm) {
   assert_that(
     isTRUE(all.equal(sort(colnames(comm_by_habit)), sort(rownames(traits_sub)))),
     msg = "community and metadata don't match")
-
+  
   traits_sub <- traits_sub[colnames(comm_by_habit), ]
   
   ### Run FD analysis ###
-
+  
   # Set names of FD metrics to exctract
   fd_metrics <- c("FRic", "FEve", "FDiv", "FDis", "RaoQ") %>%
     set_names(.)
@@ -1239,31 +1239,84 @@ analyze_fd_by_habit <- function (traits, comm) {
   # Calculate functional diversity on standardized trait data 
   # (set stand.x to TRUE)
   func_div <- dbFD(x = traits_sub, a = comm_by_habit, stand.x = TRUE,
-                       corr = "lingoes", m = "max", 
-                       w.abun = TRUE, calc.CWM = FALSE, stand.FRic = FALSE)
+                   corr = "lingoes", m = "max", 
+                   w.abun = TRUE, calc.CWM = FALSE, stand.FRic = FALSE)
+  
+  
+  ### Tidy the results ###
+  map(fd_metrics, ~ tidy_fd_output(func_div, .)) %>%
+    reduce(left_join, by = "site") %>%
+    as_tibble %>% 
+    # Convert back to site and growth habit as separate columns
+    mutate(habit = case_when(
+      str_detect(site, "_E") ~ "epiphytic",
+      str_detect(site, "_T") ~ "terrestrial",
+    )) %>%
+    mutate(
+      site = str_remove_all(site, "_E|_T")
+    ) %>% 
+    select(site, habit, everything())
+  
+}
+
+#' Analyze functional diversity in epiphytic and 
+#' terrestrial communities
+#'
+#' @param comm Community matrix with sites as columns and species as rows
+#' @param traits Traits of each species, including growth habit
+#'
+#' @return Dataframe; results of FD::dbFD() in a single dataframe, including
+#' site name and growth habit.
+#' 
+analyze_cwm_by_habit <- function (traits, comm) {
+  
+  ### Format community matrix ###
+  # Split communities into epiphytic / terrestrial,
+  # but keep together in a single community dataframe so we can
+  # analyze FD taking into account PC space of all species.
+  comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = TRUE) %>%
+    column_to_rownames("site") 
+  
+  ### Format traits ###
+  # Subset traits to those in community, but don't transform
+  # (for calculating CWMs)
+  traits_sub <- 
+    traits %>%
+    # Keep only species in community data
+    filter(species %in% colnames(comm_by_habit)) %>%
+    # Keep only species name and numeric characters
+    select(species, colnames(.)[map_lgl(., is.numeric)]) %>%
+    # For FD::dbFD(), input trait data needs to be data.frame with
+    # rows as species with rownames.
+    column_to_rownames("species")
+  
+  ### Check order of community data and metadata ###
+  assert_that(
+    isTRUE(all.equal(sort(colnames(comm_by_habit)), sort(rownames(traits_sub)))),
+    msg = "community and metadata don't match")
+  
+  traits_sub <- traits_sub[colnames(comm_by_habit), ]
+  
+  ### Run FD analysis ###
   
   # Calculate community-weighted means on unstandardized trait data
   cwm <- dbFD(x = traits_sub, a = comm_by_habit, stand.x = FALSE,
-                  corr = "lingoes", m = "max", 
-                  w.abun = TRUE, calc.CWM = TRUE, stand.FRic = FALSE)
+              corr = "lingoes", m = "max", 
+              w.abun = TRUE, calc.CWM = TRUE, stand.FRic = FALSE)
   
   ### Tidy the results ###
-    map(fd_metrics, ~ tidy_fd_output(func_div, .)) %>%
-    reduce(left_join, by = "site") %>%
-    left_join(
-      cwm$CWM %>% rownames_to_column("site")
-    ) %>%
-    as_tibble %>% 
-      # Convert back to site and growth habit as separate columns
-  mutate(habit = case_when(
-    str_detect(site, "_E") ~ "epiphytic",
-    str_detect(site, "_T") ~ "terrestrial",
-  )) %>%
-  mutate(
-    site = str_remove_all(site, "_E|_T")
-  ) %>% 
-  select(site, habit, everything())
-  
+  cwm$CWM %>% 
+    rownames_to_column("site") %>% 
+    as_tibble %>%
+    # Convert back to site and growth habit as separate columns
+    mutate(habit = case_when(
+      str_detect(site, "_E") ~ "epiphytic",
+      str_detect(site, "_T") ~ "terrestrial",
+    )) %>%
+    mutate(
+      site = str_remove_all(site, "_E|_T")
+    ) %>% 
+    select(site, habit, everything())
 }
 
 #' Check for correlation between diversity metrics
