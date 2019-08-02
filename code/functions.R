@@ -646,8 +646,7 @@ transform_traits <- function (traits,
                               log_trans = TRUE, 
                               scale_traits = TRUE, 
                               small_number = 0.1, 
-                              trans_select = c("dissection", "stipe", "length", "width", 
-                                               "rhizome", "pinna"), 
+                              trans_select = c("length", "rhizome", "stipe", "width", "pinna"), 
                               scale_select = c("sla", "dissection", "stipe", "length", 
                                                "width", "rhizome", "pinna")
 ) {
@@ -663,15 +662,15 @@ transform_traits <- function (traits,
       mutate_at(trans_select, log)
   }
   
-  # Rescale by dividing original value by range of 
-  # that value (max - min) across the dataset
+  # Rescale by dividing original value by
+  # its standard deviation across the dataset
   if (scale_traits == TRUE) {
     traits <-
       traits %>% 
       verify(scale_select %in% colnames(traits)) %>%
       assert(is.numeric, scale_select) %>%
       mutate_at(
-        scale_select, ~ . / (max(., na.rm = TRUE) - min(., na.rm = TRUE))
+        scale_select, ~scale(.) %>% as.numeric
       )
   }
   
