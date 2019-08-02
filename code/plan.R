@@ -221,20 +221,7 @@ plan <- drake_plan(
   
   # Trait community diversity ----
   # (includes quantitative, i.e., sporophyte, traits only).
-  # Run separately for epiphytes and terrestrial then combine.
-  func_div_epi = analyze_fd_by_habit(
-    traits = fern_traits,
-    comm = comm,
-    habit_type = "epiphytic"
-  ),
-  
-  func_div_ter = analyze_fd_by_habit(
-    traits = fern_traits,
-    comm = comm,
-    habit_type = "terrestrial"
-  ),
-  
-  func_div = bind_rows(func_div_epi, func_div_ter),
+  func_div = analyze_fd_by_habit(fern_traits, comm),
   
   # Modeling community diversity ----
   

@@ -1168,9 +1168,8 @@ tidy_fd_output <- function (dbFD_output, fd_metric) {
     set_names("site", fd_metric)
 }
 
-
 #' Analyze functional diversity in epiphytic and 
-#' terrestrial communities separately
+#' terrestrial communities
 #'
 #' @param comm Community matrix with sites as columns and species as rows
 #' @param traits Traits of each species, including growth habit
@@ -1178,76 +1177,102 @@ tidy_fd_output <- function (dbFD_output, fd_metric) {
 #' @return Dataframe; results of FD::dbFD() in a single dataframe, including
 #' site name and growth habit.
 #' 
-analyze_fd_by_habit <- function (traits, comm, habit_type = c("epiphytic", "terrestrial")) {
+analyze_fd_by_habit <- function (traits, comm) {
   
-  # Only include species with trait data and 
-  # with at least one occurrence in all plots.
-  
-  # For FD::dbFD(), input community data needs to be data.frame with
-  # rows as sites (and rownames) and columns as species
-  comm <-
-    comm %>%
+  ### Format community matrix ###
+  # Split communities into epiphytic / terrestrial,
+  # but keep together in a single community dataframe so we can
+  # analyze FD taking into account PC space of all species.
+
+  # - Add growth habit to community data
+  comm <- left_join(
+    comm,
+    select(traits, species, habit)
+  ) %>%
+    # Keep only species with trait data
     filter(species %in% traits$species) %>%
-    gather(plot, abundance, -species) %>%
+    # Make sure habit isn't missing for any species
+    assert(not_na, habit)
+  
+  # - Rename columns with _E or _T at end for epiphytic or terrestrial
+  # Set species abundances to 0, e.g. for terrestrial species 
+  # in an epiphytic community.
+  comm_by_habit <- left_join(
+    comm %>%
+      mutate_at(
+        vars(-species, -habit), 
+        ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
+      select(-habit),
+    comm %>%
+      mutate_at(
+        vars(-species, -habit), 
+        ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
+      select(-habit)
+  ) %>%
+    # For FD::dbFD(), input community data needs to be data.frame with
+    # rows as sites (and rownames) and columns as species
+    gather(site, abundance, -species) %>%
     group_by(species) %>%
-    filter(sum(abundance) > 0) %>%
+    # Drop species that are zero abun in all plots
+    filter(sum(abundance) > 0) %>% 
     spread(species, abundance) %>%
-    column_to_rownames("plot")
+    column_to_rownames("site") 
   
-  # Make dataframe of traits subsetted to just
-  # epiphytic or terrestrial species (specify with habit_type).
-  
-  # For FD::dbFD(), input trait data needs to be data.frame with
-  # rows as species with rownames.
+  ### Format traits ###
+  # Subset traits to those in community, but don't transform
+  # (for calculating CWMs)
   traits_sub <- 
     traits %>%
     # Keep only species in community data
-    filter(species %in% colnames(comm)) %>%
-    # Subset to epiphytes
-    filter(habit == habit_type) %>%
+    filter(species %in% colnames(comm_by_habit)) %>%
     # Keep only species name and numeric characters
     select(species, colnames(.)[map_lgl(., is.numeric)]) %>%
-    # Remove if NA for more than half the traits
-    mutate(num_na = rowSums(is.na(.))) %>%
-    filter(num_na < (ncol(.) - 1) * 0.5) %>% # minus one b/c of species name
+    # For FD::dbFD(), input trait data needs to be data.frame with
+    # rows as species with rownames.
     column_to_rownames("species")
   
-  # Make community of epiphytic or terrestrial species only
-  comm_sub <- select(comm, rownames(traits_sub))
+  ### Check order of community data and metadata ###
+  assert_that(
+    isTRUE(all.equal(sort(colnames(comm_by_habit)), sort(rownames(traits_sub)))),
+    msg = "community and metadata don't match")
+
+  traits_sub <- traits_sub[colnames(comm_by_habit), ]
   
-  # Check order of community data and metadata
-  if (!(all.equal(colnames(comm_sub), rownames(traits_sub)))) {
-    stop ("community and metadata don't match")
-  }
-  
+  ### Run FD analysis ###
+
   # Set names of FD metrics to exctract
   fd_metrics <- c("FRic", "FEve", "FDiv", "FDis", "RaoQ") %>%
     set_names(.)
   
-  # Run FD analysis
-  # Transform traits using default settings for func div metrics
-  traits_sub_trans <- rownames_to_column(traits_sub, "species") %>%
-    transform_traits %>%
-    column_to_rownames("species")
-  
-  # Calculate functional diversity on transformed trait data
-  func_div <- dbFD(x = traits_sub_trans, a = comm_sub, 
+  # Calculate functional diversity on standardized trait data 
+  # (set stand.x to TRUE)
+  func_div <- dbFD(x = traits_sub, a = comm_by_habit, stand.x = TRUE,
                        corr = "lingoes", m = "max", 
                        w.abun = TRUE, calc.CWM = FALSE, stand.FRic = FALSE)
   
-  # Calculate community-weighted means of untransformed trait data
-  cwm <- dbFD(x = traits_sub, a = comm_sub, 
+  # Calculate community-weighted means on unstandardized trait data
+  cwm <- dbFD(x = traits_sub, a = comm_by_habit, stand.x = FALSE,
                   corr = "lingoes", m = "max", 
                   w.abun = TRUE, calc.CWM = TRUE, stand.FRic = FALSE)
   
-  # Tidy results, add habitat type
+  ### Tidy the results ###
     map(fd_metrics, ~ tidy_fd_output(func_div, .)) %>%
     reduce(left_join, by = "site") %>%
     left_join(
-      cwm$CWM %>% rownames_to_column("site") %>% select(-num_na)
+      cwm$CWM %>% rownames_to_column("site")
     ) %>%
-    mutate(habit = habit_type) %>%
-    as_tibble
+    as_tibble %>% 
+      # Convert back to site and growth habit as separate columns
+  mutate(habit = case_when(
+    str_detect(site, "_E") ~ "epiphytic",
+    str_detect(site, "_T") ~ "terrestrial",
+  )) %>%
+  mutate(
+    site = str_remove_all(site, "_E|_T")
+  ) %>% 
+  select(site, habit, everything())
   
 }
 
