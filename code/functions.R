@@ -1091,11 +1091,15 @@ make_epi_ter_comm <- function (comm, traits, drop_zero_abun = FALSE) {
 #' @param comm Community matrix with sites as columns and species as rows
 #' @param phy Phylogeny
 #' @param traits Traits of each species, including growth habit
+#' @param null_model Name of null model to use for picante ses.mpd and ses.mntd
+#' functions
+#' @param iterations Number of iterations to use for picante ses.mpd and ses.mntd
+#' functions
 #'
 #' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
 #' merged together.
 #' 
-analyze_comm_struc_by_habit <- function (comm, phy, traits) {
+analyze_comm_struc_by_habit <- function (comm, phy, traits, null_model = "phylogeny.pool", iterations = NULL) {
   
   ### Prepare data ###
   
@@ -1136,9 +1140,10 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   mpd_out <- ses.mpd(
     comm_by_habit, 
     cophenetic(phy), 
-    null.model = "phylogeny.pool", 
+    null.model = null_model, 
     abundance.weighted = TRUE, 
-    runs = 999) %>%
+    runs = 999,
+    iterations = iterations) %>%
     rownames_to_column("site") %>%
     as_tibble
   
@@ -1146,9 +1151,10 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   mntd_out <- ses.mntd(
     comm_by_habit, 
     cophenetic(phy), 
-    null.model = "phylogeny.pool", 
+    null.model = null_model, 
     abundance.weighted = TRUE, 
-    runs = 999) %>%
+    runs = 999,
+    iterations = iterations) %>%
     rownames_to_column("site") %>%
     as_tibble
   

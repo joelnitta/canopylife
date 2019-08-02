@@ -238,7 +238,9 @@ plan <- drake_plan(
   comm_struc = analyze_comm_struc_by_habit(
     comm = comm, 
     phy = phy, 
-    traits = fern_traits
+    traits = fern_traits,
+    null_model = "independentswap",
+    iterations = 10000
   ),
   
   # Trait community diversity ----
