@@ -1035,6 +1035,56 @@ run_pic <- function (traits, phy) {
 
 # Community and functional diversity ----
 
+#' Convert community matrix including epiphytic and terrestrial species to
+#' a community matrix with separate epiphytic and terretrial communities
+#'
+#' @param comm Community data matrix
+#' @param traits Trait data including growth habit (column "habit", with values
+#' as "terrestrial" or "epiphytic")
+#' @param drop_zero_abun Logical; should zero-abundance species be dropped from
+#' the final community data matrix?
+#'
+make_epi_ter_comm <- function (comm, traits, drop_zero_abun = FALSE) {
+  
+  ### Format community matrix ###
+  # Split communities into epiphytic / terrestrial,
+  # but keep together in a single community dataframe
+  
+  # - Add growth habit to community data
+  comm <- left_join(
+    comm,
+    select(traits, species, habit)
+  ) %>%
+    # Make sure habit isn't missing for any species
+    assert(not_na, habit)
+  
+  # - Rename columns with _E or _T at end for epiphytic or terrestrial
+  # Set species abundances to 0, e.g. for terrestrial species 
+  # in an epiphytic community.
+  comm_by_habit <- left_join(
+    comm %>%
+      mutate_at(
+        vars(-species, -habit), 
+        ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
+      select(-habit),
+    comm %>%
+      mutate_at(
+        vars(-species, -habit), 
+        ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
+      rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
+      select(-habit)
+  ) %>%
+    # For FD::dbFD(), input community data needs to be data.frame with
+    # rows as sites (and rownames) and columns as species
+    gather(site, abundance, -species) %>%
+    group_by(species)
+  
+  if(isTRUE(drop_zero_abun)) comm_by_habit <- filter(comm_by_habit, sum(abundance) > 0)
+  
+  spread(comm_by_habit, species, abundance)
+}
+
 #' Analyze phylogenetic community structure in epiphytic and 
 #' terrestrial communities separately
 #'
@@ -1048,14 +1098,6 @@ run_pic <- function (traits, phy) {
 analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   
   ### Prepare data ###
-  
-  # Add growth habit to community data
-  comm <- left_join(
-    comm,
-    select(traits, species, habit)
-    ) %>%
-    # Make sure habit isn't missing for any species
-  assert(not_na, habit)
   
   # Make sure all species are in the phylogeny
   # (but don't subset phylogeny to only species in Moorea
@@ -1074,26 +1116,8 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits) {
   # For ses.mpd() and ses.mntd(), needs to be a dataframe
   # with sites as rows and species as columns, and rownames
   # equal to site.
-  comm_by_habit <- left_join(
-    comm %>%
-    mutate_at(
-      vars(-species, -habit), 
-      ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
-      rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
-      select(-habit),
-    comm %>%
-      mutate_at(
-        vars(-species, -habit), 
-        ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
-      rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
-      select(-habit)
-  ) %>%
-    gather(site, abundance, -species) %>%
-    spread(species, abundance) %>%
-    as.data.frame()
-  
-  rownames(comm_by_habit) <- comm_by_habit$site
-  comm_by_habit$site <- NULL
+  comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = FALSE) %>%
+    column_to_rownames("site")
   
   ### Run community structure analysis ###
   
@@ -1183,41 +1207,7 @@ analyze_fd_by_habit <- function (traits, comm) {
   # Split communities into epiphytic / terrestrial,
   # but keep together in a single community dataframe so we can
   # analyze FD taking into account PC space of all species.
-
-  # - Add growth habit to community data
-  comm <- left_join(
-    comm,
-    select(traits, species, habit)
-  ) %>%
-    # Keep only species with trait data
-    filter(species %in% traits$species) %>%
-    # Make sure habit isn't missing for any species
-    assert(not_na, habit)
-  
-  # - Rename columns with _E or _T at end for epiphytic or terrestrial
-  # Set species abundances to 0, e.g. for terrestrial species 
-  # in an epiphytic community.
-  comm_by_habit <- left_join(
-    comm %>%
-      mutate_at(
-        vars(-species, -habit), 
-        ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
-      rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
-      select(-habit),
-    comm %>%
-      mutate_at(
-        vars(-species, -habit), 
-        ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
-      rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
-      select(-habit)
-  ) %>%
-    # For FD::dbFD(), input community data needs to be data.frame with
-    # rows as sites (and rownames) and columns as species
-    gather(site, abundance, -species) %>%
-    group_by(species) %>%
-    # Drop species that are zero abun in all plots
-    filter(sum(abundance) > 0) %>% 
-    spread(species, abundance) %>%
+  comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = TRUE) %>%
     column_to_rownames("site") 
   
   ### Format traits ###
