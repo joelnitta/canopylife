@@ -705,11 +705,19 @@ run_trait_PCA <- function (traits, phy,
     # Make sure all selected continuous traits are in the trait data
     verify(all(cont_traits %in% colnames(.))) %>%
     # Log-transform and scale
-    transform_traits() %>%
+    transform_traits(
+      trans_select = c("rhizome"),
+      scale_select = c("sla", "dissection", "stipe", "length", 
+                       "width", "rhizome", "pinna"),
+      log_trans = FALSE,
+      scale_traits = TRUE
+    ) %>%
     # Subset to continuous traits
     select(species, habit, cont_traits) %>%
     # Keep only completely sampled species
     filter(complete.cases(.)) %>%
+    # Exclude A. evecta
+    filter(species != "Angiopteris_evecta") %>%
     # Keep only species in phylogeny, in phylogenetic order
     match_traits_and_tree(traits = ., phy = phy, "traits") 
   
