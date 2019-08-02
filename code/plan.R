@@ -58,6 +58,28 @@ plan <- drake_plan(
     filter(source_1 != "T", source_2 != "T") %>%
     select(-source_1, -source_2),
   
+  # - Also make trait dataset with continuous traits scaled, but not log-transformed.
+  fern_traits_scaled = transform_traits(
+    fern_traits, 
+    log_trans = FALSE, 
+    scale_traits = TRUE,
+    scale_select = c("sla", "stipe", "length", 
+                     "width", "rhizome", "pinna",
+                     "dissection")
+  ),
+  
+  # - Also make trait dataset with continuous traits scaled and 
+  # size-related traits log-transformed.
+  fern_traits_log_scaled = transform_traits(
+    fern_traits, 
+    log_trans = TRUE, 
+    scale_traits = TRUE,
+    trans_select = c("length", "rhizome", "stipe", "width"),
+    scale_select = c("sla", "stipe", "length", 
+                     "width", "rhizome", "pinna",
+                     "dissection")
+  ),
+  
   ### Site data with elevation ###
   moorea_sites = read_csv(
     file_in("data/nitta_2017/sites.csv")) %>%
@@ -221,6 +243,8 @@ plan <- drake_plan(
   
   # Trait community diversity ----
   # (includes quantitative, i.e., sporophyte, traits only).
+  
+  # Using FD metrics (FEve, Fric, etc.)
   func_div = analyze_fd_by_habit(fern_traits, comm),
   
   # Modeling community diversity ----
