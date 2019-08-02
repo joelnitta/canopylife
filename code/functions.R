@@ -157,7 +157,7 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
 #'
 process_raw_cont_morph <- function (raw_morph_path, species_list) {
   read_csv(raw_morph_path, 
-    na = c("?", "n/a", "NA", "N/A")) %>%
+           na = c("?", "n/a", "NA", "N/A")) %>%
     clean_names() %>%
     # Get rid of species not in accepted list
     filter(species %in% species_list) %>%
@@ -245,7 +245,7 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     mutate(habit = fct_recode(habit, terrestrial = "0", epiphytic = "1"))
   
   # keep only species in species list
-    qual_traits %>%
+  qual_traits %>%
     filter(species %in% species_list)
   
 }
@@ -290,7 +290,7 @@ make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
       sla_grand_mean,
       morph_cont_mean,
       morph_qual_raw
-      ),
+    ),
     full_join) %>% 
     mutate(morphotype = factor(morphotype)) %>%
     # Rename traits to simple version
@@ -490,15 +490,15 @@ process_raw_climate <- function (climate_raw_path) {
   
   # Reformat filtered data
   climate_filtered %>%
-  mutate(
-    habit = case_when(
-      str_detect(site, "epi") ~ "epiphytic",
-      str_detect(site,  "ter") ~ "terrestrial"
-    ),
-    habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
-    site = str_remove_all(site, "_epi|_ter"),
-    vpd = plantecophys::RHtoVPD(RH, temp)
-  )
+    mutate(
+      habit = case_when(
+        str_detect(site, "epi") ~ "epiphytic",
+        str_detect(site,  "ter") ~ "terrestrial"
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
+      site = str_remove_all(site, "_epi|_ter"),
+      vpd = plantecophys::RHtoVPD(RH, temp)
+    )
   
 }
 
@@ -619,7 +619,7 @@ select_climate_vars <- function (climate_data) {
   # Double-check that no correlations > 0.9 remain,
   # and keep these as the final variables for analysis.
   selected_climate_vars <-
-  climate_corr_select %>%
+    climate_corr_select %>%
     assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname")) %>%
     pull(rowname)
   
@@ -916,7 +916,7 @@ analyze_binary_phylosig <- function (traits, phy) {
     ) %>%
     select(trait, phylo_d_summary) %>%
     unnest()
-
+  
 }
 
 # Correlated evolution ----
@@ -1022,10 +1022,10 @@ run_pic <- function (traits, phy) {
       summary = map(model, summary),
       tidy_summary = map(summary, tidy),
       contrasts_summary = map(pic_table, 
-        ~ tibble(
-          n_contrasts = nrow(.),
-          n_pos_con = sum(.[,1] > 0)
-        )
+                              ~ tibble(
+                                n_contrasts = nrow(.),
+                                n_pos_con = sum(.[,1] > 0)
+                              )
       )
     ) %>%
     # Select only results and format as output dataframe
@@ -1160,9 +1160,9 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
   
   ### Merge results ###
   left_join(
-  select(mpd_out, site, ntaxa, starts_with("mpd")),
-  select(mntd_out, site, starts_with("mntd"))
-  # Convert back to site and growth habit as separate columns
+    select(mpd_out, site, ntaxa, starts_with("mpd")),
+    select(mntd_out, site, starts_with("mntd"))
+    # Convert back to site and growth habit as separate columns
   ) %>%
     mutate(habit = case_when(
       str_detect(site, "_E") ~ "epiphytic",
@@ -1188,13 +1188,17 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
 #' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
 #' merged together.
 #' 
-analyze_func_struc_by_habit <- function (comm, traits, null_model = "phylogeny.pool", iterations = NULL) {
+analyze_func_struc_by_habit <- function (
+  comm, traits, 
+  null_model = "phylogeny.pool", iterations = NULL,
+  traits_select =c("sla", "stipe", "pinna", "dissection",
+                   "morphotype", "glands", "hairs", "gemmae")) {
   
   ### Prepare data ###
   
   # Subset to only those species with trait data
   comm <-
-  comm %>%
+    comm %>%
     filter(species %in% traits$species)
   
   # Split communities into epiphytic / terrestrial taxa, 
@@ -1207,11 +1211,13 @@ analyze_func_struc_by_habit <- function (comm, traits, null_model = "phylogeny.p
   comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = FALSE) %>%
     column_to_rownames("site")
   
+  traits_df <- select(traits, species, traits_select) %>%
+    column_to_rownames("species")
+  
+  traits_df <- traits_df[colnames(comm_by_habit), ]
+  
   # Calculate Gower distances on scaled traits
-  dist_mat <- 
-    traits %>%
-    column_to_rownames("species") %>%
-    FD::gowdis()
+  dist_mat <- FD::gowdis(traits_df)
   
   ### Run community structure analysis ###
   
@@ -1440,7 +1446,7 @@ select_div_metrics <- function (div_data) {
   # Only trait values are correlated:
   # stipe, length, width, and rhizome are all correlated with each other
   cwm_corr <-
-  corr_all %>%
+    corr_all %>%
     corrr::focus(stipe, length, width, rhizome, mirror = TRUE)
   
   # Drop length, width, and rhizome.
@@ -1679,8 +1685,8 @@ get_important_vars <- function(fssgam_results) {
   importance_location <- list("variable.importance", "aic", "variable.weights.raw")
   
   map_df(fssgam_results, 
-                       ~ pluck(., !!!importance_location) %>% as.list %>% as_tibble,
-                       .id = "resp_var")
+         ~ pluck(., !!!importance_location) %>% as.list %>% as_tibble,
+         .id = "resp_var")
   
 }
 
@@ -1791,7 +1797,7 @@ match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
   
   # Keep only species in phylogeny
   traits <- traits %>%
-  filter(species %in% phy$tip.label) 
+    filter(species %in% phy$tip.label) 
   
   # Trim to only species with trait data
   phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
@@ -1810,9 +1816,9 @@ match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
   
   if(return == "tree") { 
     return (phy) 
-    } else {
+  } else {
     return (traits)
-    }
+  }
   
 }
 
@@ -1916,11 +1922,11 @@ format_pval <- function (x, equals_sign = FALSE) {
 #'   habit_colors = habit_colors
 #' )
 make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
-                               single_line = TRUE,
-                               r_upper = TRUE,
-                               data, 
-                               fits, summaries, 
-                               habit_colors, alpha_val = 0.5) {
+                              single_line = TRUE,
+                              r_upper = TRUE,
+                              data, 
+                              fits, summaries, 
+                              habit_colors, alpha_val = 0.5) {
   
   yval_sym <- sym(yval)
   xval_sym <- sym(xval)
@@ -1949,7 +1955,7 @@ make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation 
   # ggplot::annotate with parse=TRUE so it won't error on the
   # asterisks
   r2 <- paste0('"', r2, asterisk, '"')
-
+  
   # Extract model type: does the dependent variable depend on elevation
   # only, growth habit only, the interaction of both, or none?
   model_type <- pull(summaries, model_type)
@@ -1984,7 +1990,7 @@ make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation 
                  parse = TRUE)
     }
   }
-
+  
   # Add the rest of the plot details
   plot +
     scale_color_manual(
@@ -1998,7 +2004,7 @@ make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation 
       x = xlab
     ) +
     standard_theme()
-
+  
 }
 
 #' Make a single boxplot
@@ -2200,7 +2206,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     )
   
   c <-
-  pca_results$species_locs %>%
+    pca_results$species_locs %>%
     filter(analysis_type == "standard") %>%
     left_join(select(traits, species, habit)) %>%
     ggplot(aes(x = PC1, y = PC2, color = habit)) +
@@ -2565,7 +2571,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       legend.text = element_text(size = 20/.pt),
       legend.title = element_text(size = 20/.pt)
     )
-
+  
   # Don't use frond length or width, as these are correlated with stipe length
   quant_heatmap <-
     ggplot(quant_traits) +
@@ -2671,7 +2677,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       plot.background = element_rect(fill = "transparent",colour = NA),
       plot.margin = margin(t = 0, r = 0, b = 0, l = -0.025, unit = "in")
     )
-
+  
 }
 
 #' Make a heatmap of importance scores
