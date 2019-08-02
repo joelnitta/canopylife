@@ -1099,7 +1099,7 @@ make_epi_ter_comm <- function (comm, traits, drop_zero_abun = FALSE) {
 #' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
 #' merged together.
 #' 
-analyze_comm_struc_by_habit <- function (comm, phy, traits, null_model = "phylogeny.pool", iterations = NULL) {
+analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phylogeny.pool", iterations = NULL) {
   
   ### Prepare data ###
   
@@ -1172,8 +1172,99 @@ analyze_comm_struc_by_habit <- function (comm, phy, traits, null_model = "phylog
       site = str_remove_all(site, "_E|_T")
     ) %>% 
     select(site, habit, everything())
-  
 }
+
+#' Analyze phylogenetic community structure in epiphytic and 
+#' terrestrial communities separately
+#'
+#' @param comm Community matrix with sites as columns and species as rows
+#' @param phy Phylogeny
+#' @param traits Traits of each species, including growth habit
+#' @param null_model Name of null model to use for picante ses.mpd and ses.mntd
+#' functions
+#' @param iterations Number of iterations to use for picante ses.mpd and ses.mntd
+#' functions
+#'
+#' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
+#' merged together.
+#' 
+analyze_func_struc_by_habit <- function (comm, traits, null_model = "phylogeny.pool", iterations = NULL) {
+  
+  ### Prepare data ###
+  
+  # Subset to only those species with trait data
+  comm <-
+  comm %>%
+    filter(species %in% traits$species)
+  
+  # Split communities into epiphytic / terrestrial taxa, 
+  # but keep together in a single dataframe so we can
+  # use whole fern community as null model.
+  # 
+  # For ses.mpd() and ses.mntd(), needs to be a dataframe
+  # with sites as rows and species as columns, and rownames
+  # equal to site.
+  comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = FALSE) %>%
+    column_to_rownames("site")
+  
+  # Calculate Gower distances on scaled traits
+  dist_mat <- 
+    traits %>%
+    column_to_rownames("species") %>%
+    FD::gowdis()
+  
+  ### Run community structure analysis ###
+  
+  # Look at phylo structure of each plot individually, compared to null 
+  # (standard effect size). 
+  # Null model shuffles tips of phylogeny in plots, keeps freq and richness the same
+  # Positive SES values (mpd.obs.z > 0) and high quantiles (mpd.obs.p > 0.95) 
+  # indicate phylogenetic evenness.
+  # Negative SES values and low quantiles (mpd.obs.p < 0.05) indicate 
+  # phylogenetic clustering.
+  # SES values of 0 are for trees with species spread randomly across the tree.
+  # mpd.obs.z is the standardized effect size of mpd vs. null communities 
+  # (equivalent to -NRI)
+  
+  # Run ses.mpd, convert output to tibble
+  mpd_out <- ses.mpd(
+    comm_by_habit, 
+    dist_mat, 
+    null.model = null_model, 
+    abundance.weighted = TRUE, 
+    runs = 999,
+    iterations = iterations) %>%
+    rownames_to_column("site") %>%
+    as_tibble
+  
+  # Run ses.mntd, convert output to tibble
+  mntd_out <- ses.mntd(
+    comm_by_habit, 
+    dist_mat, 
+    null.model = null_model, 
+    abundance.weighted = TRUE, 
+    runs = 999,
+    iterations = iterations) %>%
+    rownames_to_column("site") %>%
+    as_tibble
+  
+  ### Merge results ###
+  left_join(
+    select(mpd_out, site, ntaxa, starts_with("mpd")),
+    select(mntd_out, site, starts_with("mntd"))
+    # Convert back to site and growth habit as separate columns
+  ) %>%
+    mutate(habit = case_when(
+      str_detect(site, "_E") ~ "epiphytic",
+      str_detect(site, "_T") ~ "terrestrial",
+    )) %>%
+    mutate(
+      site = str_remove_all(site, "_E|_T")
+    ) %>% 
+    select(site, habit, everything())
+}
+
+
 
 #' Helper function to extract output from FD::dbFD()
 #' 

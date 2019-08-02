@@ -235,19 +235,36 @@ plan <- drake_plan(
   ),
   
   # Phylogenetic community diversity ----
-  comm_struc = analyze_comm_struc_by_habit(
+  phy_comm_struc = analyze_phy_struc_by_habit(
     comm = comm, 
     phy = phy, 
     traits = fern_traits,
     null_model = "independentswap",
-    iterations = 10000
+    iterations = 1000
   ),
   
   # Trait community diversity ----
   # (includes quantitative, i.e., sporophyte, traits only).
   
-  # Using FD metrics (FEve, Fric, etc.)
+  # - Using FD metrics (FEve, Fric, etc.)
+  # (FD does the scaling for us)
   func_div = analyze_fd_by_habit(fern_traits, comm),
+  
+  # - Using MPD, MNTD on scaled traits
+  func_comm_struc = analyze_func_struc_by_habit(
+    comm = comm,
+    traits = fern_traits_scaled,
+    null_model = "independentswap",
+    iterations = 1000
+  ),
+  
+  # - Using MPD, MNTD on log-transformed, scaled traits
+  func_comm_struc_trans = analyze_func_struc_by_habit(
+    comm = comm,
+    traits = fern_traits_log_scaled,
+    null_model = "independentswap",
+    iterations = 1000
+  ),
   
   # Modeling community diversity ----
   
