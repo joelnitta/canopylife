@@ -1276,8 +1276,6 @@ analyze_func_struc_by_habit <- function (
     select(site, habit, everything())
 }
 
-
-
 #' Helper function to extract output from FD::dbFD()
 #' 
 #' FD::dbFD() outputs results in a list of named
@@ -1888,6 +1886,43 @@ format_pval <- function (x, equals_sign = FALSE) {
     isTRUE(equals_sign) ~ paste("=", round(x, 3) %>% as.character()),
     TRUE ~ round(x, 3) %>% as.character()
   )
+}
+
+#' Bind a list of dataframes and add an ID column with the
+#' name of the dataframe.
+#' 
+#' Handy if you don't want to manually specify the names of
+#' each individual dataframe.
+#'
+#' @param ... Input dataframes
+#' @param id_col Value to use as name of column specifying
+#' where the data came from (the name of each input dataframe)
+#'
+#' @examples
+#' data_1 <- tibble(a = c(1,2), b = c(3,4))
+#' data_2 <- tibble(a = c(5,6), b = c(7,8))
+#' bind_data(data_1, data_2)
+bind_data <- function (..., id_col = "dataset") {
+  
+  # Function to convert the input into a character
+  # vector, where each item in the vector is the
+  # name of the input
+  # copied from
+  # https://masterr.org/r/the-magic-of-substitute-and-deparse/
+  foo1 <- function(a, ...) {
+    arg = deparse(substitute(a))
+    dots = substitute(list(...))[-1]
+    c(arg, sapply(dots, deparse))
+  }
+  
+  names = foo1(...) 
+  
+  data = list(...)
+  
+  names(data) <- names
+  
+  bind_rows(data, .id = id_col)
+  
 }
 
 # Plotting ----
