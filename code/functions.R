@@ -1184,14 +1184,16 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
 #' functions
 #' @param iterations Number of iterations to use for picante ses.mpd and ses.mntd
 #' functions
+#' @param abundance_weighted Logical; should abundance weighting be used?
 #'
 #' @return Dataframe; results of picante::ses.mpd and picante::ses.mntd
 #' merged together.
 #' 
 analyze_func_struc_by_habit <- function (
   comm, traits, 
-  null_model = "phylogeny.pool", iterations = NULL,
-  traits_select =c("sla", "stipe", "pinna", "dissection",
+  null_model = "phylogeny.pool", iterations = NULL, abundance_weighted = TRUE,
+  traits_select =c("stipe", "length", "width", "rhizome",
+                   "sla", "pinna", "dissection",
                    "morphotype", "glands", "hairs", "gemmae")) {
   
   ### Prepare data ###
@@ -1211,12 +1213,16 @@ analyze_func_struc_by_habit <- function (
   comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = FALSE) %>%
     column_to_rownames("site")
   
+  # Calculate Gower distance matrix
+  # Input needs to be a dataframe
+  # with species as rows and traits as columns, and rownames
+  # equal to species.
   traits_df <- select(traits, species, traits_select) %>%
     column_to_rownames("species")
   
+  # Match species order in community data
   traits_df <- traits_df[colnames(comm_by_habit), ]
   
-  # Calculate Gower distances on scaled traits
   dist_mat <- FD::gowdis(traits_df)
   
   ### Run community structure analysis ###
@@ -1237,7 +1243,7 @@ analyze_func_struc_by_habit <- function (
     comm_by_habit, 
     dist_mat, 
     null.model = null_model, 
-    abundance.weighted = TRUE, 
+    abundance.weighted = abundance_weighted, 
     runs = 999,
     iterations = iterations) %>%
     rownames_to_column("site") %>%
@@ -1248,13 +1254,13 @@ analyze_func_struc_by_habit <- function (
     comm_by_habit, 
     dist_mat, 
     null.model = null_model, 
-    abundance.weighted = TRUE, 
+    abundance.weighted = abundance_weighted, 
     runs = 999,
     iterations = iterations) %>%
     rownames_to_column("site") %>%
     as_tibble
   
-  ### Merge results ###
+  ### Tidy results ###
   left_join(
     select(mpd_out, site, ntaxa, starts_with("mpd")),
     select(mntd_out, site, starts_with("mntd"))
