@@ -1960,7 +1960,7 @@ bind_data <- function (..., id_col = "dataset") {
 
 # Plotting ----
 
-#' Make a single scatterplot
+#' Make a single climate scatterplot
 #'
 #' @param yval Name of y variable
 #' @param xval Name of x variable
@@ -1995,7 +1995,7 @@ bind_data <- function (..., id_col = "dataset") {
 #'   summaries = div_el_model_summaries, 
 #'   habit_colors = habit_colors
 #' )
-make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
+make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                               single_line = TRUE,
                               r_upper = TRUE,
                               data, 
@@ -2072,6 +2072,124 @@ make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation 
     ) +
     scale_alpha_manual(
       values = c("yes" = alpha_val, "no" = 1.0)
+    ) +
+    labs(
+      y = ylab,
+      x = xlab
+    ) +
+    standard_theme()
+  
+}
+
+#' Make a single scatterplot
+#'
+#' @param yval Name of y variable
+#' @param xval Name of x variable
+#' @param ylab Label for y axis
+#' @param xlab Label for x axis
+#' @param single_line Logical; should a single trend line be used?
+#' @param r_upper Logical; should the R-squared value be printed
+#' in the upper-right? (FALSE means it will be printed in the
+#' lower-right).
+#' @param data Dataset used to plot points. Must include columns "el" for
+#' elevation, "is_outlier" for outliers, "habit" for growth habit,
+#' and response variable of interest.
+#' @param fits Model fits
+#' @param summaries Model summaries
+#' @param habit_colors Colors to use for growth habit
+#' @param alpha_val Transparency value to set for outlier points
+#' not included in model
+#'
+#' @return ggplot object
+#' @example
+#' make_scatterplot(
+#'   yval = "vpd_mean",
+#'   data = climate_select,
+#'   fits = climate_model_fits, 
+#'   summaries = climate_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+#' make_scatterplot(
+#'   yval = "ntaxa",
+#'   data = div_metrics_select,
+#'   fits = div_el_model_fits, 
+#'   summaries = div_el_model_summaries, 
+#'   habit_colors = habit_colors
+#' )
+make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
+                              single_line = TRUE,
+                              r_upper = TRUE,
+                              data, 
+                              fits, summaries, 
+                              habit_colors) {
+  
+  yval_sym <- sym(yval)
+  xval_sym <- sym(xval)
+  
+  # Reformat model summaries for printing
+  summaries <- summaries %>%
+    mutate(r.squared = round_t(r.squared, 2))
+  
+  # Subset model fits and summaries to response variable of interest
+  fits <- filter(fits, var == yval)
+  summaries <- filter(summaries, var == yval)
+  
+  # Extract r2 and p values
+  r2 <- pull(summaries, r.squared)
+  p <- pull(summaries, p.value)
+  
+  # Set number of asterisks for printing with r2
+  asterisk <- case_when(
+    p < 0.001 ~ "***",
+    p < 0.01 ~ "**",
+    p < 0.05 ~ "*",
+    TRUE ~ ""
+  )
+  
+  # Need to wrap r2 plus asterisks in quotes for passing to 
+  # ggplot::annotate with parse=TRUE so it won't error on the
+  # asterisks
+  r2 <- paste0('"', r2, asterisk, '"')
+  
+  # Extract model type: does the dependent variable depend on elevation
+  # only, growth habit only, the interaction of both, or none?
+  model_type <- pull(summaries, model_type)
+  
+  # Plot lines only for models with a significant elevation effect
+  if(model_type == "el_only") {
+    plot <- ggplot(data, aes(x = !!xval_sym))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + geom_point(aes(y = !!yval_sym, color = habit))
+  } else if(model_type == "interaction") {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + geom_point(aes(y = !!yval_sym))
+  } else {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit)) +
+      geom_point(aes(y = !!yval_sym))
+  }
+  
+  # Set location of where to print R-squared
+  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
+    if (isTRUE(r_upper)) {
+      plot <- plot +
+        annotate("text", x = Inf, y = Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = 1.2,
+                 parse = TRUE)
+    } else {
+      plot <- plot +
+        annotate("text", x = Inf, y = -Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = -0.2,
+                 parse = TRUE)
+    }
+  }
+  
+  # Add the rest of the plot details
+  plot +
+    scale_color_manual(
+      values = habit_colors
     ) +
     labs(
       y = ylab,
@@ -2197,7 +2315,7 @@ make_climate_plot <- function (data, resp_vars,
              summaries = summaries, 
              habit_colors = list(habit_colors),
              alpha_val = alpha_val),
-        make_scatterplot)
+        make_climate_scatterplot)
     )
   
   # Can't use map with ggplot `+`, so tweak as needed in a loop.
