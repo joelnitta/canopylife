@@ -2615,11 +2615,9 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
   # so that patchwork::wrap_plots will output them in the
   # correct order.
   plots_df <- plots_df %>%
-    filter(resp_var %in% 
-             c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic")) %>%
     mutate(resp_var = factor(
       resp_var, 
-      levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", "FDiv", "FEve", "FRic"))) %>%
+      levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func"))) %>%
     mutate(plot_type = factor(
       plot_type, 
       levels = c("scatter", "box"))) %>%
@@ -2628,7 +2626,7 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
   for(i in 1:nrow(plots_df)) {
-    if(plots_df$resp_var[[i]] != "FRic") {
+    if(plots_df$resp_var[[i]] != "mntd.obs.z.func") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.x = element_blank(),
