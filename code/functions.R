@@ -1276,6 +1276,39 @@ analyze_func_struc_by_habit <- function (
     select(site, habit, everything())
 }
 
+#' Calculate community-weighted means and standard deviations
+#'
+#' @param traits Traits of each species, including growth habit
+#' @param comm Community matrix
+#' @param site_data Dataframe of sites on Moorea in this study
+#' @param traits_select Vector of trait names to include
+#'
+#' @return Tibble in long format
+#' 
+calculate_cwm <- function (traits, comm, site_data, 
+                           traits_select = c(
+                             "stipe", "length", "width", "rhizome",
+                             "sla", "pinna", "dissection"
+                           )) {
+  
+  comm %>%
+    filter(species %in% traits$species) %>%
+    gather(site, abundance, -species) %>%
+    filter(abundance > 0) %>%
+    left_join(traits) %>% 
+    uncount(abundance) %>%
+    left_join(site_data) %>%
+    select(site, species, habit, el, traits_select) %>%
+    gather(trait, value, -site, -species, -el, -habit) %>%
+    group_by(habit, trait, site, el) %>%
+    summarize(
+      cwm = mean(value, na.rm = TRUE),
+      sd = sd(value, na.rm = TRUE)
+    ) %>%
+    ungroup
+  
+}
+
 #' Helper function to extract output from FD::dbFD()
 #' 
 #' FD::dbFD() outputs results in a list of named
