@@ -1194,7 +1194,8 @@ analyze_func_struc_by_habit <- function (
   null_model = "phylogeny.pool", iterations = NULL, abundance_weighted = TRUE,
   traits_select =c("stipe", "length", "width", "rhizome",
                    "sla", "pinna", "dissection",
-                   "morphotype", "glands", "hairs", "gemmae")) {
+                   "morphotype", "glands", "hairs", "gemmae"),
+  weights = NULL) {
   
   ### Prepare data ###
   
@@ -1223,8 +1224,12 @@ analyze_func_struc_by_habit <- function (
   # Match species order in community data
   traits_df <- traits_df[colnames(comm_by_habit), ]
   
-  dist_mat <- FD::gowdis(traits_df)
-  
+  if (!is.null(weights)) {
+    dist_mat <- FD::gowdis(traits_df, w = weights) 
+  } else {
+    dist_mat <- FD::gowdis(traits_df) 
+    }
+
   ### Run community structure analysis ###
   
   # Look at phylo structure of each plot individually, compared to null 
@@ -2437,6 +2442,98 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   
 }
 
+make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
+                                  single_line = TRUE,
+                                  r_upper = TRUE,
+                                  data, 
+                                  fits, summaries, 
+                                  habit_colors) {
+  
+  yval_sym <- sym(yval)
+  xval_sym <- sym(xval)
+  
+  # Filter data
+  data <-
+    data %>% filter(trait == yval)
+  
+  # Reformat model summaries for printing
+  summaries <- summaries %>%
+    mutate(r.squared = round_t(r.squared, 2))
+  
+  # Subset model fits and summaries to response variable of interest
+  fits <- filter(fits, var == yval)
+  summaries <- filter(summaries, var == yval)
+  
+  # Extract r2 and p values
+  r2 <- pull(summaries, r.squared)
+  p <- pull(summaries, p.value)
+  
+  # Set number of asterisks for printing with r2
+  asterisk <- case_when(
+    p < 0.001 ~ "***",
+    p < 0.01 ~ "**",
+    p < 0.05 ~ "*",
+    TRUE ~ ""
+  )
+  
+  # Need to wrap r2 plus asterisks in quotes for passing to 
+  # ggplot::annotate with parse=TRUE so it won't error on the
+  # asterisks
+  r2 <- paste0('"', r2, asterisk, '"')
+  
+  # Extract model type: does the dependent variable depend on elevation
+  # only, growth habit only, the interaction of both, or none?
+  model_type <- pull(summaries, model_type)
+  
+  # Plot lines only for models with a significant elevation effect
+  if(model_type == "el_only") {
+    plot <- ggplot(data, aes(x = !!xval_sym))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + 
+      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_point(aes(y = cwm))
+  } else if(model_type == "interaction") {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
+    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    plot <- plot + 
+      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_point(aes(y = cwm))
+  } else {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
+    plot <- plot +
+      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_point(aes(y = cwm))
+  }
+  
+  # Set location of where to print R-squared
+  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
+    if (isTRUE(r_upper)) {
+      plot <- plot +
+        annotate("text", x = Inf, y = Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = 1.2,
+                 parse = TRUE)
+    } else {
+      plot <- plot +
+        annotate("text", x = Inf, y = -Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = 1.1, vjust = -0.2,
+                 parse = TRUE)
+    }
+  }
+  
+  # Add the rest of the plot details
+  plot +
+    scale_color_manual(
+      values = habit_colors
+    ) +
+    labs(
+      y = ylab,
+      x = xlab
+    ) +
+    standard_theme()
+}
+
 #' Combine community-weighted mean plots into final figure
 #'
 #' @param args Dataframe of independent and dependent variables
@@ -2445,55 +2542,37 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
 #' @param boxplots List of boxplots
 #'
 #' @return ggplot object
-combine_cwm_plots <- function (scatterplots, boxplots) {
+combine_cwm_plots <- function (scatterplots) {
   
   # Combine scatterplots and boxplots into tibble
-  plots_df <- bind_rows(
+  plots_df <- 
     tibble(
       resp_var = names(scatterplots),
       plot = as.list(scatterplots),
-      plot_type = "scatter"
-    ),
-    tibble(
-      resp_var = names(boxplots),
-      plot = as.list(boxplots),
-      plot_type = "box"
-    )
-  )
-  
-  # Sort plots by response and plot type
+    ) %>%
+  # Sort plots by response
   # so that patchwork::wrap_plots will output them in the
   # correct order.
-  plots_df <- plots_df %>%
-    filter(resp_var %in% 
-             c("dissection", "sla", "stipe", "pinna")) %>%
-    mutate(resp_var = factor(
-      resp_var, 
-      levels = c("dissection", "sla", "stipe", "pinna"))) %>%
-    mutate(plot_type = factor(
-      plot_type, 
-      levels = c("scatter", "box"))) %>%
-    arrange(resp_var, plot_type)
+    mutate(
+      resp_var = factor(
+        resp_var, 
+        levels = c("stipe", "length", "width", "rhizome", 
+                   "dissection", "pinna", "sla"))
+    )
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
   for(i in 1:nrow(plots_df)) {
-    if(plots_df$resp_var[[i]] != "pinna") {
+    if(plots_df$resp_var[[i]] %in% c("stipe", "length", "width")) {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.x = element_blank(),
           axis.text.x = element_blank())
     }
-    if(plots_df$plot_type[[i]] == "box") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        theme(
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank())
-    }
   }
   
   # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 2) & theme(
+  wrap_plots(plots_df$plot, ncol = 4, nrow = 2) & theme(
     legend.position = "none",
     # Tweak margins to remove whitespace between plots
     plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
