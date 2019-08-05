@@ -2776,8 +2776,8 @@ make_heatmap <- function(important_div_vars) {
                    "temp_sd", "vpd_mean", "vpd_min", "vpd_sd")),
       resp_var = factor(
         resp_var, 
-        levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", 
-                   "FDiv", "FEve", "FRic",
+        levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
+                   "mpd.obs.z.func", "mntd.obs.z.func", 
                    "dissection", "sla", "stipe", "pinna"))
     ) %>%
     # Reformat the names of the indep and resp vars so they
@@ -2789,8 +2789,8 @@ make_heatmap <- function(important_div_vars) {
                        "SD Temp.", "Mean VPD", "Min. VPD", "SD VPD")),
       resp_var = lvls_revalue(
         resp_var, 
-        new_levels = c("Richness", "MPD", "MNTD", 
-                       "FDiv", "FEve", "FRic",
+        new_levels = c("Richness", "MPDphy", "MNTDphy", 
+                       "MPDfunc", "MNTDfunc", 
                        "Dissection", "SLA", "Stipe length", "Pinna no.")) %>%
         fct_rev()
     )
