@@ -1985,21 +1985,6 @@ bind_data <- function (..., id_col = "dataset") {
 #' not included in model
 #'
 #' @return ggplot object
-#' @example
-#' make_scatterplot(
-#'   yval = "vpd_mean",
-#'   data = climate_select,
-#'   fits = climate_model_fits, 
-#'   summaries = climate_model_summaries, 
-#'   habit_colors = habit_colors
-#' )
-#' make_scatterplot(
-#'   yval = "ntaxa",
-#'   data = div_metrics_select,
-#'   fits = div_el_model_fits, 
-#'   summaries = div_el_model_summaries, 
-#'   habit_colors = habit_colors
-#' )
 make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                               single_line = TRUE,
                               r_upper = TRUE,
@@ -2124,7 +2109,7 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
 #'   summaries = div_el_model_summaries, 
 #'   habit_colors = habit_colors
 #' )
-make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
+make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                               single_line = TRUE,
                               r_upper = TRUE,
                               data, 
@@ -2578,6 +2563,10 @@ combine_cwm_plots <- function (scatterplots) {
           axis.title.x = element_blank(),
           axis.text.x = element_blank())
     }
+    if(plots_df$resp_var[[i]] == "sla") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        ylab(expression(SLA~(m^{"2"}~kg^{"-1"})))
+    }
   }
   
   # Combine plots into single output
@@ -2631,6 +2620,21 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
         theme(
           axis.title.x = element_blank(),
           axis.text.x = element_blank())
+    }
+    if(plots_df$resp_var[[i]] == "ntaxa") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab("Richness")
+    }
+    if(plots_df$resp_var[[i]] == "mntd.obs.z.func") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[func]))
+    }
+    if(plots_df$resp_var[[i]] == "mpd.obs.z.func") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[func]))
+    }
+    if(plots_df$resp_var[[i]] == "mntd.obs.z.phy") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[phy]))
+    }
+    if(plots_df$resp_var[[i]] == "mpd.obs.z.phy") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[phy]))
     }
     if(plots_df$plot_type[[i]] == "box") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
@@ -2965,12 +2969,16 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
 #'
 #' @return GGplot object
 #' 
-make_heatmap <- function(important_div_vars) {
+make_heatmap <- function(important_div_vars, vars_select = c(
+  "ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func",
+  "stipe", "rhizome", "sla", "dissection", "pinna"
+)) {
   
   # Reformat data for plotting
   plot_data <-
     important_div_vars %>%
-    gather(indep_var, value, -resp_var) %>%
+    filter(resp_var %in% vars_select) %>%
+    gather(indep_var, value, -resp_var) %>% 
     # Specify levels of indep and resp vars so they show up along
     # the axes in the right order
     mutate(
@@ -2982,7 +2990,7 @@ make_heatmap <- function(important_div_vars) {
         resp_var, 
         levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
                    "mpd.obs.z.func", "mntd.obs.z.func", 
-                   "dissection", "sla", "stipe", "pinna"))
+                   "stipe", "rhizome", "dissection", "sla", "pinna"))
     ) %>%
     # Reformat the names of the indep and resp vars so they
     # look pretty
@@ -2993,9 +3001,9 @@ make_heatmap <- function(important_div_vars) {
                        "SD Temp.", "Mean VPD", "Min. VPD", "SD VPD")),
       resp_var = lvls_revalue(
         resp_var, 
-        new_levels = c("Richness", "MPDphy", "MNTDphy", 
-                       "MPDfunc", "MNTDfunc", 
-                       "Dissection", "SLA", "Stipe length", "Pinna no.")) %>%
+        new_levels = c("Richness", "MPD[phy]", "MNTD[phy]", 
+                       "MPD[func]", "MNTD[func]", 
+                       "Stipe~length", "Rhizome~diam.", "Frond~dissection", "SLA", "Pinna~no.")) %>%
         fct_rev()
     )
   
@@ -3011,6 +3019,7 @@ make_heatmap <- function(important_div_vars) {
       y = "Response",
       fill = "Importance"
     ) +
+    scale_y_discrete(labels = parse(text = levels(plot_data$resp_var))) +
     jntools::standard_theme() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 }
