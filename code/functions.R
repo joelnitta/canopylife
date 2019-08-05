@@ -2082,7 +2082,10 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
       y = ylab,
       x = xlab
     ) +
-    standard_theme()
+    standard_theme() +
+    scale_x_continuous(
+      breaks = c(300,600,900,1200)
+    )
   
 }
 
@@ -2200,7 +2203,10 @@ make_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation 
       y = ylab,
       x = xlab
     ) +
-    standard_theme()
+    standard_theme() +
+    scale_x_continuous(
+      breaks = c(300,600,900,1200)
+    )
   
 }
 
@@ -2531,7 +2537,10 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
       y = ylab,
       x = xlab
     ) +
-    standard_theme()
+    standard_theme() +
+    scale_x_continuous(
+      breaks = c(300,600,900,1200)
+    )
 }
 
 #' Combine community-weighted mean plots into final figure
