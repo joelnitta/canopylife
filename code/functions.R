@@ -716,8 +716,6 @@ run_trait_PCA <- function (traits, phy,
     select(species, habit, cont_traits) %>%
     # Keep only completely sampled species
     filter(complete.cases(.)) %>%
-    # Exclude A. evecta
-    filter(species != "Angiopteris_evecta") %>%
     # Keep only species in phylogeny, in phylogenetic order
     match_traits_and_tree(traits = ., phy = phy, "traits") 
   
@@ -3115,3 +3113,4 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   # run fitPagel() on widespread growth vs. presence/absence of gemmae
   fitPagel(tree = phy_trim, x = trait_vec, y = gemmae_vec)
   
+}

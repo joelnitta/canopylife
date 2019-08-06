@@ -186,7 +186,7 @@ plan <- drake_plan(
   
   # Principal components analysis ----
   pca_results = run_trait_PCA(
-    traits = fern_traits,
+    traits = fern_traits_log_scaled,
     phy = phy
   ),
   
@@ -213,6 +213,8 @@ plan <- drake_plan(
   ),
   
   # Correlated evolution ----
+  
+  # Run Pagel's test of corr. evol. on binary (gametophyte) traits.
   correlated_evo_test = list(
     as.list(c("morphotype", "glands", "hairs", "gemmae")),
     traits = list(fern_traits),
