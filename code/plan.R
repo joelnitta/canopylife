@@ -254,47 +254,67 @@ plan <- drake_plan(
   ),
   
   # Functional community diversity ----
-  # (includes quantitative, i.e., sporophyte, traits only).
+  # Define sets of traits for analysis:
+  # - all traits
+  all = c("stipe", "length", "width", "rhizome",
+          "sla", "pinna", "dissection",
+          "morphotype", "glands", "hairs", "gemmae"),
   
-  # - Using FD metrics (FEve, Fric, etc.)
-  # (FD does the scaling for us)
-  # func_div = analyze_fd_by_habit(fern_traits, comm),
-  
-  # - Define sets of traits for analysis
+  # - traits related to sporophyte size
   size = c("stipe", "length", "width", "rhizome"),
   
+  # - traits other than sporophyte size
   other = c("sla", "pinna", "dissection",
-                   "morphotype", "glands", "hairs", "gemmae"),
+            "morphotype", "glands", "hairs", "gemmae"),
   
-  all = c("stipe", "length", "width", "rhizome",
-                 "morphotype", "glands", "hairs", "gemmae"),
+  # - sporophyte traits
+  sporo = c("stipe", "length", "width", "rhizome",
+            "sla", "pinna", "dissection"),
   
-  all_reduced = c("stipe", "morphotype", "glands", "hairs", "gemmae"),
+  # - gametophyte traits
+  gameto = c("morphotype", "glands", "hairs", "gemmae"),
   
-  # - Using MPD, MNTD on trait distances
-  func_comm_struc = target(
+  # - reduced set of traits excluding frond length and width,
+  # which are highly correlated with stipe length.
+  reduced = c("stipe", "rhizome",
+              "sla", "pinna", "dissection",
+              "morphotype", "glands", "hairs", "gemmae"),
+  
+  # For SI, test out sets of different traits and transformations
+  func_comm_struc_test = target(
     analyze_func_struc_by_habit(
       comm = comm,
       traits = trait_data,
       traits_select = traits_select_list,
-      null_model = null_model_list,
-      abundance_weighted = abundance_weighted_list,
-      iterations = 5000
+      null_model = "independentswap",
+      abundance_weighted = TRUE,
+      iterations = 10000
     ),
     transform = cross(
-      trait_data = c(fern_traits, fern_traits_scaled, fern_traits_log_scaled),
-      traits_select_list = c(size, other, all, all_reduced),
-      null_model_list = c("phylogeny.pool", "independentswap"),
-      abundance_weighted_list = c(TRUE, FALSE)
+      trait_data = c(fern_traits_scaled, fern_traits_log_scaled),
+      traits_select_list = c(all, size, other, sporo, gameto, reduced),
     )
   ),
-  
+
   func_comm_struc_combined = target(
-    bind_data(func_comm_struc),
-    transform = combine(func_comm_struc)
-  )
+    bind_data(func_comm_struc_test),
+    transform = combine(func_comm_struc_test)
+  ),
   
-)
+  # For main results, analyze traits in the "reduced" set
+  # that have been log-transformed and scaled.
+  func_comm_struc = analyze_func_struc_by_habit(
+    comm = comm,
+    traits = fern_traits_log_scaled,
+    traits_select = reduced,
+    null_model = "independentswap",
+    # Weigh so that sporophyte and gametophyte traits
+    # are split evenly
+    weights = c(rep(.5 / 5, 5), rep(.5 / 4, 4)),
+    abundance_weighted = TRUE,
+    iterations = 10000
+  ),
+  
 
   
 #   # Modeling ----
