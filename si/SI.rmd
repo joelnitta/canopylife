@@ -93,28 +93,32 @@ correlated_evo_test_strict %>%
   write_csv(here::here("si/Table_S4.csv"))
 ```
 
-**Table S5** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown. Abbreviations: FDiv, functional diversity; FEve, functional evenness; FRic, functional richness; MPD, mean phylogenetic distance; MNTD, mean nearest taxon distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion. Values of MPD and MNTD are the standard effect sizes calculated from comparison of observed values with null distribution (see Methods). Trait names refer to community-weighted mean values (see Methods).
+**Table S5** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown. Abbreviations: MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
 
 ```{r best-fit-mods}
 # Format and write out table as CSV file
 best_fit_div_models %>%
+  # Drop frond length and width (highly correlated with rhizome dia.)
+  filter(resp_var %in% c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
+                   "mpd.obs.z.func", "mntd.obs.z.func",
+                   "dissection", "sla", "stipe", "rhizome", "pinna")) %>%
   mutate(resp_var = factor(
         resp_var, 
-        levels = c("ntaxa", "mpd.obs.z", "mntd.obs.z", 
-                   "FDiv", "FEve", "FRic",
-                   "dissection", "sla", "stipe", "pinna"))) %>%
+        levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
+                   "mpd.obs.z.func", "mntd.obs.z.func",
+                   "dissection", "sla", "stipe", "rhizome", "pinna"))) %>%
   mutate(
     resp_var = lvls_revalue(
         resp_var, 
-        new_levels = c("Richness", "MPD", "MNTD", 
-                       "FDiv", "FEve", "FRic",
-                       "Dissection", "SLA", "Stipe length", "Pinna no.")) 
+        new_levels = c("Richness", "MPDphy", "MNTDphy", 
+                       "MPDfunc", "MNTDfunc",
+                       "Dissection", "SLA", "Stipe length", "Rhizome diam.", "Pinna no.")) 
   ) %>%
   arrange(resp_var, delta_AICc) %>%
   mutate(
     modname = modname %>%
       str_replace_all("\\+", " \\+ ") %>%
-      str_replace_all("\\.by\\.", " × ") %>%
+      str_replace_all("\\.by\\.", " x ") %>%
       str_replace_all("habit", "Growth habit") %>%
       str_replace_all("temp_mean", "Mean temp.") %>%
       str_replace_all("temp_sd", "SD temp.") %>%
