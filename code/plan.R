@@ -315,176 +315,191 @@ plan <- drake_plan(
     iterations = 10000
   ),
   
+  # Calculate community-weighted means with standard deviation
+  # - in long format
+  cwm_long = calculate_cwm(fern_traits, comm, moorea_sites),
+  # - and by site
+  cwm_by_site = cwm_long %>% select(-sd, -el) %>% spread(trait, cwm),
 
+  # Modeling ----
+
+  ### Prepare diversity data (response variables) ###
+
+  # - Combine diversity metrics into single dataframe
+  div_metrics_all = left_join(
+    select(phy_comm_struc, 
+           site, habit, ntaxa, 
+           mpd.obs.z.phy = mpd.obs.z, 
+           mntd.obs.z.phy = mntd.obs.z),
+    select(func_comm_struc,
+           site, habit, 
+           mpd.obs.z.func = mpd.obs.z, 
+           mntd.obs.z.func = mntd.obs.z)) %>%
+    left_join(cwm_by_site) %>%
+    left_join(moorea_sites),
+
+  ### Run full-subset analysis using GAMs ###
+
+  # - Merge all diversity metrics and climate data for GAMs
+  # (transformed version of climate, but including outlier)
+  div_climate_trans = inner_join(div_metrics_all, climate_trans),
+
+  # - Make named vector of response variables to test
+  resp_vars = div_metrics_all %>%
+    select(-site, -habit, -el, -long, -lat) %>%
+    colnames %>% rlang::set_names(),
+
+  # - Run full-subsets model analysis.
+  fss_div_results = purrr::map(
+    resp_vars,
+    ~ run_full_subset_canopy_mods(
+      data = div_climate_trans,
+      indep_vars = climate_vars,
+      resp_var = .)
+  ),
+
+  # - Extract table of importance of each environmental variable.
+  important_div_vars = get_important_vars(fss_div_results),
+
+  # - Extract table of best-fit models.
+  best_fit_div_models = get_best_fss_mods(fss_div_results),
+
+  # - Test for spatial autocorrelation in residuals with Moran's I.
+  best_fit_div_models_moran = mutate(
+    best_fit_div_models,
+    moran_test = map2(
+      .x = resp_var, .y = modname,
+      ~ check_moran_fss(
+        model_set = fss_div_results,
+        resp_var = .x,
+        best_mod = .y,
+        site_data = moorea_sites
+      )
+    )
+  ) %>%
+    unnest() %>%
+    select(resp_var, modname, AICc, r2, delta_AICc,
+           morans_I = statistic, morans_I_pval = p.value),
+
+  ### Run linear models of diversity metrics by elevation ###
+
+  # - Make full set of models including each diversity metric
+  # by elevation, growth habit, and
+  # their interaction, then choose the best model for each.
+  div_el_models = choose_habit_elevation_models(div_metrics_all, resp_vars),
+
+  # - Extract fits of best models.
+  div_el_model_fits = extract_model_fits(div_el_models),
+
+  # - Get summaries of best model parameters.
+  div_el_model_parameter_summaries = extract_model_parameters(div_el_models),
+
+  # - Get summaries of best models.
+  div_el_model_summaries = extract_model_summaries(div_el_models),
+
+  # - Check for spatial autocorrelation in residuals.
+  div_el_model_moran = div_el_models %>%
+    select(-model) %>%
+    unnest %>%
+    select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
+
+  ### Run t-tests by growth habit ###
+  div_t_test_results = map_df(
+    resp_vars,
+    ~ run_t_test_by_habit(
+      resp_var = .,
+      data = div_metrics_all
+    )
+  ),
+
+  # Plots ----
+
+  # Set color scheme: epiphytes in green, terrestrial in brown.
+  habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
+    set_names(levels(moorea_climate_raw$habit)),
+
+  # Make climate plot.
+  climate_plot = make_climate_plot(
+    data = climate_select,
+    resp_vars = climate_vars,
+    fits = climate_model_fits,
+    summaries = climate_model_summaries,
+    habit_colors = habit_colors),
+
+  # Make PCA plot.
+  pca_plot = make_pca_plot(
+    pca_results = pca_results,
+    habit_colors = habit_colors,
+    traits = fern_traits
+  ),
+
+  # Make plot of traits with tree.
+  traits_with_tree = plot_traits_on_tree(
+    traits = fern_traits,
+    phy = phy,
+    ppgi = ppgi
+  ),
+
+  # Make CWM scatterplots.
+  cwm_scatterplots = map2(
+    .x = c("stipe", "length", "width", "rhizome",
+    "sla", "pinna", "dissection") %>% set_names(.),
+    .y = c("Stipe length (cm)", "Frond length (cm)", "Frond width (cm)", "Rhizome dia. (cm)",
+          "SLA", "Pinna no.", "Frond dissection"),
+    ~ make_cwm_scatterplot(
+      data = cwm_long,
+      fits = div_el_model_fits,
+      summaries = div_el_model_summaries,
+      yval = .x,
+      ylab = .y,
+      habit_colors = habit_colors)
+  ),
   
-#   # Modeling ----
-#   
-#   ### Prepare diversity data (response variables) ###
-#   
-#   # - Combine diversity metrics into single dataframe
-#   div_metrics_all = left_join(comm_struc, func_div) %>%
-#     select(site, habit,
-#            ntaxa, mpd.obs.z, mntd.obs.z, 
-#            FRic, FEve, FDiv,
-#            dissection, sla, stipe, length, width, rhizome, pinna),
-#   
-#   # - Subset diversity metrics to only those with correlation
-#   # coefficients less than 0.9, and add elevation and outlier status.
-#   div_metrics_select = select_div_metrics(div_metrics_all) %>%
-#     left_join(moorea_sites) %>%
-#     mutate(
-#       is_outlier = case_when(
-#         site == "Rotui_800m_slope" ~ "yes",
-#         TRUE ~ "no"
-#       )
-#     ),
-#   
-#   ### Run full-subset analysis using GAMs ###
-#   
-#   # - Merge all diversity metrics and climate data for GAMs
-#   # (transformed version of climate, but including outlier)
-#   div_climate_trans = inner_join(div_metrics_select, climate_trans),
-#   
-#   # - Make named vector of response variables to test
-#   resp_vars = div_metrics_select %>%
-#     select(-site, -habit, -el, -is_outlier, -long, -lat) %>% 
-#     colnames %>% rlang::set_names(),
-#   
-#   # - Run full-subsets model analysis.
-#   fss_div_results = purrr::map(
-#     resp_vars, 
-#     ~ run_full_subset_canopy_mods(
-#       data = div_climate_trans,
-#       indep_vars = climate_vars,
-#       resp_var = .)
-#   ),
-#   
-#   # - Extract table of importance of each environmental variable.
-#   important_div_vars = get_important_vars(fss_div_results),
-#   
-#   # - Extract table of best-fit models.
-#   best_fit_div_models = get_best_fss_mods(fss_div_results),
-#   
-#   # - Test for spatial autocorrelation in residuals with Moran's I.
-#   best_fit_div_models_moran = mutate(
-#     best_fit_div_models,
-#     moran_test = map2(
-#       .x = resp_var, .y = modname,
-#       ~ check_moran_fss(
-#         model_set = fss_div_results,
-#         resp_var = .x,
-#         best_mod = .y,
-#         site_data = moorea_sites
-#       )
-#     )
-#   ) %>%
-#     unnest() %>%
-#     select(resp_var, modname, AICc, r2, delta_AICc, 
-#            morans_I = statistic, morans_I_pval = p.value),
-#   
-#   ### Run linear models of diversity metrics by elevation ###
-#   
-#   # - Make full set of models including each diversity metric 
-#   # by elevation, growth habit, and
-#   # their interaction, then choose the best model for each.
-#   div_el_models = choose_habit_elevation_models(div_metrics_select, resp_vars),
-#   
-#   # - Extract fits of best models.
-#   div_el_model_fits = extract_model_fits(div_el_models),
-#   
-#   # - Get summaries of best model parameters.
-#   div_el_model_parameter_summaries = extract_model_parameters(div_el_models),
-#   
-#   # - Get summaries of best models.
-#   div_el_model_summaries = extract_model_summaries(div_el_models),
-#   
-#   # - Check for spatial autocorrelation in residuals.
-#   div_el_model_moran = div_el_models %>%
-#     select(-model) %>%
-#     unnest %>%
-#     select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
-#   
-#   ### Run t-tests by growth habit ###
-#   div_t_test_results = map_df(
-#     resp_vars,
-#     ~ run_t_test_by_habit(
-#       resp_var = .,
-#       data = div_metrics_select
-#     )
-#   ),
-#   
-#   # Plots ----
-#   
-#   # Set color scheme: epiphytes in green, terrestrial in brown.
-#   habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
-#     set_names(levels(moorea_climate_raw$habit)),
-#   
-#   # Make climate plot.
-#   climate_plot = make_climate_plot(
-#     data = climate_select,
-#     resp_vars = climate_vars,
-#     fits = climate_model_fits, 
-#     summaries = climate_model_summaries, 
-#     habit_colors = habit_colors),
-#   
-#   # Make PCA plot.
-#   pca_plot = make_pca_plot(
-#     pca_results = pca_results, 
-#     habit_colors = habit_colors, 
-#     traits = fern_traits
-#   ),
-#   
-#   # Make plot of traits with tree.
-#   traits_with_tree = plot_traits_on_tree(
-#     traits = fern_traits,
-#     phy = phy,
-#     ppgi = ppgi
-#   ),
-#   
-#   # Make community diversity scatterplots.
-#   div_scatterplots = map(
-#     resp_vars, 
-#     ~ make_scatterplot(
-#       data = div_metrics_select,
-#       fits = div_el_model_fits, 
-#       summaries = div_el_model_summaries, 
-#       yval = .,
-#       habit_colors = habit_colors)
-#   ),
-#   
-#   # Make community diversity boxplots.
-#   div_boxplots = map(
-#     resp_vars, 
-#     ~ make_boxplot(
-#       data = div_metrics_select,
-#       summaries = div_t_test_results, 
-#       yval = .,
-#       habit_colors = habit_colors)
-#   ),
-#   
-#   # Combine community diversity scatterplots
-#   # and boxplots into final figure.
-#   combined_comm_div_plots = combine_comm_div_plots(
-#     scatterplots = div_scatterplots, 
-#     boxplots = div_boxplots),
-#   
-#   # Combine community-weighted means scatterplots
-#   # and boxplots into final figure.
-#   combined_cwm_plots = combine_cwm_plots(
-#     scatterplots = div_scatterplots, 
-#     boxplots = div_boxplots),
-#   
-#   # Make heatmap of importance scores.
-#   importance_heatmap = make_heatmap(important_div_vars),
-#   
-#   # Manuscript ----
-#   ms = rmarkdown::render(
-#     knitr_in("ms/manuscript.Rmd"),
-#     quiet = TRUE),
-#   
-#   # Write out supplemental information
-#   si = rmarkdown::render(
-#     knitr_in("si/SI.Rmd"),
-#     quiet = TRUE)
-#   
-# )
+  # Make community diversity scatterplots
+  div_scatterplots = map(
+    c("ntaxa", "mpd.obs.z.phy",  "mntd.obs.z.phy", 
+      "mpd.obs.z.func", "mntd.obs.z.func") %>% set_names(.),
+    ~ make_div_scatterplot(
+      data = div_metrics_all,
+      fits = div_el_model_fits,
+      summaries = div_el_model_summaries,
+      yval = .,
+      habit_colors = habit_colors)
+  ),
+
+  # Make community diversity boxplots.
+  div_boxplots = map(
+    c("ntaxa", "mpd.obs.z.phy",  "mntd.obs.z.phy",  
+      "mpd.obs.z.func", "mntd.obs.z.func") %>% set_names(.),
+    ~ make_boxplot(
+      data = div_metrics_all,
+      summaries = div_t_test_results,
+      yval = .,
+      habit_colors = habit_colors)
+  ),
+
+  # Combine community diversity scatterplots
+  # and boxplots into final figure.
+  combined_comm_div_plots = combine_comm_div_plots(
+    scatterplots = div_scatterplots,
+    boxplots = div_boxplots),
+
+  # Combine community-weighted means scatterplots
+  # and boxplots into final figure.
+  combined_cwm_plots = combine_cwm_plots(
+    scatterplots = cwm_scatterplots),
+
+  # Make heatmap of importance scores.
+  importance_heatmap = make_heatmap(important_div_vars),
+
+  # Manuscript ----
+  ms = rmarkdown::render(
+    knitr_in("ms/manuscript.Rmd"),
+    quiet = TRUE),
+
+  # Write out supplemental information
+  si = rmarkdown::render(
+    knitr_in("si/SI.Rmd"),
+    quiet = TRUE)
+
+)
