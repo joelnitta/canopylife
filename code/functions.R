@@ -3023,3 +3023,95 @@ make_heatmap <- function(important_div_vars, vars_select = c(
     jntools::standard_theme() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 }
+
+# SI ----
+
+
+#' Run Pagel's test of correlated evolution on widespread gametos
+#' vs. presence/absence of gemmae for ferns of Moorea
+#'
+#' @param community_matrix_path Path to community matrix of Nitta et al 2017
+#' @param phy Phylogeny including ferns of Moorea and Tahiti
+#' @param traits Traits dataframe including growth habit
+#' @param moorea_sites Site data for plots on Moorea including elevation
+#'
+#' @return List; output of fitPagel
+#' 
+test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moorea_sites) {
+  
+  # Convert raw community data to long format by sporophyte and gametophyte
+  # min and max elevational range.
+  range_long <-
+    read_csv(community_matrix_path) %>%
+    rename(site = X1) %>% 
+    gather(species, abundance, -site) %>%
+    # Exclude some species missing sporo observations in the raw data
+    filter(!species %in% c("Hymenophyllum_braithwaitei", "Lindsaea_propinqua", 
+                           "Lindsaea_repens", "Loxogramme_parksii")) %>%
+    mutate(generation = case_when(
+      str_detect(site, "_S") ~ "sporophyte",
+      str_detect(site, "_G") ~ "gametophyte"
+    )) %>%
+    mutate(site = str_remove_all(site, "_S") %>% str_remove_all("_G")) %>%
+    # Keep only sites on Moorea
+    filter(site %in% moorea_sites$site) %>%
+    left_join(moorea_sites) %>%
+    filter(abundance > 0) %>%
+    group_by(species, generation) %>%
+    summarize(
+      min_range = min(el),
+      max_range = max(el)
+    ) %>%
+    ungroup
+  
+  # Compare ranges to see which species have gametophytes beyond sporophytes
+  range_comp <- full_join(
+    range_long %>%
+      gather(variable, value, -species, -generation) %>%
+      filter(generation == "sporophyte") %>% 
+      select(-generation) %>%
+      spread(variable, value) %>%
+      rename_at(vars(max_range, min_range), ~paste("sporo", ., sep = "_")),
+    range_long %>%
+      gather(variable, value, -species, -generation) %>%
+      filter(generation == "gametophyte") %>% 
+      select(-generation) %>%
+      spread(variable, value) %>%
+      rename_at(vars(max_range, min_range), ~paste("gameto", ., sep = "_"))
+  ) %>%
+    mutate(
+      gameto_beyond_sporo = case_when(
+        gameto_max_range > sporo_max_range ~ "yes",
+        gameto_min_range < sporo_min_range ~ "yes",
+        is.na(sporo_max_range) & is.na(sporo_min_range) ~ "yes",
+        TRUE ~ "no"
+      )
+    )
+  
+  # Add growth habit
+  range_comp <- inner_join(
+    fern_traits, range_comp
+  ) %>%
+    select(species, gameto_beyond_sporo, gemmae) %>%
+    mutate(gemmae = case_when(
+      gemmae == 1 ~ "yes",
+      gemmae == 0 ~ "no"
+    )) %>%
+    # Trim data to non-missing trait values
+    remove_missing(na.rm = TRUE)
+  
+  # Make sure species in same order in tree and traits
+  traits_trim <- match_traits_and_tree(traits = range_comp, phy = phy, "traits") 
+  phy_trim <- match_traits_and_tree(traits = range_comp, phy = phy, "tree") 
+  
+  # Format input data for phytools
+  # - Extract named vector of trait values
+  trait_vec <- pull(traits_trim, gameto_beyond_sporo) %>%
+    set_names(traits_trim$species)
+  # - Extract named vector of gemmae presence/absence
+  gemmae_vec <- pull(traits_trim, gemmae) %>%
+    set_names(traits_trim$species)
+  
+  # run fitPagel() on widespread growth vs. presence/absence of gemmae
+  fitPagel(tree = phy_trim, x = trait_vec, y = gemmae_vec)
+  

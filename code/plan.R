@@ -228,6 +228,14 @@ plan <- drake_plan(
   ) %>%
     pmap_dfr(test_corr_evo),
   
+  # For SI, run test on widespread gametophytes vs. pres/abs of gemmae.
+  correlated_evo_test_gemmae = test_corr_evo_range_gemmae(
+    file_in("data/nitta_2017/all_plots.csv"), 
+    phy, 
+    fern_traits, 
+    moorea_sites
+  ),
+  
   # Phylogenetically independent contrasts ----
   pic_results = run_pic(
     traits = fern_traits,
