@@ -3,7 +3,7 @@ plan <- drake_plan(
   
   # Data processing ----
   
-  ### Download pre-processed data ###
+  ### Pre-processed data ###
   # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
   nitta_2017_data = download_and_unzip_nitta_2017(
     dl_path = "data/nitta_2017_data_and_scripts.zip",
@@ -114,7 +114,7 @@ plan <- drake_plan(
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
   
-  ###  Format trait data for SI ###
+  ### Format trait data for SI ###
   # Include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
     sla_raw, morph_cont_raw, morph_qual_raw
@@ -158,8 +158,7 @@ plan <- drake_plan(
   # - Make full set of climate models including
   # each climate var by elevation, growth habit, and
   # their interaction, then choose the best model for each.
-  # Exclude single outlier site, but use untransformed
-  # data so the fits can be plotted.
+  # Exclude single outlier site.
   climate_models = choose_habit_elevation_models(
     data = climate_trans_no_outlier,
     resp_vars = climate_vars),
@@ -260,16 +259,11 @@ plan <- drake_plan(
           "sla", "pinna", "dissection",
           "morphotype", "glands", "hairs", "gemmae"),
   
-  # - traits related to sporophyte size
+  # - sporophyte traits related to size
   size = c("stipe", "length", "width", "rhizome"),
   
-  # - traits other than sporophyte size
-  other = c("sla", "pinna", "dissection",
-            "morphotype", "glands", "hairs", "gemmae"),
-  
-  # - sporophyte traits
-  sporo = c("stipe", "length", "width", "rhizome",
-            "sla", "pinna", "dissection"),
+  # - sporophyte traits other than size
+  other = c("sla", "pinna", "dissection"),
   
   # - gametophyte traits
   gameto = c("morphotype", "glands", "hairs", "gemmae"),
@@ -292,7 +286,7 @@ plan <- drake_plan(
     ),
     transform = cross(
       trait_data = c(fern_traits_scaled, fern_traits_log_scaled),
-      traits_select_list = c(all, size, other, sporo, gameto, reduced),
+      traits_select_list = c(all, size, other, gameto, reduced),
     )
   ),
 
@@ -497,7 +491,7 @@ plan <- drake_plan(
     knitr_in("ms/manuscript.Rmd"),
     quiet = TRUE),
 
-  # Write out supplemental information
+  # SI ----
   si = rmarkdown::render(
     knitr_in("si/SI.Rmd"),
     quiet = TRUE)

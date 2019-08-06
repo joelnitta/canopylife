@@ -133,7 +133,7 @@ best_fit_div_models %>%
   write_csv(here::here("si/Table_S5.csv"))
 ```
 
-**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input: **a**, standard effect size of mean phylogenetic distance (MPD~func~) **b**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "sporo" (sporophyte traits; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "size" (sporophyte size-related traits; frond length and width, stipe length, rhizome width), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "reduced" (all traits but excluding frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
+**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input: **a**, standard effect size of mean phylogenetic distance (MPD~func~) **b**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "size" (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "reduced" (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
 
 ```{r fig-s1}
 library(corrr)
@@ -163,6 +163,7 @@ mpd_corr <-
   correlate %>% 
   rearrange(absolute = FALSE) # arrange so most correlated variables are closest
 
+# Make plot 
 # Modified from https://github.com/tidymodels/corrr/issues/35
 order <- mpd_corr %>% 
   select(-rowname) %>% 
@@ -192,18 +193,12 @@ mntd_corr <-
   spread(dataset, mntd.obs.z) %>%
   select(-site, -habit) %>%
   correlate %>% 
-  rearrange(absolute = FALSE) # arrange so most correlated variables are closest
-
-# Modified from https://github.com/tidymodels/corrr/issues/35
-# order <- mntd_corr %>% 
-#   select(-rowname) %>% 
-#   colnames() %>% 
-#   rev()
+  rearrange(absolute = FALSE)
 
 mntd_corr_plot <-
   mntd_corr %>% 
   stretch(na.rm = TRUE) %>%
-  mutate_at(c("x", "y"), forcats::fct_relevel, ... = order) %>% 
+  mutate_at(c("x", "y"), forcats::fct_relevel, ... = order) %>% # Use same order as MPD
   ggplot(aes(x, y, fill = r)) +
   geom_tile() +
   geom_text(aes(label = as.character(fashion(r))), color = "white", size = 3) +
