@@ -3088,7 +3088,7 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   
   # Add growth habit
   range_comp <- inner_join(
-    fern_traits, range_comp
+    traits, range_comp
   ) %>%
     select(species, gameto_beyond_sporo, gemmae) %>%
     mutate(gemmae = case_when(
