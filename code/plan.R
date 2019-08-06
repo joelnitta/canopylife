@@ -444,10 +444,15 @@ plan <- drake_plan(
       data = cwm_long,
       fits = div_el_model_fits,
       summaries = div_el_model_summaries,
+      t_test_results = div_t_test_results,
       yval = .x,
       ylab = .y,
       habit_colors = habit_colors)
   ),
+  
+  # Combine community-weighted means scatterplots into final figure.
+  combined_cwm_plots = combine_cwm_plots(
+    scatterplots = cwm_scatterplots),
   
   # Make community diversity scatterplots
   div_scatterplots = map(
@@ -477,11 +482,6 @@ plan <- drake_plan(
   combined_comm_div_plots = combine_comm_div_plots(
     scatterplots = div_scatterplots,
     boxplots = div_boxplots),
-
-  # Combine community-weighted means scatterplots
-  # and boxplots into final figure.
-  combined_cwm_plots = combine_cwm_plots(
-    scatterplots = cwm_scatterplots),
 
   # Make heatmap of importance scores.
   importance_heatmap = make_heatmap(important_div_vars),

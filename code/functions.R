@@ -1226,8 +1226,8 @@ analyze_func_struc_by_habit <- function (
     dist_mat <- FD::gowdis(traits_df, w = weights) 
   } else {
     dist_mat <- FD::gowdis(traits_df) 
-    }
-
+  }
+  
   ### Run community structure analysis ###
   
   # Look at phylo structure of each plot individually, compared to null 
@@ -1984,11 +1984,11 @@ bind_data <- function (..., id_col = "dataset") {
 #'
 #' @return ggplot object
 make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
-                              single_line = TRUE,
-                              r_upper = TRUE,
-                              data, 
-                              fits, summaries, 
-                              habit_colors, alpha_val = 0.5) {
+                                      single_line = TRUE,
+                                      r_upper = TRUE,
+                                      data, 
+                                      fits, summaries, 
+                                      habit_colors, alpha_val = 0.5) {
   
   yval_sym <- sym(yval)
   xval_sym <- sym(xval)
@@ -2108,11 +2108,11 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
 #'   habit_colors = habit_colors
 #' )
 make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
-                              single_line = TRUE,
-                              r_upper = TRUE,
-                              data, 
-                              fits, summaries, 
-                              habit_colors) {
+                                  single_line = TRUE,
+                                  r_upper = TRUE,
+                                  data, 
+                                  fits, summaries, 
+                                  habit_colors) {
   
   yval_sym <- sym(yval)
   xval_sym <- sym(xval)
@@ -2436,26 +2436,42 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                                   r_upper = TRUE,
                                   data, 
                                   fits, summaries, 
+                                  t_test_results,
                                   habit_colors) {
   
   yval_sym <- sym(yval)
   xval_sym <- sym(xval)
   
-  # Filter data
+  # Filter plotting data (actual points)
   data <-
     data %>% filter(trait == yval)
+  
+  # Force minimum of error bar to be zero
+  data <-
+    data %>%
+    mutate(y_min = cwm - sd, y_max = cwm + sd) %>%
+    mutate(y_min = case_when(
+      y_min < 0 ~ 0,
+      TRUE ~ y_min
+    ))
   
   # Reformat model summaries for printing
   summaries <- summaries %>%
     mutate(r.squared = round_t(r.squared, 2))
   
+  t_test_results <- t_test_results %>%
+    mutate(statistic = round_t(statistic, 2))
+  
   # Subset model fits and summaries to response variable of interest
   fits <- filter(fits, var == yval)
   summaries <- filter(summaries, var == yval)
+  t_test_results <- filter(t_test_results, var == yval)
   
-  # Extract r2 and p values
+  # Extract r2, t-value, and p values
   r2 <- pull(summaries, r.squared)
   p <- pull(summaries, p.value)
+  t <- pull(t_test_results, statistic)
+  t_test_p <- pull(t_test_results, p.value)
   
   # Set number of asterisks for printing with r2
   asterisk <- case_when(
@@ -2465,10 +2481,19 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
     TRUE ~ ""
   )
   
+  # Set number of asterisks for printing with t-value
+  t_test_asterisk <- case_when(
+    t_test_p < 0.001 ~ "***",
+    t_test_p < 0.01 ~ "**",
+    t_test_p < 0.05 ~ "*",
+    TRUE ~ ""
+  )
+  
   # Need to wrap r2 plus asterisks in quotes for passing to 
   # ggplot::annotate with parse=TRUE so it won't error on the
   # asterisks
   r2 <- paste0('"', r2, asterisk, '"')
+  t <- paste0('"', t, asterisk, '"')
   
   # Extract model type: does the dependent variable depend on elevation
   # only, growth habit only, the interaction of both, or none?
@@ -2479,36 +2504,51 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
     plot <- ggplot(data, aes(x = !!xval_sym))
     if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + 
-      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
       geom_point(aes(y = cwm))
   } else if(model_type == "interaction") {
     plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
     if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + 
-      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
       geom_point(aes(y = cwm))
   } else {
     plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
     plot <- plot +
-      geom_errorbar(aes(ymin = cwm -sd, ymax = cwm + sd), alpha = 0.25) +
+      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
       geom_point(aes(y = cwm))
   }
   
-  # Set location of where to print R-squared
-  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
-    if (isTRUE(r_upper)) {
-      plot <- plot +
-        annotate("text", x = Inf, y = Inf, 
-                 label = glue::glue("italic(R) ^ 2 == {r2}"),
-                 hjust = 1.1, vjust = 1.2,
-                 parse = TRUE)
-    } else {
-      plot <- plot +
-        annotate("text", x = Inf, y = -Inf, 
-                 label = glue::glue("italic(R) ^ 2 == {r2}"),
-                 hjust = 1.1, vjust = -0.2,
-                 parse = TRUE)
-    }
+  # Print t and r2 statistics:
+  # both R2 and t if model is interaction and both signif.
+  if (p < 0.05 & t_test_p < 0.05 & model_type == "interaction") {
+    plot <- plot +
+      annotate("text", x = Inf, y = Inf, 
+               label = glue::glue("italic(R) ^ 2 == {r2}"),
+               hjust = 1.1, vjust = 1.1,
+               parse = TRUE,
+               size = 10 / .pt) +
+      annotate("text", x = Inf, y = Inf, 
+               label = glue::glue("italic(t) == {t}"),
+               hjust = 1.1, vjust = 3,
+               parse = TRUE,
+               size = 10 / .pt)
+    # R2 only if model is significant for elevation or interaction but not t
+  } else if (p < 0.05 & t_test_p > 0.05 & model_type %in% c("el_only", "interaction")) {
+    plot <- plot +
+      annotate("text", x = Inf, y = Inf, 
+               label = glue::glue("italic(R) ^ 2 == {r2}"),
+               hjust = 1.1, vjust = 1.1,
+               parse = TRUE,
+               size = 10 / .pt)
+    # T-value only if t is significant and model type is growth habit only
+  } else if (t_test_p < 0.05 & model_type == "habit_only") {
+    plot <- plot +
+      annotate("text", x = Inf, y = Inf, 
+               label = glue::glue("italic(t) == {t}"),
+               hjust = 1.1, vjust = 1.1,
+               parse = TRUE,
+               size = 10 / .pt)
   }
   
   # Add the rest of the plot details
@@ -2542,9 +2582,9 @@ combine_cwm_plots <- function (scatterplots) {
       resp_var = names(scatterplots),
       plot = as.list(scatterplots),
     ) %>%
-  # Sort plots by response
-  # so that patchwork::wrap_plots will output them in the
-  # correct order.
+    # Sort plots by response
+    # so that patchwork::wrap_plots will output them in the
+    # correct order.
     mutate(
       resp_var = factor(
         resp_var, 
