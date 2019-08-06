@@ -11,7 +11,7 @@ loadd(trait_data_for_si)
 loadd(climate_ancova_results)
 loadd(phylosig_binary_traits_strict)
 loadd(correlated_evo_test_strict)
-loadd(best_fit_div_models)
+loadd(best_fit_div_models_moran)
 loadd(func_comm_struc_combined)
 
 ```
@@ -93,11 +93,11 @@ correlated_evo_test_strict %>%
   write_csv(here::here("si/Table_S4.csv"))
 ```
 
-**Table S5** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown. Abbreviations: MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
+**Table S5** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown. Abbreviations: MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, *P* value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
 
 ```{r best-fit-mods}
 # Format and write out table as CSV file
-best_fit_div_models %>%
+best_fit_div_models_moran %>%
   # Drop frond length and width (highly correlated with rhizome dia.)
   filter(resp_var %in% c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
                    "mpd.obs.z.func", "mntd.obs.z.func",
@@ -132,7 +132,9 @@ best_fit_div_models %>%
     `Model` = modname,
     AICc,
     `R2` = r2,
-    delta_AICc
+    delta_AICc,
+    `Moran's I` = morans_I,
+    `P_moran` = morans_I_pval
   ) %>%
   write_csv(here::here("si/Table_S5.csv"))
 ```
