@@ -441,21 +441,24 @@ traits_used %>%
   ) %>%
   cols_label(
     data_type = "Data type (unit)",
-    ecological_significance = "Ecological Significance"
+    ecological_significance = "Ecological Significance",
+    reference = "Reference(s)"
   ) %>% 
   as_rtf() %>%
-  write_lines(here("ms/table1.rtf"))
+  write_lines(here::here("ms/table1.rtf"))
 
 # Include in PDF using kableExtra to convert to latex format
 traits_used %>% 
-  rename(`Data type (unit)` = data_type, `Functional significance` = ecological_significance) %>%
+  rename(`Data type (unit)` = data_type, `Functional significance` = ecological_significance, `Reference(s)` = reference) %>%
   column_to_rownames("trait") %>%
   knitr::kable(caption = "Traits used in this study", format = "latex", booktabs = TRUE, escape = TRUE) %>%
   kable_styling(full_width = FALSE) %>%
   pack_rows("Sporophyte traits", 1, 7) %>%
   pack_rows("Gametophyte traits", 8, 11) %>%
-  column_spec(3, width = "15em") %>%
-  footnote(general = "References: 1, Watkins \\\\textit{et al.} (2010); 2, Vogel (1968); 3, Creese \\\\textit{et al.} (2011); 4, Kluge \\\\& Kessler (2007); 5, Wright \\\\textit{et al.} (2004); 6, Watkins \\\\textit{et al.} (2007b); 7, Pittermann \\\\textit{et al.} (2013); 8, Farrar \\\\textit{et al.} (2008); 9, Wollenweber \\\\& Schneider (2000). Noncordate gametophyte morphotypes include ribbon, strap and filamentous.", general_title = "", threeparttable = TRUE, escape = FALSE)
+  column_spec(2, width = "8em") %>%
+  column_spec(3, width = "12em") %>%
+  column_spec(4, width = "8em") %>%
+  footnote(general = "Noncordate gametophyte morphotypes include ribbon, strap and filamentous.", general_title = "", threeparttable = TRUE, escape = TRUE)
 ```
 
 \clearpage
