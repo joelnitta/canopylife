@@ -197,7 +197,9 @@ Raw values of MPD and MNTD are statistically related to species richness [@Swens
 
 We tested for differences in diversity metrics between epiphytic and terrestrial communities with a paired \tval-test. We simultaneously tested the effects of climate and growth habit on diversity metrics using a full-subsets multiple regression approach with general additive models (GAMs) as implemented in the \package{FSSgamm} R package [@Fisher2018]. For each diversity metric, we built a set of models (Gaussian family, with site as a random effect) taking into account all combinations of explanatory variables and their pairwise interactions, and ranked these by AIC~c~ to find the models that best explain the data. Our dataset included `r nrow(div_metrics_all) - nrow(climate_select)` communities that lacked climate data and could not be included in full-subsets multiple regression analysis. Since we found that all climatic variables are related to elevation (see Results), we also constructed linear models for each diversity metric using the same model selection procedure as in the climate analysis. We checked for spatial autocorrelation in the model residuals with Moran's *I* [@Moran1950] as implemented in the \package{spdep} R package [@Bivand2013].
 
-Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife. Data have been deposited in Dryad (\*\*\* ADD DOI \*\*\*).
+### Data accessibility
+
+Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife. Raw and processed data are openly available from the Dryad repository at (http://doi.org/[\*\*\* ADD DOI \*\*\*]) [@Nitta2019].
 
 ## Results
 
