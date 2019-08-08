@@ -1963,6 +1963,20 @@ bind_data <- function (..., id_col = "dataset") {
 
 # Plotting ----
 
+#' Define ggplot theme
+#' 
+#' BW theme with no gridlines, black axis text.
+#'
+standard_theme2 <- function () {
+  ggplot2::theme_bw() + 
+    theme(
+      panel.grid.minor = ggplot2::element_blank(),
+      panel.grid.major = ggplot2::element_blank(),
+      axis.text.x = ggplot2::element_text(colour="black"),
+      axis.text.y = ggplot2::element_text(colour="black")
+    )
+}
+
 #' Make a single climate scatterplot
 #'
 #' @param yval Name of y variable
@@ -2065,7 +2079,7 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
       y = ylab,
       x = xlab
     ) +
-    standard_theme() +
+    standard_theme2() +
     scale_x_continuous(
       breaks = c(300,600,900,1200)
     )
@@ -2186,7 +2200,7 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
       y = ylab,
       x = xlab
     ) +
-    standard_theme() +
+    standard_theme2() +
     scale_x_continuous(
       breaks = c(300,600,900,1200)
     )
@@ -2251,7 +2265,7 @@ make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
       y = ylab,
       x = xlab
     ) +
-    standard_theme()
+    standard_theme2()
   
 }
 
@@ -2426,7 +2440,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     )
   
   a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
-    standard_theme() &
+    standard_theme2() &
     theme(legend.position = "none")
   
 }
@@ -2560,7 +2574,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
       y = ylab,
       x = xlab
     ) +
-    standard_theme() +
+    standard_theme2() +
     scale_x_continuous(
       breaks = c(300,600,900,1200)
     )
@@ -3058,7 +3072,7 @@ make_heatmap <- function(important_div_vars, vars_select = c(
       fill = "Importance"
     ) +
     scale_y_discrete(labels = parse(text = levels(plot_data$resp_var))) +
-    jntools::standard_theme() +
+    standard_theme2() +
     theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 }
 
