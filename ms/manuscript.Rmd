@@ -30,6 +30,7 @@ nocite: |
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
 library(drake)
+library(gt)
 library(patchwork)
 library(knitr)
 library(kableExtra)
@@ -363,7 +364,11 @@ We thank members of the Davis Lab, N. Michele Holbrook, and Jonathan Losos for h
 
 J.H.N. conceived and carried out the study. R.T. collected data. J.H.N. performed the analyses. J.H.N., J.E.W., and C.C.D. wrote the manuscript.
 
-## Figure Legends
+## References
+<!-- Insert <div id="refs"></div> to place the refs here instead of at the end -->
+<div id="refs"></div>
+
+\clearpage
 
 **\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. (**a**) Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinna pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. (**b**) Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
 
@@ -404,7 +409,7 @@ traits_used %>%
     ecological_significance = "Ecological Significance"
   ) %>% 
   as_rtf() %>%
-  write_lines("ms/table1.rtf")
+  write_lines(here("ms/table1.rtf"))
 
 # Include in PDF using kableExtra to convert to latex format
 traits_used %>% 
@@ -448,7 +453,7 @@ phylosig_cont_traits_table %>%
     lambda = "lambda"
   )  %>% 
   as_rtf() %>%
-  write_lines("ms/table2.rtf")
+  write_lines(here("ms/table2.rtf"))
 
 # Include in PDF in latex format
 phylosig_cont_traits_table %>%
@@ -486,7 +491,7 @@ phylosig_binary_traits_table %>%
     prob_brownian = md("*P*(bm)")
   ) %>% 
   as_rtf() %>%
-  write_lines("ms/table3.rtf")
+  write_lines(here("ms/table3.rtf"))
 
 # Include in PDF in latex format
 phylosig_binary_traits_table %>%
@@ -528,7 +533,7 @@ gt(rowname_col = "trait") %>%
     p.value = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines("ms/table4.rtf")
+  write_lines(here("ms/table4.rtf"))
 
 # Include in PDF in latex format
 pic_table %>%
@@ -566,7 +571,7 @@ gt(rowname_col = "trait") %>%
     pval = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines("ms/table5.rtf")
+  write_lines(here("ms/table5.rtf"))
 
 # Include in PDF in latex format
 correlated_evo_test_table %>%
@@ -577,8 +582,6 @@ correlated_evo_test_table %>%
 ```
 
 \clearpage
-
-## Figures
 
 ```{r traits-used-image, fig.width=7, fig.height=7, fig.cap = "Examples of traits used in this study."}
 knitr::include_graphics(here("images/Figure_3_1_traits_lowres.pdf"))
@@ -619,7 +622,3 @@ combined_cwm_plots
 ```{r comm-div, fig.height = 8, fig.width = 4, fig.cap = "Community diversity metrics."}
 combined_comm_div_plots
 ```
-
-\clearpage
-
-## References
