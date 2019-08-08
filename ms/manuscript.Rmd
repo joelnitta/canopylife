@@ -34,7 +34,6 @@ library(gt)
 library(patchwork)
 library(knitr)
 library(kableExtra)
-library(here)
 library(magrittr)
 library(scales)
 library(tidyverse)
@@ -390,7 +389,7 @@ J.H.N. conceived and carried out the study. R.T. collected data. J.H.N. performe
 # Table 1: traits used in this study
 
 # Read in csv version of the table
-traits_used <- read_csv(here("data/table_1.csv"))
+traits_used <- read_csv(here::here("data/table_1.csv"))
 
 # Write out table in rich text format for submitting
 # MS as word doc
@@ -455,7 +454,7 @@ phylosig_cont_traits_table %>%
     lambda = "lambda"
   )  %>% 
   as_rtf() %>%
-  write_lines(here("ms/table2.rtf"))
+  write_lines(here::here("ms/table2.rtf"))
 
 # Include in PDF in latex format
 phylosig_cont_traits_table %>%
@@ -493,7 +492,7 @@ phylosig_binary_traits_table %>%
     prob_brownian = md("*P*(bm)")
   ) %>% 
   as_rtf() %>%
-  write_lines(here("ms/table3.rtf"))
+  write_lines(here::here("ms/table3.rtf"))
 
 # Include in PDF in latex format
 phylosig_binary_traits_table %>%
@@ -535,7 +534,7 @@ gt(rowname_col = "trait") %>%
     p.value = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines(here("ms/table4.rtf"))
+  write_lines(here::here("ms/table4.rtf"))
 
 # Include in PDF in latex format
 pic_table %>%
@@ -573,7 +572,7 @@ gt(rowname_col = "trait") %>%
     pval = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines(here("ms/table5.rtf"))
+  write_lines(here::here("ms/table5.rtf"))
 
 # Include in PDF in latex format
 correlated_evo_test_table %>%
@@ -586,47 +585,47 @@ correlated_evo_test_table %>%
 \clearpage
 
 ```{r traits-used-image, fig.width=7, fig.height=7, fig.cap = "Examples of traits used in this study."}
-knitr::include_graphics(here("images/Figure_3_1_traits_lowres.pdf"))
+knitr::include_graphics(here::here("images/Figure_3_1_traits_lowres.pdf"))
 ```
 
 \clearpage
 
 ```{r climate, fig.height = 4, fig.width = 6, fig.cap = "Microclimatic variables."}
 climate_plot
-ggsave(plot = climate_plot, filename = here("ms/fig1.tiff"), height = 4, width = 6, units = "in", dpi = "retina")
+ggsave(plot = climate_plot, filename = here::here("ms/fig1.tiff"), height = 4, width = 6, units = "in", dpi = "retina")
 ```
 
 \clearpage
 
 ```{r pca, fig.height = 6, fig.width = 6, fig.cap = "Trait PCA."}
 pca_plot
-ggsave(plot = pca_plot, filename = here("ms/fig2.tiff"), height = 6, width = 6, units = "in", dpi = "retina")
+ggsave(plot = pca_plot, filename = here::here("ms/fig2.tiff"), height = 6, width = 6, units = "in", dpi = "retina")
 ```
 
 \clearpage
 
 ```{r tree, fig.height = 8, fig.width = 6, fig.cap = "Traits on tree."}
 traits_with_tree
-ggsave(plot = traits_with_tree, filename = here("ms/fig3.tiff"), height = 8, width = 6, units = "in", dpi = "retina")
+ggsave(plot = traits_with_tree, filename = here::here("ms/fig3.tiff"), height = 8, width = 6, units = "in", dpi = "retina")
 ```
 
 \clearpage
 
 ```{r heatmap, fig.height = 4, fig.width = 6, fig.cap = "Variable importance scores."}
 importance_heatmap
-ggsave(plot = importance_heatmap, filename = here("ms/fig4.tiff"), height = 4, width = 6, units = "in", dpi = "retina")
+ggsave(plot = importance_heatmap, filename = here::here("ms/fig4.tiff"), height = 4, width = 6, units = "in", dpi = "retina")
 ```
 
 \clearpage
 
 ```{r cwm-div, fig.height = 4, fig.width = 8, fig.cap = "Community-weighted means."}
 combined_cwm_plots
-ggsave(plot = combined_cwm_plots, filename = here("ms/fig5.tiff"), height = 4, width = 8, units = "in", dpi = "retina")
+ggsave(plot = combined_cwm_plots, filename = here::here("ms/fig5.tiff"), height = 4, width = 8, units = "in", dpi = "retina")
 ```
 
 \clearpage
 
 ```{r comm-div, fig.height = 8, fig.width = 4, fig.cap = "Community diversity metrics."}
 combined_comm_div_plots
-ggsave(plot = combined_comm_div_plots, filename = here("ms/fig6.tiff"), height = 8, width = 4, units = "in", dpi = "retina")
+ggsave(plot = combined_comm_div_plots, filename = here::here("ms/fig6.tiff"), height = 8, width = 4, units = "in", dpi = "retina")
 ```
