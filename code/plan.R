@@ -436,9 +436,9 @@ plan <- drake_plan(
 
   # Make CWM scatterplots.
   cwm_scatterplots = map2(
-    .x = c("stipe", "length", "width", "rhizome",
+    .x = c("stipe", "length", "rhizome",
     "sla", "pinna", "dissection") %>% set_names(.),
-    .y = c("Stipe length (cm)", "Frond length (cm)", "Frond width (cm)", "Rhizome dia. (cm)",
+    .y = c("Stipe length (cm)", "Frond length (cm)", "Rhizome dia. (cm)",
           "SLA", "Pinna no.", "Frond dissection"),
     ~ make_cwm_scatterplot(
       data = cwm_long,

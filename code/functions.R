@@ -2607,14 +2607,14 @@ combine_cwm_plots <- function (scatterplots) {
     mutate(
       resp_var = factor(
         resp_var, 
-        levels = c("stipe", "length", "width", "rhizome", 
+        levels = c("stipe", "length", "rhizome", 
                    "dissection", "pinna", "sla"))
     )
   
   # Remove un-needed plot features.
   # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
   for(i in 1:nrow(plots_df)) {
-    if(plots_df$resp_var[[i]] %in% c("stipe", "length", "width")) {
+    if(plots_df$resp_var[[i]] %in% c("stipe", "length", "rhizome")) {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.x = element_blank(),
@@ -2627,10 +2627,10 @@ combine_cwm_plots <- function (scatterplots) {
   }
   
   # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 4, nrow = 2) & theme(
-    legend.position = "none",
+  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+    legend.position = "none" # ,
     # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+    # plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
   )
   
 }
