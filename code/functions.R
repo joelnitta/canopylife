@@ -2057,12 +2057,14 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
         annotate("text", x = Inf, y = Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),
                  hjust = 1.1, vjust = 1.2,
+                 size = 9 / .pt,
                  parse = TRUE)
     } else {
       plot <- plot +
         annotate("text", x = Inf, y = -Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),
                  hjust = 1.1, vjust = -0.2,
+                 size = 9 / .pt,
                  parse = TRUE)
     }
   }
@@ -2181,12 +2183,14 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
         annotate("text", x = Inf, y = Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),
                  hjust = 1.1, vjust = 1.2,
+                 size = 9 / .pt,
                  parse = TRUE)
     } else {
       plot <- plot +
         annotate("text", x = Inf, y = -Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),
                  hjust = 1.1, vjust = -0.2,
+                 size = 9 / .pt,
                  parse = TRUE)
     }
   }
@@ -2257,6 +2261,7 @@ make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
       "text", label = asterisk, size = 5, fontface = "bold",
       x = 1.5, 
       y = Inf,
+      size = 9 / .pt,
       vjust = 2.0, hjust = 0.5) +
     scale_color_manual(
       values = habit_colors
@@ -2541,12 +2546,12 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                label = glue::glue("italic(R) ^ 2 == {r2}"),
                hjust = 1.1, vjust = 1.1,
                parse = TRUE,
-               size = 10 / .pt) +
+               size = 9 / .pt) +
       annotate("text", x = Inf, y = Inf, 
                label = glue::glue("italic(t) == {t}"),
                hjust = 1.1, vjust = 3,
                parse = TRUE,
-               size = 10 / .pt)
+               size = 9 / .pt)
     # R2 only if model is significant for elevation or interaction but not t
   } else if (p < 0.05 & t_test_p > 0.05 & model_type %in% c("el_only", "interaction")) {
     plot <- plot +
@@ -2554,7 +2559,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                label = glue::glue("italic(R) ^ 2 == {r2}"),
                hjust = 1.1, vjust = 1.1,
                parse = TRUE,
-               size = 10 / .pt)
+               size = 9 / .pt)
     # T-value only if t is significant and model type is growth habit only
   } else if (t_test_p < 0.05 & model_type == "habit_only") {
     plot <- plot +
@@ -2562,7 +2567,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                label = glue::glue("italic(t) == {t}"),
                hjust = 1.1, vjust = 1.1,
                parse = TRUE,
-               size = 10 / .pt)
+               size = 9 / .pt)
   }
   
   # Add the rest of the plot details
