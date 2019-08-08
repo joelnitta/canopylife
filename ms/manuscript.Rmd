@@ -591,34 +591,40 @@ knitr::include_graphics(here("images/Figure_3_1_traits_lowres.pdf"))
 
 ```{r climate, fig.height = 4, fig.width = 6, fig.cap = "Microclimatic variables."}
 climate_plot
+ggsave(plot = climate_plot, filename = here("ms/fig1.pdf"), height = 4, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r pca, fig.height = 6, fig.width = 6, fig.cap = "Trait PCA."}
 pca_plot
+ggsave(plot = pca_plot, filename = here("ms/fig2.pdf"), height = 6, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r tree, fig.height = 8, fig.width = 6, fig.cap = "Traits on tree."}
 traits_with_tree
+ggsave(plot = traits_with_tree, filename = here("ms/fig3.pdf"), height = 8, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r heatmap, fig.height = 4, fig.width = 6, fig.cap = "Variable importance scores."}
 importance_heatmap
+ggsave(plot = importance_heatmap, filename = here("ms/fig4.pdf"), height = 4, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r cwm-div, fig.height = 4, fig.width = 8, fig.cap = "Community-weighted means."}
 combined_cwm_plots
+ggsave(plot = combined_cwm_plots, filename = here("ms/fig5.pdf"), height = 4, width = 8, units = "in")
 ```
 
 \clearpage
 
 ```{r comm-div, fig.height = 8, fig.width = 4, fig.cap = "Community diversity metrics."}
 combined_comm_div_plots
+ggsave(plot = combined_comm_div_plots, filename = here("ms/fig6.pdf"), height = 8, width = 4, units = "in")
 ```
