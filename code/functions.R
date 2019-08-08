@@ -2262,7 +2262,7 @@ make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
       x = 1.5, 
       y = Inf,
       size = 9 / .pt,
-      vjust = 2.0, hjust = 0.5) +
+      vjust = 1.8, hjust = 0.5) +
     scale_color_manual(
       values = habit_colors
     ) +
@@ -2317,7 +2317,7 @@ make_climate_plot <- function (data, resp_vars,
     mutate(yval = as.character(yval))
   
   # Make plots as a column of the tibble
-  plots_tibble <-
+  plots_df <-
     plotting_data %>%
     mutate(
       plot = pmap(
@@ -2332,16 +2332,34 @@ make_climate_plot <- function (data, resp_vars,
     )
   
   # Can't use map with ggplot `+`, so tweak as needed in a loop.
+  # Make x-axis title transparent for all but bottom-center plot
+  # This means it won't show up, but all the plots will still be
+  # the same size (element_blank() actually removes the title and
+  # shrinks the plot slightly)
+  for(i in c(1:3, 4, 6)) {
+    plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+      theme(axis.title.x = element_text(color = "transparent"))
+  }
+  
   for(i in 1:3) {
-    plots_tibble$plot[[i]] <- plots_tibble$plot[[i]] + theme(axis.title.x = element_blank())
+    plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+      theme(axis.text.x = element_text(color = "transparent"))
   }
   
   # Combine plots into single output
-  wrap_plots(plots_tibble$plot, ncol = 3, nrow = 2) & theme(
-    legend.position = "none"# ,
+  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+    legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    # plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
   )
+  
+  # Combine plots into single output
+  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+    legend.position = "none",
+    # Tweak margins to remove whitespace between plots
+    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+  )
+  
 }
 
 
@@ -2617,8 +2635,13 @@ combine_cwm_plots <- function (scatterplots) {
     if(plots_df$resp_var[[i]] %in% c("stipe", "length", "rhizome")) {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
-          axis.title.x = element_blank(),
-          axis.text.x = element_blank())
+          axis.title.x = element_text(color = "transparent"),
+          axis.text.x = element_text(color = "transparent"))
+    }
+    if(plots_df$resp_var[[i]] %in% c("sla", "dissection")) {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.x = element_text(color = "transparent"))
     }
     if(plots_df$resp_var[[i]] == "sla") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
@@ -2628,11 +2651,10 @@ combine_cwm_plots <- function (scatterplots) {
   
   # Combine plots into single output
   wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
-    legend.position = "none" # ,
+    legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    # plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
   )
-  
 }
 
 #' Combine functional diveristy plots into final figure
@@ -2675,8 +2697,8 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
     if(plots_df$resp_var[[i]] != "mntd.obs.z.func") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
-          axis.title.x = element_blank(),
-          axis.text.x = element_blank())
+          axis.title.x = element_text(color = "transparent"),
+          axis.text.x = element_text(color = "transparent"))
     }
     if(plots_df$resp_var[[i]] == "ntaxa") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab("Richness")
@@ -2696,8 +2718,8 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
     if(plots_df$plot_type[[i]] == "box") {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
-          axis.title.y = element_blank(),
-          axis.text.y = element_blank())
+          axis.title.y = element_text(color = "transparent"),
+          axis.text.y = element_text(color = "transparent"))
     }
   }
   
@@ -2705,7 +2727,7 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
   wrap_plots(plots_df$plot, ncol = 2) & theme(
     legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = 0.10, r = 0, b = 0, l = 0.10, unit = "in")
+    plot.margin = margin(t = -0.2, r = -0.1, b = 0, l = -0.1, unit = "in")
   )
 }
 
