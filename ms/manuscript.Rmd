@@ -380,10 +380,35 @@ J.H.N. conceived and carried out the study. R.T. collected data. J.H.N. performe
 \clearpage
 
 ```{r traits-used}
+# Table 1: traits used in this study
+
+# Read in csv version of the table
 traits_used <- read_csv(here("data/table_1.csv"))
 
+# Write out table in rich text format for submitting
+# MS as word doc
+traits_used %>%
+  gt %>%
+  fmt_markdown(columns = everything()) %>%
+  gt(rowname_col = "trait") %>%
+  tab_row_group(
+    group = "Sporophyte traits",
+    rows = matches("Stipe|Frond|Rhizome|Pinna|Leaf")
+  ) %>%
+  tab_row_group(
+    group = "Gametophyte traits",
+    rows = matches("Morphotype|Gemmae|Glands|Hairs")
+  ) %>%
+  cols_label(
+    data_type = "Data type (unit)",
+    ecological_significance = "Ecological Significance"
+  ) %>% 
+  as_rtf() %>%
+  write_lines("ms/table1.rtf")
+
+# Include in PDF using kableExtra to convert to latex format
 traits_used %>% 
-  rename(`Data type` = data_type, `Functional significance` = ecological_significance) %>%
+  rename(`Data type (unit)` = data_type, `Functional significance` = ecological_significance) %>%
   column_to_rownames("trait") %>%
   knitr::kable(caption = "Traits used in this study", format = "latex", booktabs = TRUE, escape = TRUE) %>%
   kable_styling(full_width = FALSE) %>%
@@ -391,30 +416,15 @@ traits_used %>%
   pack_rows("Gametophyte traits", 8, 11) %>%
   column_spec(3, width = "15em") %>%
   footnote(general = "References: 1, Watkins \\\\textit{et al.} (2010); 2, Vogel (1968); 3, Creese \\\\textit{et al.} (2011); 4, Kluge \\\\& Kessler (2007); 5, Wright \\\\textit{et al.} (2004); 6, Watkins \\\\textit{et al.} (2007b); 7, Pittermann \\\\textit{et al.} (2013); 8, Farrar \\\\textit{et al.} (2008); 9, Wollenweber \\\\& Schneider (2000). Noncordate gametophyte morphotypes include ribbon, strap and filamentous.", general_title = "", threeparttable = TRUE, escape = FALSE)
-
-# 
-# traits_used %>%
-#   gt %>%
-#   fmt_markdown(columns = everything()) %>%
-#   gt(rowname_col = "trait") %>%
-#   tab_row_group(
-#     group = "Sporophyte traits",
-#     rows = matches("Stipe|Frond|Rhizome|Pinna|Leaf")
-#   ) %>%
-#   tab_row_group(
-#     group = "Gametophyte traits",
-#     rows = matches("Morphotype|Gemmae|Glands|Hairs")
-#   ) %>%
-#   cols_label(
-#     data_type = "Data type (unit)",
-#     ecological_significance = "Ecological Significance"
-#   ) %>%
-#   knitr::kable(caption = "Traits used", booktabs = TRUE)
 ```
 
 \clearpage
 
 ```{r phylosig-cont}
+# Table 2: Phylogenetic signal in continuous traits
+
+# Format the raw results for table presentation
+phylosig_cont_traits_table <-
 phylosig_cont_traits %>%
   mutate_at(vars(kval, lambda), ~round_t(., 2)) %>%
   mutate(lambda_pval = format_pval(lambda_pval)) %>%
@@ -426,7 +436,22 @@ phylosig_cont_traits %>%
     trait,
     new_levels = c("Stipe length", "Frond length", "Frond width", "Rhizome diam.", 
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
-  arrange(trait) %>%
+  arrange(trait)
+
+# Write out table in rich text format
+phylosig_cont_traits_table %>%
+  gt(rowname_col = "trait") %>%
+  cols_label(
+    kval = md("*K*"),
+    k_pval = md("*P*(*K*)"),
+    lambda_pval = md("*P*(lambda)"),
+    lambda = "lambda"
+  )  %>% 
+  as_rtf() %>%
+  write_lines("ms/table2.rtf")
+
+# Include in PDF in latex format
+phylosig_cont_traits_table %>%
   rename(K = kval, `P(K)` = k_pval, `P(lambda)` = lambda_pval) %>%
   column_to_rownames("trait") %>%
   kable(caption = "Phylogenetic signal in continuous traits", format = "latex", booktabs = TRUE) %>%
@@ -436,6 +461,10 @@ phylosig_cont_traits %>%
 \clearpage
 
 ```{r phylosig-binary}
+# Table 3: Phylogenetic signal in binary traits
+
+# Format the raw results for table presentation
+phylosig_binary_traits_table <-
 phylosig_binary_traits %>%
   mutate(D = round_t(D, 2)) %>%
   mutate(trait = factor(
@@ -444,7 +473,23 @@ phylosig_binary_traits %>%
   mutate(trait = lvls_revalue(
     trait,
     new_levels = c("Epiphytic growth", "Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
-  arrange(trait) %>%
+  arrange(trait)
+
+# Write out table in rich text format
+phylosig_binary_traits_table %>%
+  gt(rowname_col = "trait") %>%
+  cols_label(
+    num_present = "Number of presences",
+    num_absent = "Number of absences",
+    D = md("*D*"),
+    prob_random = md("*P*(rnd)"),
+    prob_brownian = md("*P*(bm)")
+  ) %>% 
+  as_rtf() %>%
+  write_lines("ms/table3.rtf")
+
+# Include in PDF in latex format
+phylosig_binary_traits_table %>%
   select(trait, `Number of presences` = num_present, `Number of absences` = num_absent,
          D, `P(rnd)` = prob_random, `P(bm)` = prob_brownian) %>%
 column_to_rownames("trait") %>%
@@ -455,6 +500,10 @@ column_to_rownames("trait") %>%
 \clearpage
 
 ```{r pics}
+# Table 4: phylogenetically independent contrasts
+
+# Format the raw results for table presentation
+pic_table <- 
 pic_results %>%
   mutate_at(vars(estimate, std.error, statistic), ~round_t(., 2)) %>%
   mutate(p.value = format_pval(p.value)) %>%
@@ -467,7 +516,22 @@ pic_results %>%
     trait,
     new_levels = c("Stipe length", "Frond length", "Frond width", "Rhizome diam.", 
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
-  arrange(trait) %>%
+  arrange(trait)
+
+# Write out table in rich text format
+pic_table %>%
+gt(rowname_col = "trait") %>%
+  cols_label(
+    n_contrasts = "Num. constrasts",
+    n_pos_con = "Num. pos. constrasts",
+    statistic = md("*t*"),
+    p.value = md("*P*"),
+  ) %>% 
+  as_rtf() %>%
+  write_lines("ms/table4.rtf")
+
+# Include in PDF in latex format
+pic_table %>%
   rename(t = statistic, P = p.value, `Num. constrasts` = n_contrasts, `Num. pos. constrasts` = n_pos_con) %>%
   column_to_rownames("trait") %>%
   kable(caption = "Results of phylogenetically independent contrasts analysis of quantitative (sporophyte) traits related to epiphytic growth", format = "latex", booktabs = TRUE) %>%
@@ -477,6 +541,10 @@ pic_results %>%
 \clearpage
 
 ```{r corr-evo}
+# Table 5: Pagel's test of correlated evolution
+
+# Format the raw results for table presentation
+correlated_evo_test_table <-
 correlated_evo_test %>%
   mutate(pval = format_pval(pval)) %>%
   mutate_if(is.numeric, ~round_t(., 1)) %>%
@@ -486,7 +554,22 @@ correlated_evo_test %>%
   mutate(trait = lvls_revalue(
     trait,
     new_levels = c("Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
-  arrange(trait) %>%
+  arrange(trait)
+
+# Write out table in rich text format
+correlated_evo_test_table %>%
+gt(rowname_col = "trait") %>%
+  cols_label(
+    logL_indep = "LogL(independent)",
+    logL_dep = "LogL(dependent)",
+    likelihood_ratio = "Likelihood ratio",
+    pval = md("*P*"),
+  ) %>% 
+  as_rtf() %>%
+  write_lines("ms/table5.rtf")
+
+# Include in PDF in latex format
+correlated_evo_test_table %>%
   rename(`LogL(independent)` = logL_indep, `LogL(dependent)` = logL_dep, `Likelihood ratio` = likelihood_ratio, P = pval) %>%
   column_to_rownames("trait") %>%
   kable(caption = "Pagel's (1994) test of correlated evolution between binary traits", format = "latex", booktabs = TRUE) %>%
