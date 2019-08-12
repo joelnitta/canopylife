@@ -1312,96 +1312,6 @@ calculate_cwm <- function (traits, comm, site_data,
   
 }
 
-#' Helper function to extract output from FD::dbFD()
-#' 
-#' FD::dbFD() outputs results in a list of named
-#' vectors and dataframes. This function extracts
-#' one of the named vectors as a dataframe.
-#'
-#' @param dbFD_output Output of FD::dbFD()
-#' @param fd_metric Name of metric to extract
-#'
-#' @return Dataframe
-#'
-#' @examples
-#' library(FD)
-#' ex1 <- dbFD(dummy$trait, dummy$abun)
-#' tidy_fd_output(ex1, "FDiv")
-tidy_fd_output <- function (dbFD_output, fd_metric) {
-  dbFD_output %>% 
-    magrittr::extract2(fd_metric) %>%
-    as.data.frame %>% 
-    rownames_to_column("site") %>% 
-    set_names("site", fd_metric)
-}
-
-#' Analyze functional diversity in epiphytic and 
-#' terrestrial communities
-#'
-#' @param comm Community matrix with sites as columns and species as rows
-#' @param traits Traits of each species, including growth habit
-#'
-#' @return Dataframe; results of FD::dbFD() in a single dataframe, including
-#' site name and growth habit.
-#' 
-analyze_fd_by_habit <- function (traits, comm) {
-  
-  ### Format community matrix ###
-  # Split communities into epiphytic / terrestrial,
-  # but keep together in a single community dataframe so we can
-  # analyze FD taking into account PC space of all species.
-  comm_by_habit <- make_epi_ter_comm(comm, traits, drop_zero_abun = TRUE) %>%
-    column_to_rownames("site") 
-  
-  ### Format traits ###
-  # Subset traits to those in community, but don't transform
-  # (for calculating CWMs)
-  traits_sub <- 
-    traits %>%
-    # Keep only species in community data
-    filter(species %in% colnames(comm_by_habit)) %>%
-    # Keep only species name and numeric characters
-    select(species, colnames(.)[map_lgl(., is.numeric)]) %>%
-    # For FD::dbFD(), input trait data needs to be data.frame with
-    # rows as species with rownames.
-    column_to_rownames("species")
-  
-  ### Check order of community data and metadata ###
-  assert_that(
-    isTRUE(all.equal(sort(colnames(comm_by_habit)), sort(rownames(traits_sub)))),
-    msg = "community and metadata don't match")
-  
-  traits_sub <- traits_sub[colnames(comm_by_habit), ]
-  
-  ### Run FD analysis ###
-  
-  # Set names of FD metrics to exctract
-  fd_metrics <- c("FRic", "FEve", "FDiv", "FDis", "RaoQ") %>%
-    set_names(.)
-  
-  # Calculate functional diversity on standardized trait data 
-  # (set stand.x to TRUE)
-  func_div <- dbFD(x = traits_sub, a = comm_by_habit, stand.x = TRUE,
-                   corr = "lingoes", m = "max", 
-                   w.abun = TRUE, calc.CWM = FALSE, stand.FRic = FALSE)
-  
-  
-  ### Tidy the results ###
-  map(fd_metrics, ~ tidy_fd_output(func_div, .)) %>%
-    reduce(left_join, by = "site") %>%
-    as_tibble %>% 
-    # Convert back to site and growth habit as separate columns
-    mutate(habit = case_when(
-      str_detect(site, "_E") ~ "epiphytic",
-      str_detect(site, "_T") ~ "terrestrial",
-    )) %>%
-    mutate(
-      site = str_remove_all(site, "_E|_T")
-    ) %>% 
-    select(site, habit, everything())
-  
-}
-
 #' Analyze functional diversity in epiphytic and 
 #' terrestrial communities
 #'
@@ -1461,52 +1371,6 @@ analyze_cwm_by_habit <- function (traits, comm) {
     ) %>% 
     select(site, habit, everything())
 }
-
-#' Check for correlation between diversity metrics
-#' and retain non-correlated ones
-#'
-#' @param div_data All diversity metrics
-#'
-#' @return Diversity metrics subsetted
-#' to only those that are correlated less than 0.9
-#' 
-select_div_metrics <- function (div_data) {
-  
-  # Calculate total correlation for all variables
-  corr_all <-
-    div_data %>%
-    select(-site, -habit) %>%
-    corrr::correlate()
-  
-  # Check for correlations > 0.9
-  # (comment-out when not inspecting or will cause error)
-  # corr_all %>%
-  # assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname"))
-  
-  # Only trait values are correlated:
-  # stipe, length, width, and rhizome are all correlated with each other
-  cwm_corr <-
-    corr_all %>%
-    corrr::focus(stipe, length, width, rhizome, mirror = TRUE)
-  
-  # Drop length, width, and rhizome.
-  # Keep only stipe length since it has the best hypothesis
-  # for functional significance
-  div_corr_select <-
-    corr_all %>%
-    corrr::focus(-length, -width, -rhizome, mirror = TRUE)
-  
-  # Double-check that no correlations > 0.9 remain,
-  # and keep these as the final variables for analysis.
-  selected_div_vars <-
-    div_corr_select %>%
-    assertr::assert(function (x) x < 0.9 | is.na(x), -starts_with("rowname")) %>%
-    pull(rowname)
-  
-  div_data %>%
-    select(site, habit, selected_div_vars)
-}
-
 
 # Models ----
 
@@ -1965,7 +1829,8 @@ bind_data <- function (..., id_col = "dataset") {
 
 #' Define ggplot theme
 #' 
-#' BW theme with no gridlines, black axis text.
+#' BW theme with no gridlines, black axis text, main font size 11,
+#' axis ticks size 9.
 #'
 standard_theme2 <- function () {
   ggplot2::theme_bw() + 
@@ -2361,7 +2226,6 @@ make_climate_plot <- function (data, resp_vars,
   )
   
 }
-
 
 # Helper function for labeling PCA plot
 get_label <- function(axis_labels, analysis_type_select, axis_select) {
