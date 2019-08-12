@@ -1676,155 +1676,6 @@ check_moran_fss <- function (model_set, resp_var, best_mod, site_data) {
   spdep::moran.mc(model_fits$.resid, spdep::mat2listw(dist_mat), 10000) %>% broom::tidy()
 }
 
-
-# Misc ----
-
-#' Match trait data and tree
-#' 
-#' Order of species in traits will be rearranged to match the
-#' phylogeny.
-#'
-#' @param traits Dataframe of traits, with 'species' column and
-#' additional columns, one for each trait
-#' @param phy Phylogeny (list of class "phylo")
-#' @param return Type of object to return
-#'
-#' @return Either a dataframe or a list of class "phylo"; the tree or
-#' the traits, pruned so that only species occurring in both datasets
-#' are included.
-#' @export
-#'
-#' @examples
-match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
-  
-  assert_that("species" %in% colnames(traits))
-  
-  # Keep only species in phylogeny
-  traits <- traits %>%
-    filter(species %in% phy$tip.label) 
-  
-  # Trim to only species with trait data
-  phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
-  
-  # Get traits in same order as tips
-  traits <- left_join(
-    tibble(species = phy$tip.label),
-    traits
-  )
-  
-  # Make sure that worked
-  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
-  
-  # Return traits or tree
-  assert_that(return %in% c("tree", "traits"))
-  
-  if(return == "tree") { 
-    return (phy) 
-  } else {
-    return (traits)
-  }
-  
-}
-
-#' Match community data and tree
-#' 
-#' Order of species in comm will be rearranged to match the
-#' phylogeny.
-#'
-#' @param comm Community data frame, with one column for sites and
-#' the rest for species.
-#' @param phy Phylogeny (list of class "phylo")
-#' @param return Type of object to return
-#'
-#' @return Either a dataframe or a list of class "phylo"; the tree or
-#' the community, pruned so that only species occurring in both datasets
-#' are included.
-#' @export
-#'
-#' @examples
-match_comm_and_tree <- function (comm, phy, return = c("comm", "tree")) {
-  
-  assert_that("species" %in% colnames(comm))
-  
-  # Keep only species in phylogeny
-  comm <- comm %>%
-    filter(species %in% phy$tip.label) 
-  
-  # Trim to only species with trait data
-  phy <- drop.tip(phy, setdiff(phy$tip.label, comm$species))
-  
-  # Get comm in same order as tips
-  comm <- left_join(
-    tibble(species = phy$tip.label),
-    comm
-  )
-  
-  # Make sure that worked
-  assert_that(isTRUE(all.equal(comm$species, phy$tip.label)))
-  
-  # Return comm or tree
-  assert_that(return %in% c("tree", "comm"))
-  
-  if(return == "tree") { 
-    return (phy) 
-  } else {
-    return (comm)
-  }
-  
-}
-
-# Function for rounding with trailing zeros
-round_t <- function (x, digits) {
-  round(x, digits) %>% sprintf(glue::glue("%.{digits}f"), .)
-}
-
-# Function for formatting p-values: round to 3 digits,
-# or just say "< 0.001"
-format_pval <- function (x, equals_sign = FALSE) {
-  case_when(
-    x < 0.001 ~ "< 0.001",
-    isTRUE(equals_sign) ~ paste("=", round(x, 3) %>% as.character()),
-    TRUE ~ round(x, 3) %>% as.character()
-  )
-}
-
-#' Bind a list of dataframes and add an ID column with the
-#' name of the dataframe.
-#' 
-#' Handy if you don't want to manually specify the names of
-#' each individual dataframe.
-#'
-#' @param ... Input dataframes
-#' @param id_col Value to use as name of column specifying
-#' where the data came from (the name of each input dataframe)
-#'
-#' @examples
-#' data_1 <- tibble(a = c(1,2), b = c(3,4))
-#' data_2 <- tibble(a = c(5,6), b = c(7,8))
-#' bind_data(data_1, data_2)
-bind_data <- function (..., id_col = "dataset") {
-  
-  # Function to convert the input into a character
-  # vector, where each item in the vector is the
-  # name of the input
-  # copied from
-  # https://masterr.org/r/the-magic-of-substitute-and-deparse/
-  foo1 <- function(a, ...) {
-    arg = deparse(substitute(a))
-    dots = substitute(list(...))[-1]
-    c(arg, sapply(dots, deparse))
-  }
-  
-  names = foo1(...) 
-  
-  data = list(...)
-  
-  names(data) <- names
-  
-  bind_rows(data, .id = id_col)
-  
-}
-
 # Plotting ----
 
 #' Define ggplot theme
@@ -1840,6 +1691,13 @@ standard_theme2 <- function () {
       axis.text.x = ggplot2::element_text(colour="black"),
       axis.text.y = ggplot2::element_text(colour="black")
     )
+}
+
+# Helper function for labeling PCA plot
+get_label <- function(axis_labels, analysis_type_select, axis_select) {
+  axis_labels %>% 
+    filter(analysis_type == analysis_type_select, axis == axis_select) %>% 
+    pull(label)
 }
 
 #' Make a single climate scatterplot
@@ -2227,13 +2085,6 @@ make_climate_plot <- function (data, resp_vars,
   
 }
 
-# Helper function for labeling PCA plot
-get_label <- function(axis_labels, analysis_type_select, axis_select) {
-  axis_labels %>% 
-    filter(analysis_type == analysis_type_select, axis == axis_select) %>% 
-    pull(label)
-}
-
 make_pca_plot <- function (pca_results, habit_colors, traits) {
   
   # Make a dataframe of axis labels that include
@@ -2467,132 +2318,66 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
     )
 }
 
-#' Combine community-weighted mean plots into final figure
+#' Make a heatmap of importance scores
 #'
-#' @param args Dataframe of independent and dependent variables
-#' used to make scatterplots
-#' @param scatterplots List of scatterplots
-#' @param boxplots List of boxplots
+#' @param important_div_vars Importance scores output from 
+#' FSSgam::fit.model.set()
 #'
-#' @return ggplot object
-combine_cwm_plots <- function (scatterplots) {
+#' @return GGplot object
+#' 
+make_heatmap <- function(important_div_vars, vars_select = c(
+  "ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func",
+  "stipe", "rhizome", "sla", "dissection", "pinna"
+)) {
   
-  # Combine scatterplots and boxplots into tibble
-  plots_df <- 
-    tibble(
-      resp_var = names(scatterplots),
-      plot = as.list(scatterplots),
-    ) %>%
-    # Sort plots by response
-    # so that patchwork::wrap_plots will output them in the
-    # correct order.
+  # Reformat data for plotting
+  plot_data <-
+    important_div_vars %>%
+    filter(resp_var %in% vars_select) %>%
+    gather(indep_var, value, -resp_var) %>% 
+    # Specify levels of indep and resp vars so they show up along
+    # the axes in the right order
     mutate(
+      indep_var = factor(
+        indep_var, 
+        levels = c("habit", "temp_max", "temp_mean", 
+                   "temp_sd", "vpd_mean", "vpd_min", "vpd_sd")),
       resp_var = factor(
         resp_var, 
-        levels = c("stipe", "length", "rhizome", 
-                   "dissection", "pinna", "sla"))
+        levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
+                   "mpd.obs.z.func", "mntd.obs.z.func", 
+                   "stipe", "rhizome", "dissection", "sla", "pinna"))
+    ) %>%
+    # Reformat the names of the indep and resp vars so they
+    # look pretty
+    mutate(
+      indep_var = lvls_revalue(
+        indep_var, 
+        new_levels = c("Habit", "Max. temp.", "Mean temp.", 
+                       "SD Temp.", "Mean VPD", "Min. VPD", "SD VPD")),
+      resp_var = lvls_revalue(
+        resp_var, 
+        new_levels = c("Richness", "MPD[phy]", "MNTD[phy]", 
+                       "MPD[func]", "MNTD[func]", 
+                       "Stipe~length", "Rhizome~diam.", "Frond~dissection", "SLA", "Pinna~no.")) %>%
+        fct_rev()
     )
   
-  # Remove un-needed plot features.
-  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
-  for(i in 1:nrow(plots_df)) {
-    if(plots_df$resp_var[[i]] %in% c("stipe", "length", "rhizome")) {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        theme(
-          axis.title.x = element_text(color = "transparent"),
-          axis.text.x = element_text(color = "transparent"))
-    }
-    if(plots_df$resp_var[[i]] %in% c("sla", "dissection")) {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        theme(
-          axis.title.x = element_text(color = "transparent"))
-    }
-    if(plots_df$resp_var[[i]] == "sla") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        ylab(expression(SLA~(m^{"2"}~kg^{"-1"})))
-    }
-  }
-  
-  # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
-    legend.position = "none",
-    # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
-  )
-}
-
-#' Combine functional diveristy plots into final figure
-#'
-#' @param scatterplots List of scatterplots
-#' @param boxplots List of boxplots
-#'
-#' @return ggplot object
-combine_comm_div_plots <- function (scatterplots, boxplots) {
-  
-  # Combine scatterplots and boxplots into tibble
-  plots_df <- bind_rows(
-    tibble(
-      resp_var = names(scatterplots),
-      plot = as.list(scatterplots),
-      plot_type = "scatter"
-    ),
-    tibble(
-      resp_var = names(boxplots),
-      plot = as.list(boxplots),
-      plot_type = "box"
-    )
-  )
-  
-  # Sort plots by response and plot type
-  # so that patchwork::wrap_plots will output them in the
-  # correct order.
-  plots_df <- plots_df %>%
-    mutate(resp_var = factor(
-      resp_var, 
-      levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func"))) %>%
-    mutate(plot_type = factor(
-      plot_type, 
-      levels = c("scatter", "box"))) %>%
-    arrange(resp_var, plot_type)
-  
-  # Remove un-needed plot features.
-  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
-  for(i in 1:nrow(plots_df)) {
-    if(plots_df$resp_var[[i]] != "mntd.obs.z.func") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        theme(
-          axis.title.x = element_text(color = "transparent"),
-          axis.text.x = element_text(color = "transparent"))
-    }
-    if(plots_df$resp_var[[i]] == "ntaxa") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab("Richness")
-    }
-    if(plots_df$resp_var[[i]] == "mntd.obs.z.func") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[func]))
-    }
-    if(plots_df$resp_var[[i]] == "mpd.obs.z.func") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[func]))
-    }
-    if(plots_df$resp_var[[i]] == "mntd.obs.z.phy") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[phy]))
-    }
-    if(plots_df$resp_var[[i]] == "mpd.obs.z.phy") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[phy]))
-    }
-    if(plots_df$plot_type[[i]] == "box") {
-      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
-        theme(
-          axis.title.y = element_text(color = "transparent"),
-          axis.text.y = element_text(color = "transparent"))
-    }
-  }
-  
-  # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 2) & theme(
-    legend.position = "none",
-    # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = -0.1, b = 0, l = -0.1, unit = "in")
-  )
+  # Make heatmap
+  ggplot(plot_data, aes(x = indep_var, y = resp_var, fill = value)) +
+    geom_tile() +
+    scale_fill_scico(
+      palette = "bilbao", 
+      breaks = c(0, 0.25, 0.5, 0.75, 1.0), 
+      limits = c(0, 1.0)) +
+    labs(
+      x = "Predictor",
+      y = "Response",
+      fill = "Importance"
+    ) +
+    scale_y_discrete(labels = parse(text = levels(plot_data$resp_var))) +
+    standard_theme2() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
 }
 
 #' Plot sporophyte and gametophyte traits on phylogenetic tree
@@ -2905,70 +2690,135 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
   
 }
 
-#' Make a heatmap of importance scores
+#' Combine community-weighted mean plots into final figure
 #'
-#' @param important_div_vars Importance scores output from 
-#' FSSgam::fit.model.set()
+#' @param args Dataframe of independent and dependent variables
+#' used to make scatterplots
+#' @param scatterplots List of scatterplots
+#' @param boxplots List of boxplots
 #'
-#' @return GGplot object
-#' 
-make_heatmap <- function(important_div_vars, vars_select = c(
-  "ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func",
-  "stipe", "rhizome", "sla", "dissection", "pinna"
-)) {
+#' @return ggplot object
+combine_cwm_plots <- function (scatterplots) {
   
-  # Reformat data for plotting
-  plot_data <-
-    important_div_vars %>%
-    filter(resp_var %in% vars_select) %>%
-    gather(indep_var, value, -resp_var) %>% 
-    # Specify levels of indep and resp vars so they show up along
-    # the axes in the right order
+  # Combine scatterplots and boxplots into tibble
+  plots_df <- 
+    tibble(
+      resp_var = names(scatterplots),
+      plot = as.list(scatterplots),
+    ) %>%
+    # Sort plots by response
+    # so that patchwork::wrap_plots will output them in the
+    # correct order.
     mutate(
-      indep_var = factor(
-        indep_var, 
-        levels = c("habit", "temp_max", "temp_mean", 
-                   "temp_sd", "vpd_mean", "vpd_min", "vpd_sd")),
       resp_var = factor(
         resp_var, 
-        levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
-                   "mpd.obs.z.func", "mntd.obs.z.func", 
-                   "stipe", "rhizome", "dissection", "sla", "pinna"))
-    ) %>%
-    # Reformat the names of the indep and resp vars so they
-    # look pretty
-    mutate(
-      indep_var = lvls_revalue(
-        indep_var, 
-        new_levels = c("Habit", "Max. temp.", "Mean temp.", 
-                       "SD Temp.", "Mean VPD", "Min. VPD", "SD VPD")),
-      resp_var = lvls_revalue(
-        resp_var, 
-        new_levels = c("Richness", "MPD[phy]", "MNTD[phy]", 
-                       "MPD[func]", "MNTD[func]", 
-                       "Stipe~length", "Rhizome~diam.", "Frond~dissection", "SLA", "Pinna~no.")) %>%
-        fct_rev()
+        levels = c("stipe", "length", "rhizome", 
+                   "dissection", "pinna", "sla"))
     )
   
-  # Make heatmap
-  ggplot(plot_data, aes(x = indep_var, y = resp_var, fill = value)) +
-    geom_tile() +
-    scale_fill_scico(
-      palette = "bilbao", 
-      breaks = c(0, 0.25, 0.5, 0.75, 1.0), 
-      limits = c(0, 1.0)) +
-    labs(
-      x = "Predictor",
-      y = "Response",
-      fill = "Importance"
-    ) +
-    scale_y_discrete(labels = parse(text = levels(plot_data$resp_var))) +
-    standard_theme2() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+  # Remove un-needed plot features.
+  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
+  for(i in 1:nrow(plots_df)) {
+    if(plots_df$resp_var[[i]] %in% c("stipe", "length", "rhizome")) {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.x = element_text(color = "transparent"),
+          axis.text.x = element_text(color = "transparent"))
+    }
+    if(plots_df$resp_var[[i]] %in% c("sla", "dissection")) {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.x = element_text(color = "transparent"))
+    }
+    if(plots_df$resp_var[[i]] == "sla") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        ylab(expression(SLA~(m^{"2"}~kg^{"-1"})))
+    }
+  }
+  
+  # Combine plots into single output
+  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+    legend.position = "none",
+    # Tweak margins to remove whitespace between plots
+    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+  )
+}
+
+#' Combine functional diveristy plots into final figure
+#'
+#' @param scatterplots List of scatterplots
+#' @param boxplots List of boxplots
+#'
+#' @return ggplot object
+combine_comm_div_plots <- function (scatterplots, boxplots) {
+  
+  # Combine scatterplots and boxplots into tibble
+  plots_df <- bind_rows(
+    tibble(
+      resp_var = names(scatterplots),
+      plot = as.list(scatterplots),
+      plot_type = "scatter"
+    ),
+    tibble(
+      resp_var = names(boxplots),
+      plot = as.list(boxplots),
+      plot_type = "box"
+    )
+  )
+  
+  # Sort plots by response and plot type
+  # so that patchwork::wrap_plots will output them in the
+  # correct order.
+  plots_df <- plots_df %>%
+    mutate(resp_var = factor(
+      resp_var, 
+      levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", "mpd.obs.z.func", "mntd.obs.z.func"))) %>%
+    mutate(plot_type = factor(
+      plot_type, 
+      levels = c("scatter", "box"))) %>%
+    arrange(resp_var, plot_type)
+  
+  # Remove un-needed plot features.
+  # Can't use ggplot `+` with mutate(), etc., so do old-fashioned loop.
+  for(i in 1:nrow(plots_df)) {
+    if(plots_df$resp_var[[i]] != "mntd.obs.z.func") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.x = element_text(color = "transparent"),
+          axis.text.x = element_text(color = "transparent"))
+    }
+    if(plots_df$resp_var[[i]] == "ntaxa") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab("Richness")
+    }
+    if(plots_df$resp_var[[i]] == "mntd.obs.z.func") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[func]))
+    }
+    if(plots_df$resp_var[[i]] == "mpd.obs.z.func") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[func]))
+    }
+    if(plots_df$resp_var[[i]] == "mntd.obs.z.phy") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MNTD[phy]))
+    }
+    if(plots_df$resp_var[[i]] == "mpd.obs.z.phy") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + ylab(expression(MPD[phy]))
+    }
+    if(plots_df$plot_type[[i]] == "box") {
+      plots_df$plot[[i]] <- plots_df$plot[[i]] + 
+        theme(
+          axis.title.y = element_text(color = "transparent"),
+          axis.text.y = element_text(color = "transparent"))
+    }
+  }
+  
+  # Combine plots into single output
+  wrap_plots(plots_df$plot, ncol = 2) & theme(
+    legend.position = "none",
+    # Tweak margins to remove whitespace between plots
+    plot.margin = margin(t = -0.2, r = -0.1, b = 0, l = -0.1, unit = "in")
+  )
 }
 
 # SI ----
-
 
 #' Run Pagel's test of correlated evolution on widespread gametos
 #' vs. presence/absence of gemmae for ferns of Moorea
@@ -3057,5 +2907,154 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   
   # run fitPagel() on widespread growth vs. presence/absence of gemmae
   fitPagel(tree = phy_trim, x = trait_vec, y = gemmae_vec)
+  
+}
+
+
+# Misc ----
+
+#' Match trait data and tree
+#' 
+#' Order of species in traits will be rearranged to match the
+#' phylogeny.
+#'
+#' @param traits Dataframe of traits, with 'species' column and
+#' additional columns, one for each trait
+#' @param phy Phylogeny (list of class "phylo")
+#' @param return Type of object to return
+#'
+#' @return Either a dataframe or a list of class "phylo"; the tree or
+#' the traits, pruned so that only species occurring in both datasets
+#' are included.
+#' @export
+#'
+#' @examples
+match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
+  
+  assert_that("species" %in% colnames(traits))
+  
+  # Keep only species in phylogeny
+  traits <- traits %>%
+    filter(species %in% phy$tip.label) 
+  
+  # Trim to only species with trait data
+  phy <- drop.tip(phy, setdiff(phy$tip.label, traits$species))
+  
+  # Get traits in same order as tips
+  traits <- left_join(
+    tibble(species = phy$tip.label),
+    traits
+  )
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(traits$species, phy$tip.label)))
+  
+  # Return traits or tree
+  assert_that(return %in% c("tree", "traits"))
+  
+  if(return == "tree") { 
+    return (phy) 
+  } else {
+    return (traits)
+  }
+  
+}
+
+#' Match community data and tree
+#' 
+#' Order of species in comm will be rearranged to match the
+#' phylogeny.
+#'
+#' @param comm Community data frame, with one column for sites and
+#' the rest for species.
+#' @param phy Phylogeny (list of class "phylo")
+#' @param return Type of object to return
+#'
+#' @return Either a dataframe or a list of class "phylo"; the tree or
+#' the community, pruned so that only species occurring in both datasets
+#' are included.
+#' @export
+#'
+#' @examples
+match_comm_and_tree <- function (comm, phy, return = c("comm", "tree")) {
+  
+  assert_that("species" %in% colnames(comm))
+  
+  # Keep only species in phylogeny
+  comm <- comm %>%
+    filter(species %in% phy$tip.label) 
+  
+  # Trim to only species with trait data
+  phy <- drop.tip(phy, setdiff(phy$tip.label, comm$species))
+  
+  # Get comm in same order as tips
+  comm <- left_join(
+    tibble(species = phy$tip.label),
+    comm
+  )
+  
+  # Make sure that worked
+  assert_that(isTRUE(all.equal(comm$species, phy$tip.label)))
+  
+  # Return comm or tree
+  assert_that(return %in% c("tree", "comm"))
+  
+  if(return == "tree") { 
+    return (phy) 
+  } else {
+    return (comm)
+  }
+  
+}
+
+# Function for rounding with trailing zeros
+round_t <- function (x, digits) {
+  round(x, digits) %>% sprintf(glue::glue("%.{digits}f"), .)
+}
+
+# Function for formatting p-values: round to 3 digits,
+# or just say "< 0.001"
+format_pval <- function (x, equals_sign = FALSE) {
+  case_when(
+    x < 0.001 ~ "< 0.001",
+    isTRUE(equals_sign) ~ paste("=", round(x, 3) %>% as.character()),
+    TRUE ~ round(x, 3) %>% as.character()
+  )
+}
+
+#' Bind a list of dataframes and add an ID column with the
+#' name of the dataframe.
+#' 
+#' Handy if you don't want to manually specify the names of
+#' each individual dataframe.
+#'
+#' @param ... Input dataframes
+#' @param id_col Value to use as name of column specifying
+#' where the data came from (the name of each input dataframe)
+#'
+#' @examples
+#' data_1 <- tibble(a = c(1,2), b = c(3,4))
+#' data_2 <- tibble(a = c(5,6), b = c(7,8))
+#' bind_data(data_1, data_2)
+bind_data <- function (..., id_col = "dataset") {
+  
+  # Function to convert the input into a character
+  # vector, where each item in the vector is the
+  # name of the input
+  # copied from
+  # https://masterr.org/r/the-magic-of-substitute-and-deparse/
+  foo1 <- function(a, ...) {
+    arg = deparse(substitute(a))
+    dots = substitute(list(...))[-1]
+    c(arg, sapply(dots, deparse))
+  }
+  
+  names = foo1(...) 
+  
+  data = list(...)
+  
+  names(data) <- names
+  
+  bind_rows(data, .id = id_col)
   
 }
