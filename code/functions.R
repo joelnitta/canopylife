@@ -2399,19 +2399,21 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     # Convert morphotype to binary trait
     # make binary morph category: 0 is noncordate, 1 is cordate
     mutate(morphotype = case_when(
-      morphotype == "cordate" ~ "1",
-      TRUE ~ "0"
+      morphotype == "cordate" ~ 1,
+      TRUE ~ 0
     )) %>%
     # Only keep species in tree
     match_traits_and_tree(phy = phy, "traits") %>%
     # Transform and rescale traits
-    # SLA is already between 0 and 1, so don't log-transform.
-    # Instead of scaling between min and max range, rescale between 0 and 1.
-    transform_traits(trans_select = c("dissection", "stipe", "length", 
-                                      "width", "rhizome", "pinna"),
-                     scale_traits = FALSE) %>%
+    transform_traits(
+      log_trans = TRUE, 
+      scale_traits = FALSE,
+      # log-transform same traits as for PCA
+      trans_select = c("length", "rhizome", "stipe", "width")
+    ) %>%
+    # Instead of scaling by standard deviation, rescale between 0 and 1.
     mutate_at(vars(dissection, sla, stipe, length, width, rhizome, pinna),
-              ~rescale(., c(0,1)))
+               ~rescale(., c(0,1)))
   
   # For phylogeny, only keep species in traits
   phy <- match_traits_and_tree(traits, phy, "tree")
@@ -2434,7 +2436,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     pairedcols[c(4,3)], #gemmae: dark and light green
     pairedcols[c(6,5)], #glands: red and pink
     pairedcols[c(8,7)], #hairs: dark and light orange
-    "grey95") %>%
+    "grey50") %>% # missing values: grey50
     set_names(., c(
       "epiphytic", "terrestrial",
       "noncordate", "cordate",
@@ -2476,7 +2478,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       species = fct_reorder(species, phy_order),
       trait = factor(trait, levels = c("habit", "morphotype", "gemmae", "glands", "hairs")),
       value = factor(value, levels = c("epiphytic", "terrestrial",
-                                       "noncordate", "cordate",
+                                       "cordate", "noncordate",
                                        "gemmae_present", "gemmae_absent",
                                        "glands_present", "glands_absent",
                                        "hairs_present", "hairs_absent"
@@ -2554,15 +2556,14 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       start = start-0.5,
       end = end+0.5)
   
-  ### Subplots 1: Heatmap plot of trait values
-  
+  ### Subplots 1: Tiles of qualitative trait values
   qual_heatmap <-
     ggplot(qual_traits, aes(trait, species)) +
     geom_tile(aes(fill = value)) +
     scale_fill_manual(
       values = qual_palette,
-      breaks = names(qual_palette),
-      labels = names(qual_palette) %>%
+      breaks = levels(qual_traits$value),
+      labels = levels(qual_traits$value) %>%
         str_to_sentence() %>%
         str_replace_all("_", " ")) +
     scale_x_discrete(
@@ -2579,9 +2580,10 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 24/.pt),
       axis.title.x = element_blank(),
       legend.text = element_text(size = 20/.pt),
-      legend.title = element_text(size = 20/.pt)
+      legend.title = element_text(size = 24/.pt)
     )
   
+  ### Subplots 2: Heatmap plot of quantitative trait values
   # Don't use frond length or width, as these are correlated with stipe length
   quant_heatmap <-
     ggplot(quant_traits) +
@@ -2590,7 +2592,6 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       position = "right",
       labels = function(x) str_replace_all(x, "_", " "),
       expand = c(0,0)) +
-    # jntools::blank_y_theme() +
     scale_x_discrete(
       position = "top",
       breaks= c("sla", "dissection", "stipe", "rhizome", "pinna"),
@@ -2598,25 +2599,26 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     scale_fill_scico(
       palette = "lajolla",
       breaks = c(0, 1),
-      labels = c("Low", "High")) +
+      labels = c("Low", "High"),
+      na.value = "grey50") +
     labs(
       y = "",
-      fill = "Relative Trait Value") +
+      fill = "Relative\nTrait Value") +
     guides(fill = guide_colorbar(title.position = "top")) +
     theme(
-      legend.position = "bottom",
+      legend.position = "right",
       axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 24/.pt),
       axis.title.x = element_blank(),
-      axis.text.y = element_text(face = "italic", size = 12/.pt),
+      axis.text.y = element_text(face = "italic", size = 11/.pt),
       legend.text = element_text(size = 20/.pt),
-      legend.title = element_text(size = 20/.pt)
+      legend.title = element_text(size = 24/.pt)
     )
   
-  # Extract legend
+  # Extract legend for overlaying on a different subplot
   quant_legend <- cowplot::get_legend(quant_heatmap)
   quant_heatmap <- quant_heatmap + theme(legend.position = "none")
   
-  ### Subplot 2: Phylogenetic tree
+  ### Subplot 3: Phylogenetic tree
   
   # Make named vector of nodes to label
   # node is the most common recent ancestor of
@@ -2676,7 +2678,17 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       fill = qual_palette[["epiphytic"]],
       size = 2,
       label.padding = unit(0.1, "lines")) +
-    geom_treescale(width = 50, offset = 1, x = 0 , y = 50)
+    # geom_treescale is very limited in how we can format the
+    # text (we can't). As a super-hacky workaround, set the offset
+    # so high that the text doesn't show up, then add with 
+    # annotate("text")
+    geom_treescale(width = 50, offset = 100, x = 0 , y = 50, fontsize = 4) +
+    annotate("text", x = 25, y = 55, label = "50 my", size = 3) +
+    # Add legend from heatmap
+    annotation_custom(
+      grob = quant_legend,
+      xmin = 35, xmax = 35, ymin = 100, ymax = 100
+    )
   
   ### Assemble subplots into final plot
   phy_plot + qual_heatmap + quant_heatmap + plot_layout(nrow = 1, widths = c(4,2,2)) &
