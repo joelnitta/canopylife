@@ -17,7 +17,7 @@ output:
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
 nocite: | 
-  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003
+  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Chen2014a
 ---
 
 ```{r setup, include=FALSE}
@@ -43,13 +43,15 @@ Article acceptance date:
 
 The following Supporting Information is available for this article:
 
-**Table S1** List of ferns from Moorea, French Polynesia included in this study with taxonomic data. 
+**Table S1** List of ferns from Moorea, French Polynesia included in this study.
 
-'taxon_code' is the name used for that taxon in all analyses. 'informal_variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name_source' indicates the source of the scientific name as follows, IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith, 2003.
+'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith, 2003.
 
-**Table S2** Trait values of ferns on Moorea, French Polynesia.  
+**Table S2** Trait values of ferns on Moorea, French Polynesia.
 
-SLA, specific leaf area. For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen, etc.
+SLA, specific leaf area. 
+
+'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI.
 
 ```{r}
 trait_data_for_si %>%
@@ -98,7 +100,11 @@ phylosig_binary_traits_strict %>%
   write_csv(here::here("ms/Table_S4.csv"))
 ```
 
-**Table S5** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. Abbreviations: LL, log likelihood.
+**Table S5** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. 
+
+LL, log likelihood.
+
+Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. 
 
 ```{r corr-evo-strict}
 # Format and write out table as CSV file
@@ -120,9 +126,11 @@ correlated_evo_test_strict %>%
   write_csv(here::here("ms/Table_S5.csv"))
 ```
 
-**Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown.
+**Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit.
 
-MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, *P* value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
+MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, *P* value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. 
+
+Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
 
 ```{r best-fit-mods}
 # Format and write out table as CSV file
@@ -168,7 +176,9 @@ best_fit_div_models_moran %>%
   write_csv(here::here("ms/Table_S6.csv"))
 ```
 
-**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input: **a**, standard effect size of mean phylogenetic distance (MPD~func~) **b**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "size" (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "reduced" (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
+**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.
+
+**(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "size" (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "reduced" (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
 
 ```{r fig-s1}
 library(corrr)
@@ -252,4 +262,4 @@ fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.pdf"), height = 8, width = 4, units = "in")
 ```
 
-References
+**References**
