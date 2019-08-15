@@ -409,7 +409,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
   # Add measurment sources and reformat column names/order
   left_join(morph_table, meas_sources) %>%
     select(
-      species,
+      `taxon code` = species,
       `growth habit` = habit,
       morphotype,
       gemmae, 
