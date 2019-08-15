@@ -107,9 +107,9 @@ tibble(
     "Discussion:_n",
     "Acknowledgements:_n"),
   figs_tabs = c(
-    "No. of figures:_6 (all in color)",
+    "No. of figures:_7 (all in color)",
     "No. of tables:_5",
-    "No. of supporting information files:_6 (Fig. S1; Table S1-S5)", "", "", "", "")
+    "No. of supporting information files:_7 (Fig. S1; Table S1-S6)", "", "", "", "")
 ) %>%
   separate(words, c("words", "count"), sep = "_") %>%
   separate(figs_tabs, c("figs_tabs", "n"), sep = "_", fill = "right") %>%
@@ -410,7 +410,27 @@ J.H.N. conceived and carried out the study. R.T. collected data. J.H.N. performe
 
 \clearpage
 
-**\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. (**a**) Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinna pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. (**b**) Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
+## Supporting Information
+
+Additional Supporting Information may be found online in the Supporting Information section at the end of the article:
+
+**Table S1** List of ferns from Moorea, French Polynesia included in this study.
+
+**Table S2** Trait values of ferns on Moorea, French Polynesia.
+
+**Table S3** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate.
+
+**Table S4** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy.
+
+**Table S5** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. 
+
+**Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit.
+
+**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.
+
+\clearpage
+
+**\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinna pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
 
 **\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from July 7, 2013 to July 5, 2014, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at ca. 2 m on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
 
