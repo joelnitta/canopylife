@@ -9,6 +9,11 @@
 # 
 # This script selects on the cited ones,
 # cleans them, and saves the clean bib file.
+#
+# Since other people don't need the full raw bibliography, 
+# this script is run as needed and the results (the clean bib)
+# checked-in to the repo.
+# The script is left here though for reproducibility.
 
 library(jntools)
 library(tidyverse)
