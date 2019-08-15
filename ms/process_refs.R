@@ -16,10 +16,25 @@ library(bib2df)
 
 setwd(here::here())
 
+#' Produce a filtered, cleaned .bib file
+#' 
+#' Takes the raw .bib file (e.g., one exported from
+#' Mendeley with thousands of entries), filters it
+#' to only the citations in the Rmd file, and cleans
+#' the references so pandoc won't crash.
+#'
+#' @param rmd_file Path to rmd file
+#' @param raw_bib Path to raw bib file
+#' @param final_bib Path to write cleaned, filtered bib file
+#'
+#' @return Nothing
+#' 
+make_ref_list <- function(rmd_file, raw_bib, final_bib) {
+
 # Process manuscript Rmd and pull out citations
 # (words that begin with '@')
 citations <-
-  read_lines("ms/manuscript.Rmd") %>%
+  read_lines(rmd_file) %>%
   str_split(" |;") %>%
   unlist %>%
   magrittr::extract(., str_detect(., "@")) %>%
@@ -29,7 +44,7 @@ citations <-
   str_remove_all("@")
 
 # Read in entire raw bibliography exported from Mendeley as tibble
-bib_df <- bib2df("ms/references_raw.bib")
+bib_df <- bib2df(raw_bib)
 
 # Select only needed columns and subset to citations in Rmd
 bib_df_selected <-
@@ -57,4 +72,10 @@ df2bib(bib_df_selected, file = temp_file)
 
 # Do final cleaning with jntools::clean_bib
 jntools::clean_bib(temp_file) %>% 
-  write_lines("ms/references.bib")
+  write_lines(final_bib)
+
+}
+
+make_ref_list("ms/manuscript.Rmd", "ms/references_raw.bib", "ms/references.bib")
+
+make_ref_list("ms/SI.Rmd", "ms/references_raw.bib", "ms/si_references.bib")
