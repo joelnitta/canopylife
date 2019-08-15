@@ -81,6 +81,7 @@ taxa_names_with_authors <- gnr_resolve(
     name_source == "Tropicos - Missouri Botanical Garden" ~ "TROPICOS",
     name_source == "The International Plant Names Index" ~ "IPNI",
     TRUE ~ name_source
-  ))
-
-write_csv(here("ms/Table_S1.csv"))
+  )) %>%
+  rename_all(~str_replace(., "_", " "))
+  
+write_csv(taxa_names_with_authors, here::here("ms/Table_S1.csv"))
