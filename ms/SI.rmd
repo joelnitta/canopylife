@@ -1,6 +1,23 @@
 ---
 title: ""
-output: word_document
+bibliography: "si_references.bib"
+mainfont: Times New Roman.ttf
+fontsize: 12pt
+mainfontoptions: 
+- BoldFont=Times New Roman Bold.ttf
+- ItalicFont=Times New Roman Italic.ttf
+- BoldItalicFont=Times New Roman Bold Italic.ttf
+output: 
+  bookdown::pdf_document2:
+    citation_package: none # Use pandoc default, otherwise csl can't be used for reference formatting
+    toc: no
+    number_sections: no
+    fig_caption: yes
+    keep_tex: no
+    latex_engine: xelatex
+    pandoc_args: [ "--csl", "new-phytologist.csl"]
+nocite: | 
+  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +53,7 @@ SLA, specific leaf area. For data source, L = lab observation of gametophyte cul
 
 ```{r}
 trait_data_for_si %>%
-  write_csv(here::here("si/Table_S2.csv"))
+  write_csv(here::here("ms/Table_S2.csv"))
 ```
 
 **Table S3** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate.
@@ -57,7 +74,7 @@ climate_ancova_results %>%
     )
   ) %>%
   select(`Response variable` = variable, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value) %>%
-  write_csv(here::here("si/Table_S3.csv"))
+  write_csv(here::here("ms/Table_S3.csv"))
 
 ```
 
@@ -78,7 +95,7 @@ phylosig_binary_traits_strict %>%
   arrange(trait) %>%
   select(Trait = trait, `Number of presences` = num_present, `Number of absences` = num_absent, D,
          P_rnd = prob_random, P_bm = prob_brownian) %>%
-  write_csv(here::here("si/Table_S4.csv"))
+  write_csv(here::here("ms/Table_S4.csv"))
 ```
 
 **Table S5** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. Abbreviations: LL, log likelihood.
@@ -100,7 +117,7 @@ correlated_evo_test_strict %>%
     `Likelihood ratio` = likelihood_ratio,
     `P` = pval
   ) %>%
-  write_csv(here::here("si/Table_S5.csv"))
+  write_csv(here::here("ms/Table_S5.csv"))
 ```
 
 **Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit. Models within delta AICc 3 of the best-fitting model shown.
@@ -148,7 +165,7 @@ best_fit_div_models_moran %>%
     `Moran's I` = morans_I,
     `P_moran` = morans_I_pval
   ) %>%
-  write_csv(here::here("si/Table_S6.csv"))
+  write_csv(here::here("ms/Table_S6.csv"))
 ```
 
 **Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input: **a**, standard effect size of mean phylogenetic distance (MPD~func~) **b**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "size" (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "reduced" (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
@@ -232,6 +249,7 @@ mntd_corr_plot <-
 
 fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 
-ggsave(plot = fig_s1, filename = here("si/Fig_S1.pdf"), height = 8, width = 4, units = "in")
+ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.pdf"), height = 8, width = 4, units = "in")
 ```
 
+References

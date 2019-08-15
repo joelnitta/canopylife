@@ -493,7 +493,7 @@ plan <- drake_plan(
 
   # SI ----
   si = rmarkdown::render(
-    knitr_in("si/SI.Rmd"),
+    knitr_in("ms/SI.Rmd"),
     quiet = TRUE)
 
 )

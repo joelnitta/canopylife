@@ -83,4 +83,4 @@ taxa_names_with_authors <- gnr_resolve(
     TRUE ~ name_source
   ))
 
-write_csv(here("si/Table_S1.csv"))
+write_csv(here("ms/Table_S1.csv"))
