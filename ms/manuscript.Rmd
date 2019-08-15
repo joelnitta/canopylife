@@ -649,7 +649,7 @@ correlated_evo_test_table %>%
 \clearpage
 
 ```{r traits-used-image, fig.height = 9, fig.width = 6, fig.cap = "Examples of traits used in this study."}
-knitr::include_graphics(here::here("ms/Fig_1.pdf"))
+knitr::include_graphics(here::here("images/Figure_3_1_traits_lowres.pdf"))
 ```
 
 \clearpage
