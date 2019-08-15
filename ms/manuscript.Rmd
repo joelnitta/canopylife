@@ -452,7 +452,7 @@ traits_used %>%
     reference = "Reference(s)"
   ) %>% 
   as_rtf() %>%
-  write_lines(here::here("ms/table1.rtf"))
+  write_lines(here::here("ms/Table_1.rtf"))
 
 # Include in PDF using kableExtra to convert to latex format
 traits_used %>% 
@@ -498,7 +498,7 @@ phylosig_cont_traits_table %>%
     lambda = "lambda"
   )  %>% 
   as_rtf() %>%
-  write_lines(here::here("ms/table2.rtf"))
+  write_lines(here::here("ms/Table_2.rtf"))
 
 # Include in PDF in latex format
 phylosig_cont_traits_table %>%
@@ -536,7 +536,7 @@ phylosig_binary_traits_table %>%
     prob_brownian = md("*P*(bm)")
   ) %>% 
   as_rtf() %>%
-  write_lines(here::here("ms/table3.rtf"))
+  write_lines(here::here("ms/Table_3.rtf"))
 
 # Include in PDF in latex format
 phylosig_binary_traits_table %>%
@@ -578,7 +578,7 @@ gt(rowname_col = "trait") %>%
     p.value = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines(here::here("ms/table4.rtf"))
+  write_lines(here::here("ms/Table_4.rtf"))
 
 # Include in PDF in latex format
 pic_table %>%
@@ -616,7 +616,7 @@ gt(rowname_col = "trait") %>%
     pval = md("*P*"),
   ) %>% 
   as_rtf() %>%
-  write_lines(here::here("ms/table5.rtf"))
+  write_lines(here::here("ms/Table_5.rtf"))
 
 # Include in PDF in latex format
 correlated_evo_test_table %>%
@@ -636,40 +636,40 @@ knitr::include_graphics(here::here("images/Figure_3_1_traits_lowres.pdf"))
 
 ```{r climate, fig.height = 4, fig.width = 7, fig.cap = "Microclimatic variables."}
 climate_plot
-ggsave(plot = climate_plot, filename = here::here("ms/fig1.pdf"), height = 4, width = 7, units = "in")
+ggsave(plot = climate_plot, filename = here::here("ms/Fig_1.pdf"), height = 4, width = 7, units = "in")
 ```
 
 \clearpage
 
 ```{r pca, fig.height = 6, fig.width = 6, fig.cap = "Trait PCA."}
 pca_plot
-ggsave(plot = pca_plot, filename = here::here("ms/fig2.pdf"), height = 6, width = 6, units = "in")
+ggsave(plot = pca_plot, filename = here::here("ms/Fig_2.pdf"), height = 6, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r tree, fig.height = 8, fig.width = 6, fig.cap = "Traits on tree."}
 traits_with_tree
-ggsave(plot = traits_with_tree, filename = here::here("ms/fig3.pdf"), height = 8, width = 6, units = "in")
+ggsave(plot = traits_with_tree, filename = here::here("ms/Fig_3.pdf"), height = 8, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r heatmap, fig.height = 4, fig.width = 6, fig.cap = "Variable importance scores."}
 importance_heatmap
-ggsave(plot = importance_heatmap, filename = here::here("ms/fig4.pdf"), height = 4, width = 6, units = "in")
+ggsave(plot = importance_heatmap, filename = here::here("ms/Fig_4.pdf"), height = 4, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r cwm-div, fig.height = 4, fig.width = 7, fig.cap = "Community-weighted means."}
 combined_cwm_plots
-ggsave(plot = combined_cwm_plots, filename = here::here("ms/fig5.pdf"), height = 4, width = 7, units = "in")
+ggsave(plot = combined_cwm_plots, filename = here::here("ms/Fig_5.pdf"), height = 4, width = 7, units = "in")
 ```
 
 \clearpage
 
 ```{r comm-div, fig.height = 8, fig.width = 4, fig.cap = "Community diversity metrics."}
 combined_comm_div_plots
-ggsave(plot = combined_comm_div_plots, filename = here::here("ms/fig6.pdf"), height = 8, width = 4, units = "in")
+ggsave(plot = combined_comm_div_plots, filename = here::here("ms/Fig_6.pdf"), height = 8, width = 4, units = "in")
 ```
