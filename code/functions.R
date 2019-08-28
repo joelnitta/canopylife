@@ -1722,7 +1722,7 @@ get_label <- function(axis_labels, analysis_type_select, axis_select) {
 #' @return ggplot object
 make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevation (m)",
                                       single_line = TRUE,
-                                      r_upper = TRUE,
+                                      r_position = "upper_right",
                                       data, 
                                       fits, summaries, 
                                       habit_colors, alpha_val = 0.5) {
@@ -1775,11 +1775,18 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
   
   # Set location of where to print R-squared
   if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
-    if (isTRUE(r_upper)) {
+    if (r_position == "upper_right") {
       plot <- plot +
         annotate("text", x = Inf, y = Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),
                  hjust = 1.1, vjust = 1.2,
+                 size = 9 / .pt,
+                 parse = TRUE)
+    } else if (r_position == "upper_left") {  
+      plot <- plot +
+        annotate("text", x = -Inf, y = Inf, 
+                 label = glue::glue("italic(R) ^ 2 == {r2}"),
+                 hjust = -0.1, vjust = 1.2,
                  size = 9 / .pt,
                  parse = TRUE)
     } else {
@@ -2031,6 +2038,12 @@ make_climate_plot <- function (data, resp_vars,
       yval == "vpd_mean" ~ "Mean VPD (kPa)",
       yval == "vpd_sd" ~ "SD VPD (kPa)",
     ),
+    r_position = case_when(
+      yval == "temp_max" ~ "upper_left",
+      yval == "temp_sd" ~ "upper_left",
+      yval == "vpd_sd" ~ "upper_left",
+      TRUE ~ "upper_right"
+    ),
     data = list(data),
     fits = list(fits), 
     summaries = list(summaries)
@@ -2049,6 +2062,7 @@ make_climate_plot <- function (data, resp_vars,
              data = data, 
              fits = fits, 
              summaries = summaries, 
+             r_position = r_position,
              habit_colors = list(habit_colors),
              alpha_val = alpha_val),
         make_climate_scatterplot)
