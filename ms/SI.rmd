@@ -17,7 +17,7 @@ output:
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
 nocite: | 
-  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Chen2014a
+  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
 ---
 
 ```{r setup, include=FALSE}
@@ -35,7 +35,7 @@ loadd(func_comm_struc_combined)
 
 ***New Phytologist*** **Supporting Information**
 
-Article title: Life in the canopy: Phylogenetic filtering and morphological canalization in epiphytic ferns
+Article title: Constrained, yet diverse: Phylogenetic and morphological filtering in epiphytic ferns
 
 Authors: Joel H. Nitta, James E. Watkins, Jr., Ravahere Taputuarai, and Charles C. Davis
 
@@ -51,7 +51,7 @@ The following Supporting Information is available for this article:
 
 SLA, specific leaf area. 
 
-'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI.
+Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI.
 
 ```{r}
 trait_data_for_si %>%

@@ -372,7 +372,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     # Add column for mean +/- sd (n) formatted for printing
     mutate(
       print = case_when(
-        n > 1 ~ glue("{mean} ± {sd} ({n})"),
+        n > 1 ~ glue("{mean}, {sd} ({n})"),
         n == 1 ~ glue("{mean} ({n})")
       )
     ) %>%
@@ -384,18 +384,26 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
   morph_table <- full_join(morph_mean, morph_qual_raw) %>%
     mutate(gameto_source = jntools::paste3(source_1, source_2) %>%
              str_replace(" ", ", ")) %>%
-    select(-source_1, -source_2)
+    select(-source_1, -source_2) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Lloyd1980", "Lloyd (1980)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Atkinson1975", "Atkinson (1975)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Nayar1971", "Nayar and Kaur (1971)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Tigerschiold1990", "Tigerschiold (1990)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Tigerschiold1989", "Tigerschiold (1989)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Martin2006", "Martin et al (2006)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Zhang2008", "Zhang et al (2008)")) %>%
+    mutate(gameto_source = str_replace_all(gameto_source, "Bierhorst1967", "Bierhorst (1967)"))
   
   # Add in sources for measurements
   meas_sources <- morph_cont_raw %>% 
     # Rename sources according to abbreviations
     mutate(
       source = case_when(
-        source == "Ferns & Fern-Allies of South Pacific Islands" ~ "NMNS2008", 
-        source == "Pteridophytes of the Society Islands" ~ "Copeland1932",
-        source == "Hawaii's Ferns and Fern Allies" ~ "Palmer2003",
-        source == "Flora of New South Wales" ~ "FloraNSW2019",
-        source == "Brownsey 1987" ~ "Brownsey1987",
+        source == "Ferns & Fern-Allies of South Pacific Islands" ~ "National Museum of Nature and Science (2008)", 
+        source == "Pteridophytes of the Society Islands" ~ "Copeland (1932)",
+        source == "Hawaii's Ferns and Fern Allies" ~ "Palmer (2003)",
+        source == "Flora of New South Wales" ~ "Royal Botanic Gardens and Domain Trust (2019)",
+        source == "Brownsey 1987" ~ "Brownsey (1987)",
         source == "measurement" ~ "M"
       )
     ) %>%
