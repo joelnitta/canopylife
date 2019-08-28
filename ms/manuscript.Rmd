@@ -282,13 +282,13 @@ Most measured traits showed some degree of phylogenetic signal, but the strength
 ### Correlation of Traits with Growth Habit
 
 ```{r corr-numbers}
-stipe_pval <- pic_results %>% filter(trait == "stipe") %>% pull(p.value) %>% signif(2)
-width_pval <- pic_results %>% filter(trait == "width") %>% pull(p.value) %>% signif(2)
-dissection_pval <- pic_results %>% filter(trait == "dissection") %>% pull(p.value) %>% signif(2)
-morphotype_pval <- correlated_evo_test %>% filter(trait == "morphotype") %>% pull(pval) %>% signif(2)
+stipe_pval <- pic_results %>% filter(trait == "stipe") %>% pull(p.value) %>% format_pval(., equals_sign = TRUE)
+width_pval <- pic_results %>% filter(trait == "width") %>% pull(p.value) %>% format_pval(., equals_sign = TRUE)
+dissection_pval <- pic_results %>% filter(trait == "dissection") %>% pull(p.value) %>% format_pval(., equals_sign = TRUE)
+morphotype_pval <- correlated_evo_test %>% filter(trait == "morphotype") %>% pull(pval) %>% format_pval(., equals_sign = TRUE)
 ```
 
-Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (\tab \@ref(tab:pics)). Epiphytic species tend to have smaller values for all traits (\tab \@ref(tab:pics); contrasts were made by subtracting epiphytic from terrestrial values). Short stipe length in particular appears to be strongly correlated with epiphytic growth (phylogenetically independent contrasts, \pval = `r stipe_pval`), as well as frond width (\pval = `r width_pval`) and degree of laminae dissection (\pval = `r dissection_pval`). For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval = `r morphotype_pval`; \tab \@ref(tab:corr-evo)). Similar results were obtained using the "strict" dataset (\tab S5).
+Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (\tab \@ref(tab:pics)). Epiphytic species tend to have smaller values for all traits (\tab \@ref(tab:pics); contrasts were made by subtracting epiphytic from terrestrial values). Short stipe length in particular appears to be strongly correlated with epiphytic growth (phylogenetically independent contrasts, \pval `r stipe_pval`), as well as frond width (\pval `r width_pval`) and degree of laminae dissection (\pval `r dissection_pval`). For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval `r morphotype_pval`; \tab \@ref(tab:corr-evo)). Similar results were obtained using the "strict" dataset (\tab S5).
 
 ### Functional and Phylogenetic Diversity
 
