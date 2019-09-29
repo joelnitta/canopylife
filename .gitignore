@@ -4,6 +4,7 @@
 .Ruserdata
 .drake
 .drake_history
+.DS_Store
 old
 tmp
 .secret
