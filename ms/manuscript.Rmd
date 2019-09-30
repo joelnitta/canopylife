@@ -44,29 +44,31 @@ conflict_prefer("select", "dplyr")
 conflict_prefer("filter", "dplyr")
 
 # Load analysis results
-loadd(best_fit_div_models)
-loadd(climate_ancova_results)
-loadd(climate_plot)
-loadd(climate_select)
-loadd(combined_comm_div_plots)
-loadd(combined_cwm_plots)
-loadd(comm)
-loadd(correlated_evo_test)
-loadd(correlated_evo_test_gemmae)
-loadd(daily_mean_climate)
-loadd(div_el_model_summaries)
-loadd(div_t_test_results)
-loadd(div_metrics_all)
-loadd(fern_traits)
-loadd(importance_heatmap)
-loadd(pca_plot)
-loadd(pca_results)
-loadd(phy)
-loadd(phylosig_binary_traits)
-loadd(phylosig_cont_traits)
-loadd(pic_results)
-loadd(species_list)
-loadd(traits_with_tree)
+loadd(list = c(
+  "best_fit_div_models",
+  "climate_ancova_results",
+  "climate_plot",
+  "climate_select",
+  "combined_comm_div_plots",
+  "combined_cwm_plots",
+  "comm",
+  "correlated_evo_test",
+  "correlated_evo_test_gemmae",
+  "daily_mean_climate",
+  "div_el_model_summaries",
+  "div_t_test_results",
+  "div_metrics_all",
+  "fern_traits",
+  "importance_heatmap",
+  "pca_plot",
+  "pca_results",
+  "phy",
+  "phylosig_binary_traits",
+  "phylosig_cont_traits",
+  "pic_results",
+  "species_list",
+  "traits_with_tree"),
+  cache = canopy_cache)
 ```
 
 <!-- FOR CONVERSION TO MS WORD ONLY: remove page numbers -->

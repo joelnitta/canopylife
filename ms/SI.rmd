@@ -24,12 +24,12 @@ nocite: |
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = TRUE)
 
 # Load analysis results
-loadd(trait_data_for_si)
-loadd(climate_ancova_results)
-loadd(phylosig_binary_traits_strict)
-loadd(correlated_evo_test_strict)
-loadd(best_fit_div_models_moran)
-loadd(func_comm_struc_combined)
+loadd(trait_data_for_si, cache = canopy_cache)
+loadd(climate_ancova_results, cache = canopy_cache)
+loadd(phylosig_binary_traits_strict, cache = canopy_cache)
+loadd(correlated_evo_test_strict, cache = canopy_cache)
+loadd(best_fit_div_models_moran, cache = canopy_cache)
+loadd(func_comm_struc_combined, cache = canopy_cache)
 
 ```
 
