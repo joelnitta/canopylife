@@ -1,9 +1,10 @@
 # Data processing ----
 
-#' Download Nitta et al 2017 Ecol Mono data zip file and 
-#' extract needed data files
-#'
-#' @param dl_path Name of file to download the zip file to.
+#' Unzip Nitta et al 2017 Ecol Mono data file downloaded
+#' from Dryad (https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g)
+#' and extract needed data files.
+#' 
+#' @param dl_path Name of downloaded zip file.
 #' @param unzip_path Path to directory to put the unzipped
 #' contents (will be created if needed).
 #' @param ... Extra arguments; not used by this function, but
@@ -18,13 +19,13 @@
 download_and_unzip_nitta_2017 <- function (dl_path, unzip_path, ...) {
   
   # Make sure the target directory exists
-  assertthat::assert_that(assertthat::is.dir(fs::path_dir(dl_path)))
+  # assertthat::assert_that(assertthat::is.dir(fs::path_dir(dl_path)))
   
   # Set url
-  url <- "https://datadryad.org/bitstream/handle/10255/dryad.132050/data_and_scripts.zip?sequence=1"
+  # url <- "https://datadryad.org/bitstream/handle/10255/dryad.132050/data_and_scripts.zip?sequence=1"
   
   # Download zip file
-  download.file(url, dl_path)
+  # download.file(url, dl_path)
   
   # Unzip only needed data files to data/nitta_2017/
   unzip(dl_path, "data_and_scripts/Comm_Phylo_Analysis/data/all_plots.csv", exdir = unzip_path, junkpaths = TRUE)
