@@ -1973,7 +1973,8 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
 #' )
 make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
                           data, summaries, 
-                          habit_colors) {
+                          habit_colors,
+                          include_points = FALSE) {
   
   yval_sym <- sym(yval)
   
@@ -1994,8 +1995,15 @@ make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
   # Make basic boxplot by habit
   # Add asterisk for t-test result between the bars only if they
   # differ by habit (will print nothing if not signif.)
-  ggplot(data, aes(x = habit)) +
-    geom_boxplot(aes(y = !!yval_sym, color = habit)) +
+  plot <- ggplot(data, aes(x = habit))
+  
+  if(isTRUE(include_points)) {
+    plot <- plot +
+      geom_jitter(aes(y = !!yval_sym, color = habit))
+  }
+  
+  plot +
+    geom_boxplot(aes(y = !!yval_sym, color = habit), fill = "transparent") +
     annotate(
       "text", label = asterisk, size = 5, fontface = "bold",
       x = 1.5, 
@@ -2851,6 +2859,97 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
     # Tweak margins to remove whitespace between plots
     plot.margin = margin(t = -0.2, r = -0.1, b = 0, l = -0.1, unit = "in")
   )
+}
+
+
+#' Make a composite plot of community-wide
+#' standard deviations of quantitative trait values
+#' 
+#' Includes results of t-test comparing epiphytic vs. terrestrial
+#' SD values.
+#'
+#' @param cwm_long Community-wide mean and standard deviation
+#' in trait values. Output of calculate_cwm()
+#' @param habit_colors Vector of colors to use for growth habit
+#'
+#' @return Plot
+#' 
+make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
+  
+  # Make vector of quantitative traits in the order they will be plotted
+  quant_traits <- c("stipe", "length", "width", "rhizome", 
+                    "sla", "pinna", "dissection") %>%
+    purrr::set_names(.)
+  
+  # Make vector of y-axis labels IN SAME ORDER
+  quant_labs <- c("Stipe length (cm)", "Frond length (cm)", "Frond width (cm)", "Rhizome dia. (cm)",
+    "SLA", "Pinna no.", "Frond dissection")
+  
+  # Convert community-weighted values to wide, only keep standard deviation
+  sd_wide <-
+    cwm_long %>%
+    mutate(habit = factor(habit, levels = c("epiphytic", "terrestrial"))) %>%
+    select(habit, trait, site, sd) %>%
+    spread(trait, sd)
+  
+  # Calculate t-test results between SD of each trait
+  cwsd_t_test_results = map_df(
+    quant_traits,
+    ~ run_t_test_by_habit(
+      resp_var = .,
+      data = sd_wide
+    )
+  )
+  
+  # Make list of boxplots
+  cwsd_boxplots = map2(
+    .x = quant_traits,
+    .y = quant_labs,
+    ~ make_boxplot(
+      data = sd_wide,
+      summaries = cwsd_t_test_results,
+      yval = .x,
+      ylab = .y,
+      habit_colors = habit_colors,
+      include_points = TRUE)
+  )
+  
+  
+  # Tweak plot elements
+  # - remove redundant x-axis labels
+  for(i in c(1:4, 5, 7)) {
+    cwsd_boxplots[[i]] <- cwsd_boxplots[[i]] + 
+      theme(axis.title.x = element_text(color = "transparent"))
+  }
+  
+  for(i in 1:4) {
+    cwsd_boxplots[[i]] <- cwsd_boxplots[[i]] + 
+      theme(axis.text.x = element_text(color = "transparent"))
+  }
+  
+  # - Special formatting for SLA y-axis label
+  cwsd_boxplots[["sla"]] <- cwsd_boxplots[["sla"]] +
+    ylab(expression(SLA~(m^{"2"}~kg^{"-1"})))
+  
+  # Add plot part labels
+  cwsd_boxplots[["stipe"]] <- cwsd_boxplots[["stipe"]] +
+    labs(title = "(a)") +
+    theme(plot.title = element_text(face = "bold"))
+  
+  cwsd_boxplots[["dissection"]] <- cwsd_boxplots[["dissection"]] +
+    labs(title = "(b)") +
+    theme(plot.title = element_text(face = "bold"))
+  
+  # Compile final plot
+  cwsd_boxplots[["stipe"]] + cwsd_boxplots[["length"]] + cwsd_boxplots[["width"]] +
+    cwsd_boxplots[["rhizome"]] + plot_spacer() + plot_spacer() +
+    cwsd_boxplots[["dissection"]] + cwsd_boxplots[["pinna"]] + cwsd_boxplots[["sla"]] & 
+    theme(
+      legend.position = "none",
+      # Tweak margins to remove whitespace between plots
+      plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+    )
+  
 }
 
 # SI ----

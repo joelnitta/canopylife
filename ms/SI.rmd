@@ -16,6 +16,8 @@ output:
     keep_tex: no
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
+    includes:
+      in_header: newphyt.sty
 nocite: | 
   @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
 ---
@@ -180,7 +182,7 @@ best_fit_div_models_moran %>%
 
 **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package "corrr". All trait sets were scaled to standard deviation of each trait. The following trait sets were used: "all" (all traits), "size" (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), "other" (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), "gameto" (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), "reduced" (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed "reduced" dataset was used for the main results.
 
-```{r fig-s1}
+```{r fig-s2}
 library(corrr)
 
 # Tweak names for easier viewing
@@ -260,6 +262,15 @@ mntd_corr_plot <-
 fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 
 ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.pdf"), height = 8, width = 4, units = "in")
+```
+
+**Fig. S2** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 $\times$ the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
+
+**(a)**, traits related to plant size **(b)**, traits not related to plant size.
+
+```{r fig-s1}
+loadd(cwsd_scatterplot, cache = canopy_cache)
+ggsave(plot = cwsd_scatterplot, filename = here::here("ms/Fig_S2.pdf"), height = 6, width = 7, units = "in")
 ```
 
 **References**

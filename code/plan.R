@@ -485,6 +485,10 @@ plan <- drake_plan(
 
   # Make heatmap of importance scores.
   importance_heatmap = make_heatmap(important_div_vars),
+  
+  # Make jitter plus box plot of community-wide SD values
+  # for SI
+  cwsd_scatterplot = make_cwsd_scatterplot(cwm_long, habit_colors),
 
   # Manuscript ----
   ms = rmarkdown::render(
