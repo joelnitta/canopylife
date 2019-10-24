@@ -25,3 +25,12 @@ read_lines("ms/si_references.bib") %>%
     "Royal Botanic Gardens and Domain Trust",
     "\\{Royal Botanic Gardens and Domain Trust\\}") %>%
   write_lines("ms/si_references.bib")
+
+# Make some manual fixes to authors in SI bibliography
+# (these are institutions, so need double brackets to
+# avoid latex thinking they have first and last names)
+read_lines("ms/references.bib") %>%
+  str_replace(
+    "Pteridophyte Phylogeny Group I",
+    "\\{Pteridophyte Phylogeny Group I\\}") %>%
+  write_lines("ms/references.bib")

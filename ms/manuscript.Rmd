@@ -24,7 +24,7 @@ header-includes:
 editor_options: 
   chunk_output_type: console
 nocite: | 
-  @Vogel1968, @Wollenweber2000
+  @Vogel1968
 ---
 
 ```{r setup, include=FALSE}
@@ -239,7 +239,7 @@ We tested the effects of climate and growth habit on diversity metrics using ful
 
 ### Data accessibility
 
-Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife. Raw and processed data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2019].
+Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife. Raw and processed data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2019a].
 
 ## Results
 
@@ -394,8 +394,7 @@ Interestingly, when we classified 'widespread' species as those with gametophyte
 Thus, it seems that gemmae may function in long-term gametophyte persistence, but are not required for epiphytic growth.
 
 Presence of hairs and glands in gametophytes has very strong phylogenetic signal (\tab \@ref(tab:phylosig-binary)), and these traits are associated with certain taxonomic groups [@Stokey1951; @Nayar1971].
-Although hairs have been hypothesized to reduce rates of drying and increase water uptake after desiccation [@Kappen2007], we did not detect a correlation between hair production and epiphytic growth.
-Similarly, production of glands does not appear to be correlated with epiphytic growth.
+Although hairs have been hypothesized to reduce rates of drying and increase water uptake after desiccation [@Kappen2007], and glands may affect rates of osmosis by modifying lipid concentrations [@Crow2011], we did not detect a correlation between hair or gland production and epiphytic growth.
 Wax-secreting glands are prevalent in both sporophytes and gametophytes of many notholaenid ferns, a xeric-adapted clade, but their functional significance has not been established [@Johnson2012].
 Further tests are needed to determine if such glands serve a functional role in preventing water loss in desert ferns and epiphytes.
 
