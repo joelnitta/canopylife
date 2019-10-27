@@ -165,8 +165,8 @@ While many similar adaptations are found in epiphytic seed plants and serve as k
 Ferns produce a free-living gametophyte that is typically smaller than the sporophyte and relies on aquatic motile sperm.
 Unlike the sporophyte, the fern gametophyte lacks vascular tissue, stomata, or cuticle, placing it in constant equilibrium with its external environment. 
 In parallel with some of the adaptations in the sporophytes, the gametophytes of some epiphytic ferns also exhibit morphological and physiological adaptations to minimize water loss and tolerate water scarcity. 
-For example, extreme desiccation tolerance is prevalent in gametophytes of multiple lineages of epiphytic ferns, but is rare in sporophytes  [@WatkinsJr.2007c; Pittermann2013].
-In addition, epiphytic fern gametophytes tend to exhibit more complex three-dimensional morphologies that may function to retain water and slow its loss [WatkinsJr.2007c].
+For example, extreme desiccation tolerance is prevalent in gametophytes of multiple lineages of epiphytic ferns, but is rare in sporophytes  [@WatkinsJr.2007c; @Pittermann2013].
+In addition, epiphytic fern gametophytes tend to exhibit more complex three-dimensional morphologies that may function to retain water and slow its loss [@WatkinsJr.2007c].
 Despite evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no previous studies to our knowledge have analyzed the functional ecology of fern epiphytes in a phylogenetic context including both life stages and representatives of all five Cretaceous epiphytic radiations *sensu* [@Schuettpelz2009].
 
 To gain insight into the role of the canopy in promoting or restricting diversity, a functional and community-based approach can be applied to study this question. 
@@ -190,7 +190,7 @@ Specifically, we test the following hypotheses related to epiphytic growth in fe
 
 ### Study Site
 
-Moorea, French Polynesia (\ang{17;30;}S, \ang{149;50;}W) is a small (\SI{135}{\kilo\meter\squared}) tropical oceanic island more than \SI{5000}{\kilo\meter} from the nearest continental landmass. This distance acts as a strong barrier to dispersal [@Carson1995;@Dassler2001], which combined with the young age of the island (\circa \SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa \SI{130}{\species}, 8/11 orders \sensu @PteridophytePhylogenyGroupI2016) (\tab S1). Ferns of Moorea include representatives of all five of the Cretaceous epiphytic radiations described by @Schuettpelz2009 (\ie, polygrammoids, elaphoglossoids, asplenioids, vittarioids, and filmy ferns) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
+Moorea, French Polynesia (\ang{17;30;}S, \ang{149;50;}W) is a small (\SI{135}{\kilo\meter\squared}) tropical oceanic island more than \SI{5000}{\kilo\meter} from the nearest continental landmass. This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa \SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa \SI{130}{\species}, 8/11 orders \sensu @PteridophytePhylogenyGroupI2016) (\tab S1). Ferns of Moorea include representatives of all five of the Cretaceous epiphytic radiations described by @Schuettpelz2009 (\ie, polygrammoids, elaphoglossoids, asplenioids, vittarioids, and filmy ferns) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
 
 ### Community Survey
 
@@ -256,7 +256,7 @@ We investigated differences in multivariate trait space between epiphytes and te
 
 We calculated community-weighted means (CWMs) and standard deviations of quantitative traits by using the overall mean trait value of each species weighted by their abundances in each community.
 
-We used distance-based methods to analyze community phylogenetic and functional diversity. Mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) describe the mean distance between all species in a community (MPD) or the mean distance between the closest pairs of species in a community (MNTD) [@Webb2000; Webb2002]. Although these metrics were originally formulated for phylogenetic distances, they can be applied in the same way to trait-based distances, enabling a direct comparison between the two [@Sessa2018]. For phylogenetic distances, we used the tree of @Nitta2017. For functional distances, we log-transformed and scaled traits as in the PCA, excluded frond width and length (both frond size traits highly correlated with stipe length), then calculated the distance matrix using Gower's dissimilarity coefficient [@Gower1971] with the \function{gowdis} function in the R package \package{FD} [@Laliberte2011], with equal weighting for sporophyte and gametophyte traits. To test for the effect of different trait selection schemes, we compared the results of running the same analyses for various sets of traits with and without log-transformation (Supporting Information).
+We used distance-based methods to analyze community phylogenetic and functional diversity. Mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) describe the mean distance between all species in a community (MPD) or the mean distance between the closest pairs of species in a community (MNTD) [@Webb2000; @Webb2002]. Although these metrics were originally formulated for phylogenetic distances, they can be applied in the same way to trait-based distances, enabling a direct comparison between the two [@Sessa2018]. For phylogenetic distances, we used the tree of @Nitta2017. For functional distances, we log-transformed and scaled traits as in the PCA, excluded frond width and length (both frond size traits highly correlated with stipe length), then calculated the distance matrix using Gower's dissimilarity coefficient [@Gower1971] with the \function{gowdis} function in the R package \package{FD} [@Laliberte2011], with equal weighting for sporophyte and gametophyte traits. To test for the effect of different trait selection schemes, we compared the results of running the same analyses for various sets of traits with and without log-transformation (Supporting Information).
 
 Raw values of MPD and MNTD are statistically related to species richness [@Swenson2014]; to obtain metrics that are uncorrelated with species richness, we calculated their standard effect sizes (SES) by comparing observed values to a distribution of \num{999} randomized communities. We constructed null communities using the "independent swap" algorithm [@Gotelli2000]. We included all species of ferns from Moorea and the neighboring island of Tahiti with genetic data available (`r Ntip(phy)` \si{\species} total; [@Nitta2017]) for phylogenetic null communities, and all species with trait data available (`r fern_traits %>%pull(species) %>% n_distinct`) for functional null communities. We used the \function{ses.mpd} and \function{ses.mntd} functions in the R package \package{picante} [@Kembel2010] to calculate phylogenetic and functional diversity metrics. Hereafter, "MPD~phy~" and "MNTD~phy~", and "MPD~func~" and "MNTD~func~", refer to the standard effect sizes of MPD and MNTD as measured with phylogenetic and functional trait distances, respectively.
 
@@ -379,36 +379,51 @@ We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(sp
 
 ## Discussion
 
-Here, we provide the first study to our knowledge to combine comparative methods with phylogenetic community ecology to analyze the evolutionary implications of epiphytic growth in ferns.
-We find that epiphytic ferns are constrained in size, having consistently smaller fronds and rhizomes than terrestrial species.
-In contrast, epiphytic ferns vary greatly in other traits, leading epiphytic fern communities to be more functionally diverse overall than terrestrial communities.
-Taken together, our results suggest that environmental filtering plays a strong role in limiting plant size, while simultaneously allowing for diversification across other trait axes in epiphytic ferns.
+Our study reveals a striking duality in the phylogenetic and functional diversity of fern epiphytes. 
+On one hand, we find that fern epiphytes are consistently smaller than terrestrial species at both the species and community level (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)), and that epiphytic communities are phylogenetically clustered (\fig \@ref(fig:comm-div)).
+At the same time, we find that epiphytic fern communities are significantly more diverse functionally compared to terrestrial communities (\fig \@ref(fig:comm-div)).
+Collectively, these results suggest that environmental filtering plays a strong role in limiting plant size, while simultaneously promoting diversification across other trait axes in epiphytic ferns.
 
-### Convergence in small size and non-cordate morphotype
+### Convergence in sporophyte size and gametophyte morphotype in fern epiphytes
 
-Epiphytes were markedly smaller than terrestrial species as measured by stipe and frond length, frond width, and rhizome diameter at both the species and community level (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)).
-Our results at the local scale are corroborated by @Testo2018a, who also observed abrupt size reduction associated with epiphytic growth in a globally sampled fern phylogeny.
-Stipe length in particular may be a critical trait controlling whole leaf hydraulic conductance; since ferns have resistive stipes in general, species growing in water-limited habitats are expected to decrease stipe length to minimize resistance [@WatkinsJr.2010].
-Our results support previous non-phylogenetically controlled studies that found a prevalence of short stipes in epiphytic ferns [@WatkinsJr.2010; @Creese2011].
-However, given that stipe and frond length, frond width, and rhizome diameter were correlated, and similar traits have been shown to scale together previously [@Arcand2008; @Creese2011], careful experimental manipulations are needed to distinguish the role (or lack thereof) of each in epiphytic growth.
+Epiphytes are markedly smaller than terrestrial species as measured by stipe and frond length, frond width, and rhizome diameter at both the species and community level (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)), supporting both hypotheses (convergence in epiphytic traits and reduced functional diversity of epiphytic communities).
+These results are corroborated by @Testo2018a, who similarly observed abrupt size reduction associated with epiphytic growth in a globally sampled fern phylogeny. 
+What might explain such consistent and convergent reduction in fern sporophyte size when transitioning into the canopy?
+An obvious answer is that water limitation in the canopy exerts strong selective pressure to maintain small size. 
+In spite of similar and predictable leaf-level economic tradeoffs between angiosperms and ferns [@Karst2007], fern leaves are limited in their hydraulic flexibility as they rely wholly on primary xylem that feeds into laminar tissues with reduced leaf venation.
+Stipe length and structure in particular are critical for regulating whole leaf hydraulic conductance in ferns [@Pittermann2013].
+Species growing in water-limited habitats like those in the canopy are expected by biomechanical necessity to decrease stipe length to minimize resistance [@WatkinsJr.2010].
+Our results support previous studies that identified a prevalence of short stipes among epiphytic ferns [@WatkinsJr.2010; @Creese2011].
+However, given that stipe and frond length, frond width, and rhizome diameter were correlated in our study, and similar traits have previously been shown to co-vary [@Arcand2008; @Creese2011], careful experimental manipulations are required to distinguish the role of each trait in facilitating epiphytism.
 
-Another clear pattern to emerge from our study is the association between epiphytism and non-cordate (\eg, elongate or filamentous) morphotype.
-Morphotype was previously observed to correlate with life history and habitat in ferns: terrestrial species tend to have short-lived ($< \SI{1}{\year}$), cordate gametophytes that establish following disturbance and rapidly produce sporophytes, whereas epiphytic species tend to have non-cordate gametophytes that persist over multiple growing seasons and produce sporophytes more slowly [@WatkinsJr.2007a; @Farrar2008].
-The complex, three-dimensional structure of non-cordate gametophytes slows their drying rates, and may be an adaptation to drought-prone epiphytic habitats [@WatkinsJr.2007c; @Pittermann2013], and promote out-crossing [@Farrar2008].
-Our study is the first to our knowledge to demonstrate that the correlation between non-cordate morphology and epiphytism in ferns is significant while controlling for phylogeny.
-@Sundue2015 found that non-cordate morphology is significantly correlated with increased diversification rates within Polypodiaceae, consistent with the hypothesis that this trait promoted diversification within the epiphytic niche.
+Another clear and convergent pattern to emerge from our study supporting the hypothesis of convergence is the association between epiphytism and the prevalence of non-cordate gametophyte morphotypes (\eg, elongate or filamentous).
+Gametophyte morphotype was previously observed to correlate with life history and habitat in ferns: terrestrial species tend to have short-lived ($< \SI{1}{\year}$), cordate morphotypes that establish following disturbance and rapidly produce sporophytes, whereas epiphytic species tend to have non-cordate gametophytes that persist over multiple growing seasons and produce sporophytes more slowly [@WatkinsJr.2007a; @Farrar2008].
+The complex, three-dimensional structure of non-cordate gametophytes may serve two important functions. 
+Complex thallus morphology can slow drying rates, and slow dehydration is correlated with the ability to recover from drought in gametophytes---likely a critical adaptation to drought-prone epiphytic habitats [@WatkinsJr.2007c; @Pittermann2013].
+Non-cordate thallus morphology may also promote outcrossing through the formation of long-lived gametophyte banks that can persist in epiphytic but not in more disturbance-prone terrestrial habitats [@WatkinsJr.2007a; @Farrar2008].
+Our study is the first to our knowledge to demonstrate that the correlation between non-cordate morphology and epiphytism in ferns is significant across broad phylogenetic scales.
 
-### Remarkable diversity in other traits
+### Unexpected diversity in non-size related traits of epiphytes
 
-In contrast to their clearly smaller size and non-cordate morphotypes, epiphytes were remarkably diverse in other traits.
-Epiphytes tended to have less dissected fronds with fewer pinnae than terrestrial species (\tab \@ref(tab:pics)), but the range of values for these traits was quite wide at the community level (error bars in \fig \@ref(fig:cwm-div)).
-It is likely that the high diversity of non-size related traits we observed reflects different physiological adaptations to various canopy niches.
-For example, filmy ferns (family Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have vastly different morphology from bird's nest ferns (*Asplenium nidus* and others), which capture detritus in their rosette leaves.
+Despite the apparent constraints on size and the recurrence of non-cordate gametophytes exhibited by epiphytes, we observed greater morphological diversity among epiphytes versus terrestrial species for several traits.
+These results do not support the hypothesis that fern epiphytes exhibit reduced morphological diversity.
+For example, although epiphytes demonstrated less dissected fronds at the species level (\tab \@ref(tab:pics)), they exhibited much greater variation in this trait relative to terrestrial ferns at the community level (Fig. S2).
+It is likely that the high diversity of this trait reflects different physiological adaptations to various canopy niches.
+For instance, filmy ferns (Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have extremely thin, highly dissected fronds.
+Bird’s nest ferns (e.g., *Asplenium nidus*), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
+At low-elevation sites on Moorea where these ferns co-occur, filmy ferns frequently grow in more humid portions of trees including near the main trunk, whereas bird’s nest ferns often grow higher in the canopy and on more exposed, drought-prone branches (J. Nitta, pers. obs.). 
+Similar predictable patterns of niche partitioning at the local scale has been reported in neotropical epiphtyic ferns as well [@Tausz2001; @Hietz2008]. 
+This distribution may reflect alternative water-usage strategies aligned to specific microhabitats in the canopy [desiccation tolerance vs. water capture; @Hietz2008]. 
+Such hypotheses need to be carefully tested with additional quantitative investigation, including more finely examining microclimatic variation and species composition across the canopy.
 
-Surprisingly, SLA was only slightly lower in epiphytes relative to terrestrial species (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)).
-Specific leaf area is an important part of the leaf economic spectrum, which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans [@Wright2004a].
-We expected that epiphytes would have lower SLA, given their more extreme growing conditions. 
-The lack of a clear difference in SLA between epiphytes and terrestrial species observed here may be an effect of scale: the LES was defined at regional to global scales, but tends to break down at local scales encompassing less environmental variation [@Messier2017].
+Another trait that defied simple classification into epiphytic or terrestrial groups was specific leaf area (SLA) (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)).
+Specific leaf area is part of the leaf economic spectrum (LES), which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans [@Wright2004a; Diaz2015].
+We expected that epiphytes would exhibit lower SLA, given their more extreme growing conditions.
+In contrast, we observed overlapping, wide ranging SLA values in both terrestrial and epiphytic communities, with only slightly lower values in epiphytes (\fig \@ref(fig:cwm-div)).
+This may reflect adaptations to specific niches that are not captured in the binary categorization of habitat commonly applied in ferns. 
+For example, the following species ranked among those with the five lowest SLA values (i.e., thick, well-protected leaves) on Moorea: *Humata anderssonii* (a twig epiphyte), *Acrostichum aureum* (a terrestrial mangrove specialist), and *Paesia divaticatissima* (a terrestrial species occurring on high-elevation ridges) (Table S2).
+Each of these species is likely to experience prolonged periods of drought-stress. 
+In-depth characterization of such microhabitats was beyond the scope of our study and should be investigated further in the future.
 
 We did not find that gemmae production in gametophytes was linked with epiphytism. 
 Gemmae are asexual propagules that allow gametophytes to persist over multiple growing seasons and attain large population sizes [@Farrar2008].
