@@ -1,5 +1,5 @@
 ---
-title: "Constrained, yet diverse: Phylogenetic and morphological filtering in epiphytic ferns"
+title: "Life in the canopy: community trait assessments reveal substantial functional diversity among fern epiphytes"
 bibliography: "references.bib"
 mainfont: Times New Roman.ttf
 fontsize: 12pt
@@ -80,20 +80,22 @@ loadd(list = c(
 <!-- Don't indent authors -->
 \setlength{\parindent}{0ex}
 
-Joel H. Nitta^1,4^, James E. Watkins, Jr.^2^, Ravahere Taputuarai^3^, and Charles C. Davis^1^
+Joel H. Nitta^1,3^, James E. Watkins, Jr.^2^, and Charles C. Davis^1^
 
 ^1^Department of Organismic and Evolutionary Biology and Harvard University Herbaria, Harvard University, Cambridge, MA 02138, U.S.A.
 
 ^2^Department of Biology, Colgate University, 13 Oak Drive, Hamilton, New York 13346, U.S.A.
 
-^3^Association Te Rau Ati Ati a Tau a Hiti Noa Tu, B.P. 11553, Mahina, Tahiti, French Polynesia
+^3^Current affiliation: Department of Botany, National Museum of Natural History, Smithsonian Institution, Washington, D.C., 20013, U.S.A.
 
-^4^Current affiliation: Department of Botany, National Museum of Natural History, Smithsonian Institute, Washington, D.C., 20013, U.S.A.
-
-Author for correspondence:  
+Authors for correspondence:  
 *Joel H. Nitta*  
-*Tel: +1 6174960515*  
+*Tel: +1 2026331000*  
 *Email: joelnitta@gmail.com*
+
+*Charles C. Davis*  
+*Tel: +1 6174960515*  
+*Email: cdavis@oeb.harvard.edu*
 
 <!-- Set indent to about 3 characters hereafter -->
 \setlength{\parindent}{3ex}
@@ -131,13 +133,13 @@ tibble(
 
 ## Summary
 
-- The appearance of angiosperm-dominated forests in the Cretaceous and early Cenozoic had a profound effect on terrestrial biota by creating novel ecological niches. The diversity of modern fern lineages is thought to be a response to angiosperm dominance, radiating both in the canopy and on the forest floor. Despite the significance of epiphytic growth for fern evolution, however, few studies have investigated traits related to epiphytism in ferns while accounting for phylogeny.
+- The expansion of angiosperm-dominated forests in the Cretaceous and early Cenozoic had a profound effect on terrestrial biota by creating novel ecological niches. The majority of modern fern lineages are hypothesized to have arisen in response to this expansion, particularly fern epiphytes that radiated into the canopy. Recent evidence, however, suggests that epiphytism does not correlate with increased diversification rates in ferns, calling into question the role of the canopy habitat in their diversification. 
 
-- We investigated evolutionary patterns in traits related to epiphytic growth at the species and community level using a phylogeny including representatives of multiple epiphytic fern radiations on the island of Moorea, French Polynesia. 
+- To bridge this impasse, we investigated functional traits of fern sporophytes and gametophytes at the species and community level across a broad phylogenetic sampling on the island of Moorea, French Polynesia, including > 120 species and representatives of five major epiphytic radiations.
 
-- We observed phylogenetic conservatism in multiple traits related to epiphytic growth in fern sporophytes and gametophytes. Epiphytes had significantly shorter fronds, smaller rhizomes, and a higher frequency of non-cordate gametophytes. Epiphytic communities were clustered phylogenetically but diverse functionally, indicating that the canopy acts as a filter due to its low humidity to limit size while simultaneously enabling diversification into finely divided niches.
+- While epiphytes showed convergence in small size and a higher frequency of non-cordate gametophytes, they showed greater functional diversity at the community level relative to terrestrial ferns.
 
-- Our results provide an important phylogenetic perspective on the role of functional traits in ferns, and pave the way for more detailed studies examining how niche space is filled within terrestrial and epiphytic habitats.
+- These results suggest previously overlooked functional diversity among fern epiphytes, and raise the hypothesis that while the angiosperm canopy acted as a complex filter that restricted plant size, it also facilitated diversification into finely partitioned niches. Characterizing these niche axes and adaptations of epiphytic ferns occupying them should be a priority for future pteridological research.
 
 **Key words:** community ecology, functional traits, gametophyte, Moorea, Society Islands, Tahiti.
 
@@ -471,6 +473,8 @@ Additional Supporting Information may be found online in the Supporting Informat
 **Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit.
 
 **Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.
+
+**Fig. S2** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia.
 
 \clearpage
 
