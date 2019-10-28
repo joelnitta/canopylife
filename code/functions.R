@@ -2136,6 +2136,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   a <- 
     pca_results$traits_locs %>%
     filter(analysis_type == "standard") %>%
+    mutate(trait = str_replace_all(trait, "sla", "SLA")) %>%
     ggplot(aes(x = PC1, y = PC2)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
@@ -2157,6 +2158,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   b <- 
     pca_results$traits_locs %>%
     filter(analysis_type == "phylogenetic") %>%
+    mutate(trait = str_replace_all(trait, "sla", "SLA")) %>%
     ggplot(aes(x = PC1, y = PC2)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
