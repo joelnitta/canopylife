@@ -2628,7 +2628,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     scale_x_discrete(
       position = "top",
       breaks= c("sla", "dissection", "stipe", "rhizome", "pinna"),
-      labels= c("SLA", "Dissection", "Stipe length", "Rhizome diam.", "Pinna num.")) +
+      labels= c("SLA", "Dissection", "Stipe length", "Rhizome diam.", "Pinna no.")) +
     scale_fill_scico(
       palette = "lajolla",
       breaks = c(0, 1),

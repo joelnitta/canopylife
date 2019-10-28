@@ -291,7 +291,7 @@ pca_phy_cum_var <-
   signif(2)
 ```
 
-Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (\fig \@ref(fig:pca)(c, d)). The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively. In the standard PCA, size-related traits tended to load on PC1, with SLA, pinna number, and degree of dissection on PC2. In the phylogenetic PCA, SLA was strongly loaded on PC1, while dissection, pinna, and other size-related traits were mostly loaded on PC2.
+Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (\fig \@ref(fig:pca)(c, d)). The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively. In the standard PCA, size-related traits tended to load on PC1, with SLA, number of pinnae pairs, and degree of dissection on PC2. In the phylogenetic PCA, SLA was strongly loaded on PC1, while dissection, pinnae, and other size-related traits were mostly loaded on PC2.
 
 ### Phylogenetic Signal
 
@@ -303,7 +303,7 @@ glands_d <- phylosig_binary_traits %>% filter(trait == "glands") %>% pull(D) %>%
 morphotype_d <- phylosig_binary_traits %>% filter(trait == "morphotype") %>% pull(D) %>% round_t(2)
 ```
 
-Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs \@ref(tab:phylosig-cont), \@ref(tab:phylosig-binary), \fig \@ref(fig:tree)), and for quantitative traits, different results were obtained for $\lambda$ and K. When measured with $\lambda$, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of $\lambda$ close to 1; only number of pinna pairs had $\lambda$ close to zero (\tab \@ref(tab:phylosig-cont)). However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of $\K < 1$ (\tab \@ref(tab:phylosig-cont)). All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D = `r hairs_d`) or more conserved (gemmae \D = `r gemmae_d`; glands, \D = `r glands_d`; morphotype, \D = `r morphotype_d`) than expected under BM (\tab \@ref(tab:phylosig-binary)). Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D = `r habit_d`; \tab \@ref(tab:phylosig-binary)). Similar results were obtained using the "strict" dataset (\tab S4).
+Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs \@ref(tab:phylosig-cont), \@ref(tab:phylosig-binary), \fig \@ref(fig:tree)), and for quantitative traits, different results were obtained for $\lambda$ and K. When measured with $\lambda$, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of $\lambda$ close to 1; only number of pinnae pairs had $\lambda$ close to zero (\tab \@ref(tab:phylosig-cont)). However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of $\K < 1$ (\tab \@ref(tab:phylosig-cont)). All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D = `r hairs_d`) or more conserved (gemmae \D = `r gemmae_d`; glands, \D = `r glands_d`; morphotype, \D = `r morphotype_d`) than expected under BM (\tab \@ref(tab:phylosig-binary)). Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D = `r habit_d`; \tab \@ref(tab:phylosig-binary)). Similar results were obtained using the "strict" dataset (\tab S4).
 
 ### Correlation of Traits with Growth Habit
 
@@ -372,7 +372,7 @@ mean_rich <-
 
 In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (\fig \ref{fig:heatmap}). Most of the the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (\tab S6). Spatial autocorrelation was not detected for any of the diversity metrics (\tab S6).
 
-Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and pinna number (\tval-test, all \pval < 0.05; \fig \@ref(fig:cwm-div)). Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "sla", "r")`, \pval `r get_mod_result(model_summ_print, "sla", "p")`). Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval = `r get_mod_result(model_summ_print, "dissection", "p")`). Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (\fig \@ref(fig:cwm-div)).
+Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval < 0.05; \fig \@ref(fig:cwm-div)). Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "sla", "r")`, \pval `r get_mod_result(model_summ_print, "sla", "p")`). Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval = `r get_mod_result(model_summ_print, "dissection", "p")`). Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (\fig \@ref(fig:cwm-div)).
 
 We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial species. Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species}per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r get_mod_result(t_test_print, "ntaxa", "p")`; \fig \@ref(fig:comm-div)). Species richness increased with elevation for both epiphytes and terrestrial communities (\fig \@ref(fig:comm-div)). Epiphytic communities were more diverse than terrestrial ones as measured by both MPD~func~ and MNTD~func~ (two-sided \tval-test, \pval `r get_mod_result(t_test_print, "mpd.obs.z.func", "p")` and `r get_mod_result(t_test_print, "mntd.obs.z.func", "p")`, respectively). Functional diversity increased along the gradient for both terrestrial and epiphytic communities when measured with MPD~func~ (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "mpd.obs.z.func", "r")`, \pval `r get_mod_result(model_summ_print, "mpd.obs.z.func", "p")`), but not MNTD~func~. Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD~phy~ (two-sided \tval-test, \pval `r get_mod_result(t_test_print, "mntd.obs.z.phy", "p")`) but not MPD~phy~ (\pval = `r get_mod_result(t_test_print, "mpd.obs.z.phy", "p")`; \fig \@ref(fig:comm-div)). No significant trend was detected in phylogenetic community structure with elevation in either terrestrial or epiphytic communities (\fig \@ref(fig:comm-div)). 
 
@@ -409,7 +409,7 @@ These results do not support the hypothesis that fern epiphytes have reduced fun
 For example, although epiphytes demonstrated less dissected fronds at the species level (\tab \@ref(tab:pics)), they exhibited much greater variation in this trait relative to terrestrial ferns at the community level (\fig S2).
 It is likely that the high diversity of this trait reflects different physiological adaptations to various canopy niches. 
 For instance, filmy ferns (Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have extremely thin, highly dissected fronds.
-Bird’s nest ferns (e.g., *Asplenium nidus*), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
+Bird’s nest ferns (e.g., *Asplenium nidus* L.), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
 At low-elevation sites on Moorea where these ferns co-occur, filmy ferns frequently grow in more humid portions of trees including near the main trunk, whereas bird’s nest ferns often grow higher in the canopy and on more exposed, drought-prone branches (J. Nitta, pers. obs.). 
 Similar predictable patterns of niche partitioning at the local scale has been reported in neotropical epiphtyic ferns as well [@Hietz1998; @Tausz2001]. 
 This distribution may reflect alternative water-usage strategies aligned to specific microhabitats in the canopy [desiccation tolerance vs. water capture; @Hietz1998]. 
@@ -420,7 +420,7 @@ Specific leaf area is part of the leaf economic spectrum (LES), which posits tha
 We expected that epiphytes would exhibit lower SLA, given their more extreme growing conditions.
 In contrast, we observed overlapping, wide ranging SLA values in both terrestrial and epiphytic communities, with only slightly lower values in epiphytes (\fig \@ref(fig:cwm-div)).
 This may reflect adaptations to specific niches that are not captured in the binary categorization of habitat commonly applied in ferns. 
-For example, the following species ranked among those with the five lowest SLA values (i.e., thick, well-protected leaves) on Moorea: *Humata anderssonii* (a twig epiphyte), *Acrostichum aureum* (a terrestrial mangrove specialist), and *Paesia divaticatissima* (a terrestrial species occurring on high-elevation ridges) (Table S2).
+For example, the following species ranked among those with the five lowest SLA values (i.e., thick, well-protected leaves) on Moorea: *Humata anderssonii* (Mett.) C.Chr. (a twig epiphyte), *Acrostichum aureum* L. (a terrestrial mangrove specialist), and *Paesia divaticatissima* (Dryand.) Copel. (a terrestrial species occurring on high-elevation ridges) (Table S2).
 Each of these species is likely to experience prolonged periods of drought-stress. 
 In-depth characterization of such microhabitats was beyond the scope of our study and should be investigated further in the future.
 
@@ -516,7 +516,7 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 \clearpage
 
-**\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinna pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
+**\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
 
 **\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from July 7, 2013 to July 5, 2014, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa 2 m on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
 
@@ -742,40 +742,40 @@ knitr::include_graphics(here::here("images/Fig_1_traits.pdf"))
 
 ```{r climate, fig.height = 4, fig.width = 7, fig.cap = "Microclimatic variables."}
 climate_plot
-ggsave(plot = climate_plot, filename = here::here("ms/Fig_2.pdf"), height = 4, width = 7, units = "in")
+ggsave(plot = climate_plot, filename = here::here("ms/Fig_2.eps"), height = 4, width = 7, units = "in")
 ```
 
 \clearpage
 
 ```{r pca, fig.height = 6, fig.width = 6, fig.cap = "Trait PCA."}
 pca_plot
-ggsave(plot = pca_plot, filename = here::here("ms/Fig_3.pdf"), height = 6, width = 6, units = "in")
+ggsave(plot = pca_plot, filename = here::here("ms/Fig_3.eps"), height = 6, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r tree, fig.height = 8, fig.width = 6, fig.cap = "Traits on tree."}
 traits_with_tree
-ggsave(plot = traits_with_tree, filename = here::here("ms/Fig_4.pdf"), height = 8, width = 6, units = "in")
+ggsave(plot = traits_with_tree, filename = here::here("ms/Fig_4.eps"), height = 8, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r heatmap, fig.height = 4, fig.width = 6, fig.cap = "Variable importance scores."}
 importance_heatmap
-ggsave(plot = importance_heatmap, filename = here::here("ms/Fig_5.pdf"), height = 4, width = 6, units = "in")
+ggsave(plot = importance_heatmap, filename = here::here("ms/Fig_5.eps"), height = 4, width = 6, units = "in")
 ```
 
 \clearpage
 
 ```{r cwm-div, fig.height = 4, fig.width = 7, fig.cap = "Community-weighted means."}
 combined_cwm_plots
-ggsave(plot = combined_cwm_plots, filename = here::here("ms/Fig_6.pdf"), height = 4, width = 7, units = "in")
+ggsave(plot = combined_cwm_plots, filename = here::here("ms/Fig_6.eps"), height = 4, width = 7, units = "in")
 ```
 
 \clearpage
 
 ```{r comm-div, fig.height = 8, fig.width = 4, fig.cap = "Community diversity metrics."}
 combined_comm_div_plots
-ggsave(plot = combined_comm_div_plots, filename = here::here("ms/Fig_7.pdf"), height = 8, width = 4, units = "in")
+ggsave(plot = combined_comm_div_plots, filename = here::here("ms/Fig_7.eps"), height = 8, width = 4, units = "in")
 ```
