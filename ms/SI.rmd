@@ -261,7 +261,7 @@ mntd_corr_plot <-
 
 fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 
-ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.pdf"), height = 8, width = 4, units = "in")
+ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.eps"), height = 8, width = 4, units = "in")
 ```
 
 **Fig. S2** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 $\times$ the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; $*** = \pval<0.001$; $** = \pval<0.01$; $* = \pval<0.05$.
@@ -270,7 +270,7 @@ ggsave(plot = fig_s1, filename = here::here("ms/Fig_S1.pdf"), height = 8, width 
 
 ```{r fig-s1}
 loadd(cwsd_scatterplot, cache = canopy_cache)
-ggsave(plot = cwsd_scatterplot, filename = here::here("ms/Fig_S2.pdf"), height = 6, width = 7, units = "in")
+ggsave(plot = cwsd_scatterplot, filename = here::here("ms/Fig_S2.eps"), height = 6, width = 7, units = "in")
 ```
 
 **References**

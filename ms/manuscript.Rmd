@@ -103,7 +103,7 @@ Authors for correspondence:
 ```{r word-count table}
 tibble(
   words = c(
-    "Total word count (excluding summary, references and legends):_n",
+    "Total word count (Introduction, Materials and Methods, Results, Discussion):_n",
     "Summary:_n",
     "Introduction:_n",
     "Materials and Methods:_n",
@@ -113,7 +113,7 @@ tibble(
   figs_tabs = c(
     "No. of figures:_7 (all in color)",
     "No. of tables:_5",
-    "No. of supporting information files:_7 (Fig. S1; Table S1-S6)", "", "", "", "")
+    "No. of supporting information files:_8 (Figs. S1-S2; Tables S1-S6)", "", "", "", "")
 ) %>%
   separate(words, c("words", "count"), sep = "_") %>%
   separate(figs_tabs, c("figs_tabs", "n"), sep = "_", fill = "right") %>%
@@ -141,7 +141,7 @@ tibble(
 
 - These results suggest previously overlooked functional diversity among fern epiphytes, and raise the hypothesis that while the angiosperm canopy acted as a complex filter that restricted plant size, it also facilitated diversification into finely partitioned niches. Characterizing these niche axes and adaptations of epiphytic ferns occupying them should be a priority for future pteridological research.
 
-**Key words:** community ecology, functional traits, gametophyte, Moorea, Society Islands, Tahiti.
+**Key words:** community ecology, epiphyte, fern, functional traits, gametophyte, Moorea, Society Islands, Tahiti.
 
 \clearpage
 
@@ -167,7 +167,7 @@ Unlike the sporophyte, the fern gametophyte lacks vascular tissue, stomata, or c
 In parallel with some of the adaptations in the sporophytes, the gametophytes of some epiphytic ferns also exhibit morphological and physiological adaptations to minimize water loss and tolerate water scarcity. 
 For example, extreme desiccation tolerance is prevalent in gametophytes of multiple lineages of epiphytic ferns, but is rare in sporophytes [@WatkinsJr.2007c; @Pittermann2013].
 In addition, epiphytic fern gametophytes tend to exhibit more complex three-dimensional morphologies that may function to retain water and slow its loss [@WatkinsJr.2007c].
-Despite evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no previous studies to our knowledge have analyzed the functional ecology of fern epiphytes in a phylogenetic context including both life stages and representatives of all five Cretaceous epiphytic radiations *sensu* [@Schuettpelz2009].
+Despite evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no previous studies to our knowledge have analyzed the functional ecology of fern epiphytes in a phylogenetic context including both life stages and representatives of all five Cretaceous epiphytic radiations *sensu* @Schuettpelz2009.
 
 To gain insight into the role of the canopy in promoting or restricting diversity, a functional and community-based approach can be applied to study this question. 
 If the canopy is uniformly harsher than the terrestrial environment, thus acting as a "filter", we would expect functional convergence of epiphytes at the community level, which in turn may result in decreased phylogenetic diversity of epiphytic communities if traits are phylogenetically conserved [@Webb2002; @Cavender-Bares2009]. 
@@ -179,11 +179,7 @@ Thus, environmental variation along elevational gradients is expected to impact 
 
 Here, we seek to understand the role of the canopy in fern diversification by investigating traits related to epiphytic growth in fern gametophytes and sporophytes on Moorea, French Polynesia.
 Moorea is an isolated tropical oceanic island with high phylogenetic diversity of ferns distributed across a steep elevational gradient, making it ideal for a community phylogenetic analysis of functional traits. 
-Specifically, we test the following hypotheses related to epiphytic growth in ferns:
-
-1. Epiphytic ferns have converged upon similar morphologies in both sporophyte and gametophyte phases.
-
-2. Epiphytic fern communities have lower functional and phylogenetic diversity relative to terrestrial communities.
+Specifically, we test the following hypotheses related to epiphytic growth in ferns: 1) Epiphytic ferns have converged upon similar morphologies in both sporophyte and gametophyte phases; 2) Epiphytic fern communities have lower functional and phylogenetic diversity relative to terrestrial communities.
 
 ## Materials and Methods
 
@@ -291,7 +287,7 @@ pca_phy_cum_var <-
   signif(2)
 ```
 
-Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (\fig \@ref(fig:pca)(c, d)). The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively. In the standard PCA, size-related traits tended to load on PC1, with SLA, number of pinnae pairs, and degree of dissection on PC2. In the phylogenetic PCA, SLA was strongly loaded on PC1, while dissection, pinnae, and other size-related traits were mostly loaded on PC2.
+Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (\fig \@ref(fig:pca)*c*, *d*). The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively. In the standard PCA, size-related traits tended to load on PC1, with SLA, number of pinnae pairs, and degree of dissection on PC2. In the phylogenetic PCA, SLA was strongly loaded on PC1, while dissection, pinnae, and other size-related traits were mostly loaded on PC2.
 
 ### Phylogenetic Signal
 
@@ -370,7 +366,7 @@ mean_rich <-
   mutate(stat = glue("{mean_rich} ± {sd_rich}"))
 ```
 
-In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (\fig \ref{fig:heatmap}). Most of the the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (\tab S6). Spatial autocorrelation was not detected for any of the diversity metrics (\tab S6).
+In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (\fig \ref{fig:heatmap}). Most of the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (\tab S6). Spatial autocorrelation was not detected for any of the diversity metrics (\tab S6).
 
 Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval < 0.05; \fig \@ref(fig:cwm-div)). Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "sla", "r")`, \pval `r get_mod_result(model_summ_print, "sla", "p")`). Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval = `r get_mod_result(model_summ_print, "dissection", "p")`). Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (\fig \@ref(fig:cwm-div)).
 
@@ -411,7 +407,7 @@ It is likely that the high diversity of this trait reflects different physiologi
 For instance, filmy ferns (Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have extremely thin, highly dissected fronds.
 Bird’s nest ferns (e.g., *Asplenium nidus* L.), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
 At low-elevation sites on Moorea where these ferns co-occur, filmy ferns frequently grow in more humid portions of trees including near the main trunk, whereas bird’s nest ferns often grow higher in the canopy and on more exposed, drought-prone branches (J. Nitta, pers. obs.). 
-Similar predictable patterns of niche partitioning at the local scale has been reported in neotropical epiphtyic ferns as well [@Hietz1998; @Tausz2001]. 
+Similar predictable patterns of niche partitioning at the local scale have been reported in neotropical epiphtyic ferns as well [@Hietz1998; @Tausz2001]. 
 This distribution may reflect alternative water-usage strategies aligned to specific microhabitats in the canopy [desiccation tolerance vs. water capture; @Hietz1998]. 
 Such hypotheses need to be carefully tested with additional quantitative investigation, including more finely examining microclimatic variation and species composition across the canopy.
 
@@ -455,7 +451,7 @@ Thus, when analyzed together, epiphytic fern communities encompass a wider range
 Assuming that the traits we measured reflect physiological strategies of epiphytes, this high morphological diversity likely derives from physiological adaptations to a variety of within-canopy niches. 
 Clearly, fine-grained characterization of canopy niches and associated adaptations of epiphytic ferns occupying them is an important goal for future research.
 
-### The primacy of growth habit in determining fern community composition as indicated by modelling
+### The primacy of growth habit in determining fern community composition as indicated by modeling
 
 The primary role of growth habit, in combination with temperature, in structuring fern communities is supported by the full-subsets model analysis (\fig \ref{fig:heatmap}).
 It is somewhat puzzling that VPD did not contribute significantly to any models, as we hypothesized that this would be important for epiphytes that are frequently subjected to water stress. 
