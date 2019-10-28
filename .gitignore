@@ -24,6 +24,7 @@ references_raw_selected.bib
 *.doc
 *.pdf
 *.html
+*.svg
 *_cache/
 *_files/
 *.csv
