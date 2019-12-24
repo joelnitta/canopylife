@@ -155,9 +155,9 @@ This has led to the hypothesis that epiphytism was a key factor contributing to 
 Recent studies exploring this idea [@Sundue2015; @Testo2016a; @Lehtonen2017], however, have largely failed to identify evidence of rapid diversification associated with epiphytism in ferns. 
 This raises the possibility that modern fern diversification was not shaped by the evolution of epiphytism *per se*, but rather by the exploitation of various niches within the canopy and on the forest floor.
 
-To better understand the role of the canopy in fern diversification, one obvious direction is to explore putatively adaptive fern epiphyte traits in a phylogenetic context. 
+To better understand the role of the canopy in fern diversification, one obvious direction is to explore putatively adaptive fern epiphyte traits in a phylogenetic context [@Givnish2015]. 
 In contrast to most terrestrial plants, epiphytes must contend with greater stress in the form of nutrient limitation, increased evaporative demand, drought, and extreme oscillations in temperature [@Zotz2001; @WatkinsJr.2009; @Lowman2012]. 
-Previous studies have identified multiple traits as likely adaptations to these conditions, albeit many without consideration of phylogeny. 
+Previous studies have identified multiple traits as likely adaptations to these conditions, albeit many without consideration of phylogeny [\eg, @Kluge2007]. 
 Epiphytic ferns tend to have morphological features that minimize water loss from their leaves, including shorter stipes [@WatkinsJr.2010], thicker leaves [@Kluge2007; @WatkinsJr.2007b], and protection with scales or hairs [@WatkinsJr.2006b]. 
 Additional specialized adaptations to epiphytic growth include humus collection (e.g., *Asplenium*; @Benzing1990, *Drynaria*; @Janssen2005), vegetative desiccation tolerance (DT) (e.g., Hymenophyllaceae; @Shreve1911, *Pleopeltis*; @Pessin1925), CAM photosynthesis (e.g., *Pyrrosia*; @Wong1976), and symbiotic relationships with ants (e.g., *Antrophyum*; @WatkinsJr.2008, *Lecanopteris*; @Gay1993a). 
 
@@ -167,13 +167,13 @@ Unlike the sporophyte, the fern gametophyte lacks vascular tissue, stomata, or c
 In parallel with some of the adaptations in the sporophytes, the gametophytes of some epiphytic ferns also exhibit morphological and physiological adaptations to minimize water loss and tolerate water scarcity. 
 For example, extreme desiccation tolerance is prevalent in gametophytes of multiple lineages of epiphytic ferns, but is rare in sporophytes [@WatkinsJr.2007c; @Pittermann2013].
 In addition, epiphytic fern gametophytes tend to exhibit more complex three-dimensional morphologies that may function to retain water and slow its loss [@WatkinsJr.2007c].
-Despite evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no previous studies to our knowledge have analyzed the functional ecology of fern epiphytes in a phylogenetic context including both life stages and representatives of all five Cretaceous epiphytic radiations *sensu* @Schuettpelz2009.
+Despite evidence for adaptations to epiphytism in multiple lineages in both sporophytes and gametophytes, no previous studies to our knowledge have analyzed the functional ecology of fern epiphytes in a broad phylogenetic context including both life stages.
 
 To gain insight into the role of the canopy in promoting or restricting diversity, a functional and community-based approach can be applied to study this question. 
 If the canopy is uniformly harsher than the terrestrial environment, thus acting as a "filter", we would expect functional convergence of epiphytes at the community level, which in turn may result in decreased phylogenetic diversity of epiphytic communities if traits are phylogenetically conserved [@Webb2002; @Cavender-Bares2009]. 
-Conversely, the stratification of the canopy may stimulate functional diversification by niche partitioning, leading to increased functional diversity of epiphytic communities and reduced phylogenetic signal of relevant traits. 
+Conversely, the stratification of the canopy may stimulate functional diversification by niche partitioning, leading to increased functional diversity of epiphytic communities. 
 Furthermore, the role of the canopy as a promoter or restrictor of diversity may be modulated by overall abiotic conditions, including most notably relative humidity (RH) and temperature. 
-For instance, elevation is a strong predictor of fern species richness, with maximal richness occurring at mid-elevations, especially in the tropics [@Kessler2011a]. 
+For instance, elevation is a strong predictor of fern species richness, with maximal richness occurring at mid-elevations, especially in the tropics [@Kromer2005; @Kessler2011a]. 
 Functional diversity is also correlated with species richness [@Schleuter2010]. 
 Thus, environmental variation along elevational gradients is expected to impact the functional, phylogenetic, and species diversity of epiphytic and terrestrial fern communities.
 
