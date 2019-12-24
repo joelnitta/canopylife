@@ -23,6 +23,8 @@ plan <- drake_plan(
   species_list = read_csv(file_in("data/nitta_2017/species.csv")) %>%
     clean_names() %>%
     filter(include == 1, tahiti_only == 0) %>%
+    # Exclude Microsorum_xmaximum (hybrid between M. grossum and M. commutatum)
+    filter(genus_sp != "Microsorum_xmaximum") %>%
     pull(genus_sp),
   
   # - Process raw specific leaf area (SLA) measurments
@@ -103,7 +105,9 @@ plan <- drake_plan(
   # Ferns on Moorea and Tahiti (146 species)
   phy = ape::read.tree(
     file_in("data/nitta_2017/treepl_Moorea_Tahiti.tre"
-    )),
+    )) %>%
+    # Exclude Microsorum_xmaximum (hybrid between M. grossum and M. commutatum)
+    drop.tip("Microsorum_xmaximum"),
   
   ### Community data for ferns of Moorea ###
   # Including sporophyte only,
