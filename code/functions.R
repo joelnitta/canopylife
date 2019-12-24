@@ -1120,7 +1120,7 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
   # Make sure all species are in the phylogeny
   # (but don't subset phylogeny to only species in Moorea
   # communities - we want to use the species pool including
-  # both ferns of Moorea and Tahiti fro mpd, mntd).
+  # both ferns of Moorea and Tahiti for mpd, mntd).
   assert_that(all(comm$species %in% phy$tip.label))
   
   # Split communities into epiphytic / terrestrial taxa, 
@@ -2678,6 +2678,17 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       
       H = phy_tax_data %>%
         filter(genus == "Hymenophyllum") %>%
+        pull(species) %>%
+        getMRCA(phy, .),
+      
+      T = phy_tax_data %>%
+        filter(genus %in% c(
+          "Abrodictyum", 
+          "Callistopteris", 
+          "Crepidomanes", 
+          "Didymoglossum", 
+          "Polyphlebium", 
+          "Vandenboschia")) %>%
         pull(species) %>%
         getMRCA(phy, .),
       
