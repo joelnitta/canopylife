@@ -17,7 +17,7 @@ plan <- drake_plan(
   ### Trait data ###
   # - Read in list of accepted species to use for this study
   # i.e., ferns of Moorea (130 spp)
-  species_list = read_csv("data/nitta_2017/species.csv") %>%
+  species_list = read_csv(file_in("data/nitta_2017/species.csv")) %>%
     clean_names() %>%
     filter(include == 1, tahiti_only == 0) %>%
     pull(genus_sp),
