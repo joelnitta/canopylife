@@ -4,7 +4,12 @@
 #' from Dryad (https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g)
 #' and extract needed data files.
 #' 
-#' @param dl_path Name of downloaded zip file.
+#' (This is used to download the file as part of the function, but
+#' as it is not clear how to do this with the new Dryad API that
+#' was implemented ca. Sept 2019, it now requires the user to have 
+#' already downloaded the zipped data file from Dryad manually.)
+#' 
+#' @param zipped_path Name of downloaded zip file.
 #' @param unzip_path Path to directory to put the unzipped
 #' contents (will be created if needed).
 #' @param ... Extra arguments; not used by this function, but
@@ -16,22 +21,13 @@
 #' - treepl_Moorea_Tahiti.tre: Dated tree for pteridophytes of Moorea and Tahiti
 #' - sites.csv: Site metadata including name, latitude, longitude, and elevation (m)
 #'
-download_and_unzip_nitta_2017 <- function (dl_path, unzip_path, ...) {
-  
-  # Make sure the target directory exists
-  # assertthat::assert_that(assertthat::is.dir(fs::path_dir(dl_path)))
-  
-  # Set url
-  # url <- "https://datadryad.org/bitstream/handle/10255/dryad.132050/data_and_scripts.zip?sequence=1"
-  
-  # Download zip file
-  # download.file(url, dl_path)
+unzip_nitta_2017 <- function (zipped_path, unzip_path, ...) {
   
   # Unzip only needed data files to data/nitta_2017/
-  unzip(dl_path, "data_and_scripts/Comm_Phylo_Analysis/data/all_plots.csv", exdir = unzip_path, junkpaths = TRUE)
-  unzip(dl_path, "data_and_scripts/Comm_Phylo_Analysis/data/treepl_Moorea_Tahiti.tre", exdir = unzip_path, junkpaths = TRUE)
-  unzip(dl_path, "data_and_scripts/shared_data/sites.csv", exdir = unzip_path, junkpaths = TRUE)
-  unzip(dl_path, "data_and_scripts/shared_data/species.csv", exdir = unzip_path, junkpaths = TRUE)
+  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/all_plots.csv", exdir = unzip_path, junkpaths = TRUE)
+  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/treepl_Moorea_Tahiti.tre", exdir = unzip_path, junkpaths = TRUE)
+  unzip(zipped_path, "data_and_scripts/shared_data/sites.csv", exdir = unzip_path, junkpaths = TRUE)
+  unzip(zipped_path, "data_and_scripts/shared_data/species.csv", exdir = unzip_path, junkpaths = TRUE)
   
 }
 

@@ -5,8 +5,8 @@ plan <- drake_plan(
   
   ### Pre-processed data ###
   # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
-  nitta_2017_data = download_and_unzip_nitta_2017(
-    dl_path = "data/nitta_2017_data_and_scripts.zip",
+  nitta_2017_data = unzip_nitta_2017(
+    zipped_path = "data/nitta_2017_data_and_scripts.zip",
     unzip_path = "data/nitta_2017",
     # Track data files used as input in analyses
     out1 = file_out("data/nitta_2017/sites.csv"),
