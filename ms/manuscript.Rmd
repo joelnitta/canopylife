@@ -186,8 +186,8 @@ Specifically, we test the following hypotheses related to epiphytic growth in fe
 ### Study Site
 
 Moorea, French Polynesia (\ang{17;30;}S, \ang{149;50;}W) is a small (\SI{135}{\kilo\meter\squared}) tropical oceanic island more than \SI{5000}{\kilo\meter} from the nearest continental landmass.
-This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa \SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa \SI{130}{\species}, 8/11 orders \sensu @PteridophytePhylogenyGroupI2016) (\tab S1).
-Ferns of Moorea include representatives of all five of the Cretaceous epiphytic radiations described by @Schuettpelz2009 (\ie, polygrammoids, elaphoglossoids, asplenioids, vittarioids, and filmy ferns) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
+This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa \SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa \SI{130}{\species}, 8/11 orders; taxonomy follows @PteridophytePhylogenyGroupI2016; \tab S1).
+Ferns of Moorea include representatives of multiple Cretaceous epiphytic radiations (\eg, *Asplenium*, *Elaphoglossum*, Hymenophylloideae, Polypodiaceae, Vittarioideae; [@Schuettpelz2009]) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
 
 ### Community Survey
 
@@ -251,8 +251,8 @@ Non-cordate morphotypes include elongate (strap or ribbon \sensu @Farrar2008) an
 Gametophytes were cultivated on Bold's media [@Bold1957] supplemented with Nitch's micronutrients [@Nitsch1951].
 
 Growth habit was coded as a binary trait (epiphytic or terrestrial) based on our field observations.
-Some species do not fall clearly into either category (\eg, hemi-epiphytes; [@Benzing1990; @Dubuisson2003; @Nitta2009]).
-We used connection to the soil as the criterion for defining binary growth habit; thus, epipetric plants were treated as epiphytic, and hemi-epiphytes and climbing plants were treated as terrestrial.
+Some species do not fall clearly into either category (\eg, hemi-epiphytes; [@Benzing1990; @Dubuisson2003; @Zotz2013]).
+We used connection to the soil as the criterion for defining binary growth habit; thus, epipetric plants were treated as epiphytic, and hemi-epiphytes and climbing plants were treated as terrestrial. 
 For the purposes of this study, we treated growth habit as a fixed trait and used these categories to define epiphytic and terrestrial communities.
 Other studies have demonstrated that exceptional epiphytic growth of terrestrial fern species (and vice-versa) is rare [@Cardelus2006; @Kluge2006; @WatkinsJr.2009], and we do not believe that such rare exceptions would affect our analysis.
 
@@ -261,14 +261,16 @@ Trait values and data sources are summarized in Table S2.
 ### Statistical analysis
 
 We calculated daily maximum, mean, minimum, and standard variation of temperature, RH, and VPD for each datalogger, then overall means from the daily values.
-We analyzed correlation between the mean values with Pearson's correlation coefficient, and retained a set with correlation coefficients less than 0.9 (hereafter, "climatic variables").
+We analyzed correlation between the mean values with Pearson's correlation coefficient, and retained a set with correlation coefficients less than 0.9 (a single variable was arbitrarily selected from each set of correlated variables; hereafter, "climatic variables").
 Variables relating to VPD, which have no meaning if less than zero, and some other variables that had skewed distributions, were square-root transformed prior to fitting models.
 We tested for differences between epiphytic and terrestrial dataloggers while accounting for elevation with ANCOVA, using growth habit as the categorical variable and elevation as the covariate.
 We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone and their interactions, then selecting the one with the lowest corrected Akaike Information Criterion (AIC~c~) [@Akaike1973].
 A single outlier plot with unusually high temperature and low humidity (Mt. Rotui, 830 m plot) was excluded from ANCOVA and linear models.
 Mt. Rotui is an isolated peak with greater exposure than the other two mountains where the rest of the plots were established (J. Nitta, pers. obs.).
 
-For comparative analyses, we used the dated phylogenetic tree of @Nitta2017.
+For comparative analyses, we used the dated plastid phylogenetic tree of @Nitta2017.
+*Microsorum maximum* (Brack.) Copel., a genetically verified hybrid between *M. grossum* (Langsd. & Fisch.) S. B. Andrews and *M. commutatum* Copel. [@Nitta2018] was excluded from analysis because it shares identical plastid sequences with *M. grossum*, so the plastid tree does not accurately represent its evolutionary distinctiveness.
+
 We tested for phylogenetic signal in quantitative traits using Blomberg's *K* [@Blomberg2003] and Pagel's $\lambda$ [@Pagel1999], with the \function{phylosig} function in the \package{phytools} R package [@Revell2012].
 $\lambda$ is a scaling parameter that ranges from 0 (traits evolving randomly) to 1 (traits evolving along branches according to Brownian motion [BM]).
 \K describes the ratio between the amount of observed variance in traits vs. the amount of variance expected under BM: when $\K > 1$, traits are more conserved than expected under BM; when $\K < 1$, traits have less phylogenetic signal than expected under BM [@Blomberg2003].
@@ -330,7 +332,7 @@ We checked for spatial autocorrelation in the model residuals with Moran's *I* [
 ### Data accessibility
 
 Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife.
-Raw and processed data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2019a].
+Data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2019a].
 
 ## Results
 
