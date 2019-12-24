@@ -24,10 +24,10 @@
 unzip_nitta_2017 <- function (zipped_path, unzip_path, ...) {
   
   # Unzip only needed data files to data/nitta_2017/
-  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/all_plots.csv", exdir = unzip_path, junkpaths = TRUE)
-  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/treepl_Moorea_Tahiti.tre", exdir = unzip_path, junkpaths = TRUE)
-  unzip(zipped_path, "data_and_scripts/shared_data/sites.csv", exdir = unzip_path, junkpaths = TRUE)
-  unzip(zipped_path, "data_and_scripts/shared_data/species.csv", exdir = unzip_path, junkpaths = TRUE)
+  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/all_plots.csv", exdir = unzip_path, junkpaths = TRUE, overwrite = TRUE)
+  unzip(zipped_path, "data_and_scripts/Comm_Phylo_Analysis/data/treepl_Moorea_Tahiti.tre", exdir = unzip_path, junkpaths = TRUE, overwrite = TRUE)
+  unzip(zipped_path, "data_and_scripts/shared_data/sites.csv", exdir = unzip_path, junkpaths = TRUE, overwrite = TRUE)
+  unzip(zipped_path, "data_and_scripts/shared_data/species.csv", exdir = unzip_path, junkpaths = TRUE, overwrite = TRUE)
   
 }
 
