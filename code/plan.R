@@ -5,8 +5,11 @@ plan <- drake_plan(
   
   ### Pre-processed data ###
   # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
+  # The dataset must be downloaded first by going to
+  # https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g, clicking on
+  # "Download dataset", and saving to the "data_raw" folder in this project.
   nitta_2017_data = unzip_nitta_2017(
-    zipped_path = "data/nitta_2017_data_and_scripts.zip",
+    zipped_path = file_in("data_raw/doi_10.5061_dryad.df59g__v1.zip"),
     unzip_path = "data/nitta_2017",
     # Track data files used as input in analyses
     out1 = file_out("data/nitta_2017/sites.csv"),
@@ -48,12 +51,12 @@ plan <- drake_plan(
   ),
   
   # - Combine raw trait data into final trait matrix
-  fern_traits = make_trait_matrix (sla_raw, morph_cont_raw, morph_qual_raw) %>%
+  fern_traits = make_trait_matrix(sla_raw, morph_cont_raw, morph_qual_raw) %>%
     select(-source_1, -source_2),
   
   # - Also make "strict" trait dataset by excluding species with 
   # gameto traits only known from taxonomy
-  fern_traits_strict = make_trait_matrix (sla_raw, morph_cont_raw, morph_qual_raw) %>%
+  fern_traits_strict = make_trait_matrix(sla_raw, morph_cont_raw, morph_qual_raw) %>%
     mutate_at(vars(source_1, source_2), ~replace_na(., "none")) %>%
     filter(source_1 != "T", source_2 != "T") %>%
     select(-source_1, -source_2),
