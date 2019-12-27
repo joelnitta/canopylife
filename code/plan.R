@@ -7,9 +7,9 @@ plan <- drake_plan(
   # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
   # The dataset must be downloaded first by going to
   # https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g, clicking on
-  # "Download dataset", and saving to the "data_raw" folder in this project.
+  # "Download dataset", and saving to the "data" folder in this project.
   nitta_2017_data = unzip_nitta_2017(
-    zipped_path = file_in("data_raw/doi_10.5061_dryad.df59g__v1.zip"),
+    zipped_path = file_in("data/doi_10.5061_dryad.df59g__v1.zip"),
     unzip_path = "data/nitta_2017",
     # Track data files used as input in analyses
     out1 = file_out("data/nitta_2017/sites.csv"),
@@ -31,8 +31,8 @@ plan <- drake_plan(
   # (includes multiple measures per specimen).
   # SLA is in sq m per kg
   sla_raw = combine_raw_sla(
-    file_in("data_raw/SLA_measurements.csv"),
-    file_in("data_raw/filmy_SLA.csv"),
+    file_in("data/SLA_measurements.csv"),
+    file_in("data/filmy_SLA.csv"),
     species_list
   ),
   
@@ -41,14 +41,14 @@ plan <- drake_plan(
   #  multiple specimens per species).
   # All measurements in cm, except number of pinna pairs.
   morph_cont_raw = process_raw_cont_morph(
-    file_in("data_raw/morph_measurements.csv"),
+    file_in("data/morph_measurements.csv"),
     species_list
   ),
   
   # - Process raw qualitative trait data
   # (includes one obsevation per specimen).
   morph_qual_raw = process_raw_qual_morph(
-    file_in("data_raw/morph_qual_traits_2019-07-29.csv"),
+    file_in("data/morph_qual_traits.csv"),
     species_list
   ),
   
@@ -94,7 +94,7 @@ plan <- drake_plan(
   # - Process raw climate data (rel. humidity and temperature every 15 min.)
   # - Also calculate vapor pressure deficit (VPD) from temp and RH
   moorea_climate_raw = process_raw_climate(
-    file_in("data_raw/hobo_moorea_aorai_2-24-15.csv"
+    file_in("data/hobo_moorea_aorai_2-24-15.csv"
     )),
   
   # - Calculate mean climate variables
