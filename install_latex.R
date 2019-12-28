@@ -20,6 +20,11 @@ latex_packages <- c(
   "trimspaces",
   "ulem",
   "makecell",
-  "xcolor")
+  "xcolor",
+  "unicode-math",
+  "ucharcat",
+  "filehook",
+  "mdwtools",
+  "lm-math")
 
 tinytex::tlmgr_install(latex_packages)
