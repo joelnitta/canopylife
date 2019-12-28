@@ -1,30 +1,25 @@
-# syntax = docker/dockerfile:1.0-experimental
 FROM rocker/geospatial:3.6.0
 
 ARG DEBIAN_FRONTEND=noninteractive
 
-#######################################
-### Install R packages with packrat ###
-#######################################
+# Install R packages with renv
 
-# Only run this after making packrat/packrat.lock by
-# running install_packages.R
+COPY ./renv.lock ./
 
-COPY ./packrat/packrat.lock packrat/
+COPY ./renv_restore.R ./
 
-COPY packrat_restore.R .
-COPY install_latex.R .
+RUN mkdir renv
 
-# Install R packages with packrat
-RUN Rscript -e 'install.packages("packrat", repos = "https://cran.rstudio.com/")'
+RUN Rscript renv_restore.R
 
-RUN --mount=type=secret,id=pat \
-Rscript packrat_restore.R `cat /run/secrets/pat`
+# Modify Rprofile.site so R loads renv library by default
 
-# Modify Rprofile.site so R loads packrat library by default
-RUN echo '.libPaths("/packrat/lib/x86_64-pc-linux-gnu/3.6.0")' >> /usr/local/lib/R/etc/Rprofile.site
+RUN echo '.libPaths("/renv")' >> /usr/local/lib/R/etc/Rprofile.site
 
 # Install latex packages with tinytex
+
 RUN Rscript install_latex.R
+
+# Set working dir
 
 WORKDIR /home/rstudio/

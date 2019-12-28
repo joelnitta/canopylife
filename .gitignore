@@ -41,6 +41,5 @@ references_raw_selected.bib
 *.aux
 *.log
 
-# packrat
-packrat/*
-!packrat/packrat.lock
+# renv
+renv/
