@@ -634,12 +634,11 @@ Additional Supporting Information may be found online in the Supporting Informat
 # Read in csv version of the table
 traits_used <- read_csv(here::here("data/table_1.csv"))
 
-# Write out table in rich text format for submitting
+# Write out table in html for submitting
 # MS as word doc
 traits_used %>%
-  gt %>%
-  fmt_markdown(columns = everything()) %>%
   gt(rowname_col = "trait") %>%
+  fmt_markdown(columns = everything()) %>%
   tab_row_group(
     group = "Sporophyte traits",
     rows = matches("Stipe|Frond|Rhizome|Pinna|Leaf")
@@ -653,8 +652,7 @@ traits_used %>%
     ecological_significance = "Ecological Significance",
     reference = "Reference(s)"
   ) %>% 
-  as_rtf() %>%
-  write_lines(here::here("ms/Table_1.rtf"))
+  gtsave(here::here("ms/Table_1.html"))
 
 # Include in PDF using kableExtra to convert to latex format
 traits_used %>% 
@@ -690,7 +688,7 @@ phylosig_cont_traits %>%
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
   arrange(trait)
 
-# Write out table in rich text format
+# Write out table in html format
 phylosig_cont_traits_table %>%
   gt(rowname_col = "trait") %>%
   cols_label(
@@ -698,9 +696,8 @@ phylosig_cont_traits_table %>%
     k_pval = md("*P*(*K*)"),
     lambda_pval = md("*P*(lambda)"),
     lambda = "lambda"
-  )  %>% 
-  as_rtf() %>%
-  write_lines(here::here("ms/Table_2.rtf"))
+  )  %>%
+  gtsave(here::here("ms/Table_2.html"))
 
 # Include in PDF in latex format
 phylosig_cont_traits_table %>%
@@ -727,7 +724,7 @@ phylosig_binary_traits %>%
     new_levels = c("Epiphytic growth", "Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
   arrange(trait)
 
-# Write out table in rich text format
+# Write out table in html
 phylosig_binary_traits_table %>%
   gt(rowname_col = "trait") %>%
   cols_label(
@@ -737,8 +734,7 @@ phylosig_binary_traits_table %>%
     prob_random = md("*P*(rnd)"),
     prob_brownian = md("*P*(bm)")
   ) %>% 
-  as_rtf() %>%
-  write_lines(here::here("ms/Table_3.rtf"))
+  gtsave(here::here("ms/Table_3.html"))
 
 # Include in PDF in latex format
 phylosig_binary_traits_table %>%
@@ -770,7 +766,7 @@ pic_results %>%
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
   arrange(trait)
 
-# Write out table in rich text format
+# Write out table in html
 pic_table %>%
 gt(rowname_col = "trait") %>%
   cols_label(
@@ -779,8 +775,7 @@ gt(rowname_col = "trait") %>%
     statistic = md("*t*"),
     p.value = md("*P*"),
   ) %>% 
-  as_rtf() %>%
-  write_lines(here::here("ms/Table_4.rtf"))
+  gtsave(here::here("ms/Table_4.html"))
 
 # Include in PDF in latex format
 pic_table %>%
@@ -817,8 +812,7 @@ gt(rowname_col = "trait") %>%
     likelihood_ratio = "Likelihood ratio",
     pval = md("*P*"),
   ) %>% 
-  as_rtf() %>%
-  write_lines(here::here("ms/Table_5.rtf"))
+  gtsave(here::here("ms/Table_5.html"))
 
 # Include in PDF in latex format
 correlated_evo_test_table %>%
