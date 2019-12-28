@@ -18,6 +18,8 @@ RUN echo '.libPaths("/renv")' >> /usr/local/lib/R/etc/Rprofile.site
 
 # Install latex packages with tinytex
 
+COPY ./install_latex.R ./
+
 RUN Rscript install_latex.R
 
 # Set working dir
