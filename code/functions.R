@@ -2108,19 +2108,25 @@ make_climate_plot <- function (data, resp_vars,
   }
   
   # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+  
+  # Set margins between subplots
+  mar_adj <- c(-0.2, 0.1, 0, 0.1) #top, right, bottom, left
+  
+  p <- wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
     legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+    plot.margin = margin(mar_adj[1], mar_adj[2], mar_adj[3], mar_adj[4], unit = "in")
   )
   
-  # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
-    legend.position = "none",
-    # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
-  )
+  # Set outer margins
+  mar_out = .2 + -1*(mar_adj)
   
+  # Set overall margins of combined plot: 0.2 inch margins, accounting for
+  # previous adjustments
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
+
 }
 
 make_pca_plot <- function (pca_results, habit_colors, traits) {
@@ -2217,9 +2223,14 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
       subtitle = "(d)"
     )
   
-  a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
+  # Combine into final plot with 0.2 in margins
+  p <- a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
     standard_theme2() &
     theme(legend.position = "none")
+  
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      0.2, 0.2, 0.2, 0.2, unit = "in")))
   
 }
 
@@ -2417,7 +2428,10 @@ make_heatmap <- function(important_div_vars, vars_select = c(
     ) +
     scale_y_discrete(labels = parse(text = levels(plot_data$resp_var))) +
     standard_theme2() +
-    theme(axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))
+    theme(
+      axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
+      plot.margin = margin(0.2, 0.2, 0.2, 0.2, unit = "in")
+  )
 }
 
 #' Plot sporophyte and gametophyte traits on phylogenetic tree
@@ -2742,14 +2756,20 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     )
   
   ### Assemble subplots into final plot
-  phy_plot + qual_heatmap + quant_heatmap + plot_layout(nrow = 1, widths = c(4,2,2)) &
+  p <- phy_plot + qual_heatmap + quant_heatmap + plot_layout(nrow = 1, widths = c(4,2,2)) &
     theme(
       panel.grid.major = element_blank(),
       panel.grid.minor = element_blank(),
       panel.background = element_rect(fill = "transparent",colour = NA),
       plot.background = element_rect(fill = "transparent",colour = NA),
+      # Adjust invididual margins to remove whitespace between subplots
       plot.margin = margin(t = 0, r = 0, b = 0, l = -0.025, unit = "in")
     )
+  
+  # Set overall margins of combined plot
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      t = 0.2, r = 0.2, b = 0.2, l = 0.225, unit = "in")))
   
 }
 
@@ -2800,11 +2820,25 @@ combine_cwm_plots <- function (scatterplots) {
   }
   
   # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
+  
+  # Set margins between subplots
+  mar_adj <- c(-0.2, 0.1, 0, 0.1) #top, right, bottom, left
+  
+  p <- wrap_plots(plots_df$plot, ncol = 3, nrow = 2) & theme(
     legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+    plot.margin = margin(mar_adj[1], mar_adj[2], mar_adj[3], mar_adj[4], unit = "in")
   )
+  
+  # Set outer margins
+  mar_out = .2 + -1*(mar_adj)
+  
+  # Set overall margins of combined plot: 0.2 inch margins, accounting for
+  # previous adjustments
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
+
 }
 
 #' Combine functional diveristy plots into final figure
@@ -2869,16 +2903,29 @@ combine_comm_div_plots <- function (scatterplots, boxplots) {
       plots_df$plot[[i]] <- plots_df$plot[[i]] + 
         theme(
           axis.title.y = element_text(color = "transparent"),
-          axis.text.y = element_text(color = "transparent"))
+          axis.text.y = element_text(color = "transparent"),
+          plot.background = element_rect(fill = "transparent", color = "transparent"))
     }
   }
   
   # Combine plots into single output
-  wrap_plots(plots_df$plot, ncol = 2) & theme(
+  
+  # Set margins between subplots
+  mar_adj <- c(-.2, -0.1, 0, -0.1) #top, right, bottom, left
+  
+  p <- wrap_plots(plots_df$plot, ncol = 2) & theme(
     legend.position = "none",
     # Tweak margins to remove whitespace between plots
-    plot.margin = margin(t = -0.2, r = -0.1, b = 0, l = -0.1, unit = "in")
+    plot.margin = margin(mar_adj[1], mar_adj[2], mar_adj[3], mar_adj[4], unit = "in")
   )
+  
+  # Set overall margins of combined plot: 0.2 inch margins, accounting for
+  # previous adjustments
+  mar_out <- .2 + -1*(mar_adj)
+  
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
 }
 
 
@@ -2960,15 +3007,30 @@ make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
     labs(title = "(b)") +
     theme(plot.title = element_text(face = "bold"))
   
-  # Compile final plot
-  cwsd_boxplots[["stipe"]] + cwsd_boxplots[["length"]] + cwsd_boxplots[["width"]] +
+  # Combine plots into single output
+  
+  # Set margins between subplots
+  mar_adj <- c(-0.2, 0.1, 0, 0.1) #top, right, bottom, left
+  
+  p <- 
+    cwsd_boxplots[["stipe"]] + cwsd_boxplots[["length"]] + cwsd_boxplots[["width"]] +
     cwsd_boxplots[["rhizome"]] + plot_spacer() + plot_spacer() +
     cwsd_boxplots[["dissection"]] + cwsd_boxplots[["pinna"]] + cwsd_boxplots[["sla"]] & 
     theme(
       legend.position = "none",
       # Tweak margins to remove whitespace between plots
-      plot.margin = margin(t = -0.2, r = 0.1, b = 0, l = 0.1, unit = "in")
+      plot.margin = margin(mar_adj[1], mar_adj[2], mar_adj[3], mar_adj[4], unit = "in")
     )
+  
+  # Set outer margins
+  mar_out = .2 + -1*(mar_adj)
+  
+  # Set overall margins of combined plot: 0.2 inch margins, accounting for
+  # previous adjustments
+  p +
+    plot_annotation(theme = theme(plot.margin = margin(
+      mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
+  
   
 }
 
