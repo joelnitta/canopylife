@@ -551,6 +551,13 @@
       "Repository": "CRAN",
       "Hash": "7067d90c1c780bfe80c0d497e3d7b49d"
     },
+    "english": {
+      "Package": "english",
+      "Version": "1.2-4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "54aa4ed489244b3cf264d068500f246a"
+    },
     "err": {
       "Package": "err",
       "Version": "0.2.0",
@@ -702,8 +709,9 @@
       "Package": "ggtree",
       "Version": "2.0.1",
       "Source": "Bioconductor",
+      "RemoteType": "bioconductor",
       "Remotes": "GuangchuangYu/treeio",
-      "Hash": "93a9fadc079553ffd1a69e18d4d6fd4c"
+      "Hash": "19291ca5fef3e9633ee4999cd00e8c85"
     },
     "globals": {
       "Package": "globals",
@@ -859,8 +867,8 @@
       "RemoteRepo": "jntools",
       "RemoteUsername": "joelnitta",
       "RemoteRef": "master",
-      "RemoteSha": "12092a437c584b86a2801fdecd9e485f8ef8387e",
-      "Hash": "369b7273fb37475d0b2172147f092e14"
+      "RemoteSha": "531c7ce4f2c7e371ece7f47e56db9c7fd62c9143",
+      "Hash": "eccb612e54099cf6af7ca565c94501cc"
     },
     "jsonlite": {
       "Package": "jsonlite",

@@ -1,9 +1,20 @@
 # Install packages to a docker image with renv
 #
 # This script should be run from the rocker/geospatial:3.6.0 docker image.
-#
 # This only is meant for the *initial* creation of renv.lock;
 # that file may be subsequently updated as packages are added/updated.
+#
+# To update a single package after the image is made...
+# Launch this container: `docker-compose up -d`
+# Within container, start R: `r`
+# Within the R session, specify repos:
+# ```
+# my_repos <- BiocManager::repositories()
+# my_repos["CRAN"] <- "https://cran.rstudio.com/"
+# options(repos = my_repos)
+# ```
+# Update(install) your package of choice: `install.packages("whatever")`
+# Snapshot specifying the renv library: `renv::snapshot(type = "simple", library = "/renv")`
 
 ### Initialize renv ###
 
