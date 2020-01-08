@@ -1,13 +1,49 @@
 # README
 
-Raw data files.
+Old versions of raw data not used in current project.
 
-filmy_SLA.csv: Mass of leaf fragments of (mostly) filmy ferns (family Hymenophyllaceae) from Moorea, French Polynesia used to calculate specific leaf area (SLA). Specimen is J.H. Nitta collection number. Individual numbers assigned for each specimen. Area measured with ImageJ (Abramoff 2014) using digital images of leaf fragments. These specimens had leaves with veins that were too close to avoid when preparing leaf punches (see SLA_measurements.csv), so irregularly shaped leaf fragments avoiding veins were cut out from dried leaf laminae and used instead.
+## Files
 
-hobo_moorea_aorai_2-24-15.csv: Temperature (celsius) and relative humidity (%) measured every 30 minutes (Moorea) or 60 minutes (Tahiti) with 33 dataloggers on Moorea and Tahiti, French Polynesia from 2012-07-18 to 2015-02-06 (start and end dates vary by datalogger). Dataloggers used on Moorea were Hobo Pro v2 data loggers with the RS3 Solar Radiation Shield (Onset Corporation, Bourne, Massachusetts, USA), and those on Tahiti were RHTemp 1000 data loggers (MadgeTech, Warner, New Hampshire, USA). Name of site indicates location (usually the mountain name), approximate elevation, and whether the datalogger was mounted on a tree at ca. 2 m ("epi") or on the ground at ca. 10 cm ("ter"), separated by underscores. Exact site locations available in Nitta, et al. 2017 (data_and_scripts/shared_data/sites.csv).
+morph_qual_traits_2019-07-29.csv: Most recent qualitative trait data, and the one used for final analysis. Modified from morph_qual_traits_2016-09-03_mod.csv. The exact same as data/morph_qual_traits.
 
-morph_measurements.csv: Measurements of stipe length, frond length, frond width, rhizome diameter (all in cm), and number of pinna pairs on ferns (one measurement per individual) from Moorea, French Polynesia. Specimen is J.H. Nitta collection number. If specimen is "1", that means no voucher specimen was prepared when the measurement was made. "Source" is "measurement" if measured from a specimen, or the name of the reference used if taken from the literature.
+morph_qual_traits_2016-09-03_mod.csv: Older version of qualitative trait modified from 
+Moorea_ferns_morph_2016-09-03.xls "morphology" sheet. Includes hard-coded mean 
+quantitative values from earlier data (and various other qual traits).
 
-morph_qual_traits.csv: Observations of qualitative trait states in ferns from Moorea, French Polynesia. Dissection is an integer from one to 10 describing the degree of lamina dissection as follows: 1 = simple, 2 = pinnatifid or pinnatisect, 3 = 1-pinnate, 4 = 1-pinnate-pinnatifid, 5 = 2-pinnate, 6 = 2-pinnate-pinnatifid, 7 = 3-pinnate, 8 = 3-pinnate-pinnatifid, 9 = more than 3-pinnate-pinnatifid, 10 = binpinnatifid or tripinnatifid. habit_binary is growth habit coded as terrestrial (0) or epiphytic (1); epiphytes defined by lacking a connection to the soil. glands, hairs, and gemmae are presence or absence of these structures on gametophytes. morphotype is gametophyte morphotype sensu Farrar, et al. 2008. source indicates data source for gametophyte traits, coded as follows: 1 = lab observation, 2 = Nayar and Kauar 1971, 3 = Lloyd 1980, 4 = field observation, 5 = genus/family level character, 6 = Zhang et al 2008, 7 = Bierhorst 1967, 8 = Martin et al 2006, 9 = Tigerschiöld 1989, 10 = Tigerschiöld 1990, 11 = Atkinson 1975, 12 = Chen 2014. For references, see Supporting Information. Lab and field observations were made on gametophytes collected in the field and identified to species using DNA barcoding (Nitta et al. 2017), or raised from spores in the lab.
+Moorea_ferns_morph_2016-09-03.xls: Final morphology data copied from Moorea CommPhy project.
 
-SLA_measurements.csv: Mass of leaf punches of ferns from Moorea, French Polynesia used to calculate SLA. Specimen is J.H. Nitta collection number or a SLA sample ID number if no voucher specimen was made. Number_of_punches is the number of punches used for weighing (if nothing is entered, this means 1 punch was made). Mass is mass of punch (or punches) in g. Size_of_punches is diameter in mm. Punches made with biopsy punches on fresh leaves then dried overnight in a lab heat oven. Leaf lamina excluding veins was used as much as possible; 2 mm punches were used instead of 4 mm when needed to avoid veins.
+## Change log
+
+2019-07-29: Add morph_qual_traits_2019-07-29 by copying from
+morph_qual_traits_2016-09-03_mod.csv then modifying as follows: 
+
+Delete unused columns, change 'OTU' to 'species'.
+
+Add the following sources:
+- "Acrophorus_raiateensis" <- "4"
+- "Antrophyum_sp1" <- "4"
+- "Ophioglossum_pendulum" <- "2"
+- "Oreogrammitis_subspathulata" <- "4"
+- "Schizaea_fistulosa" <- "2"
+- "Scleroglossum_sulcatum" <- "5"
+- "Vaginularia_paradoxa" <- "4"
+- "Humata repens" <- "12"
+
+Add the following character scores:
+Humata_repens, ribbon -> cordate, glands ? -> 1
+
+(Date uncertain): Copied morph_qual_traits_2016-09-03_mod.csv from Moorea_ferns_morph_2016-09-03.xls and modified. Not sure when this happened, but I verified the changes with check_diff.R.
+
+Changes to morph_qual_traits_2016-09-03_mod.csv from Moorea_ferns_morph_2016-09-03.xls as follows
+(see check_diff.R for code):
+- Delete the following rows (by OTU): "Austrobaileya_scandens", "Chloranthus_japonicus",
+"Cycas_circinalis", "Diplazium_proliferum", "Elaphoglossum_florencei", "Ginkgo_biloba",
+"Gnetum_gnemon", "Huperzia_phlegmaria", "Huperzia_ribourtii", "Huperzia_squarrosa", "Isoetes_melanopoda", "Lycopodiella_cernua", "Marsilea_polycarpa", "Ophioglossum_reticulatum",
+"Pinus_radiata", "Prosaptia_subnuda", "Selaginella_apoda", "Selaginella_banksii", 
+"Selaginella_laxa" (mostly outgroups)
+- Change "key group" column by deleting commas
+- Dicranopteris_linearis dissection from NA to 5
+- Hymenophyllum_braithwaitei hairs from 0 to NA
+- Hypolepis_sp1 hairs from ? to NA
+- Lindsaea_propinqua hairs from ? to NA
+- Sticherus_tahitensis hairs from ? to NA, dissection from NA to 5
