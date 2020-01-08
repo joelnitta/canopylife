@@ -161,7 +161,7 @@ To better understand the role of the canopy in fern diversification, one obvious
 In contrast to most terrestrial plants, epiphytes must contend with greater stress in the form of nutrient limitation, increased evaporative demand, drought, and extreme oscillations in temperature [@Zotz2001; @WatkinsJr.2009; @Lowman2012]. 
 Previous studies have identified multiple traits as likely adaptations to these conditions, albeit many without consideration of phylogeny [\eg, @Kluge2007]. 
 Epiphytic ferns tend to have morphological features that minimize water loss from their leaves, including shorter stipes [@WatkinsJr.2010], thicker leaves [@Kluge2007; @WatkinsJr.2007b], and protection with scales or hairs [@WatkinsJr.2006b]. 
-Additional specialized adaptations to epiphytic growth include humus collection (e.g., *Asplenium*; @Benzing1990, *Drynaria*; @Janssen2005), vegetative desiccation tolerance (DT) (e.g., Hymenophyllaceae; @Shreve1911, *Pleopeltis*; @Pessin1925), CAM photosynthesis (e.g., *Pyrrosia*; @Wong1976), and symbiotic relationships with ants (e.g., *Antrophyum*; @WatkinsJr.2008, *Lecanopteris*; @Gay1993a). 
+Additional specialized adaptations to epiphytic growth include humus collection (\eg, *Asplenium*; @Benzing1990, *Drynaria*; @Janssen2005), vegetative desiccation tolerance (\eg, Hymenophyllaceae; @Shreve1911, *Pleopeltis*; @Pessin1925), CAM photosynthesis (\eg, *Pyrrosia*; @Wong1976), and symbiotic relationships with ants (\eg, *Antrophyum*; @WatkinsJr.2008, *Lecanopteris*; @Gay1993a). 
 
 While many similar adaptations are found in epiphytic seed plants and serve as key reference points [@Benzing1990], the evolution of epiphytism in ferns is more complex owing to their unique life-cycle. 
 Ferns produce a free-living gametophyte that is typically smaller than the sporophyte and relies on aquatic motile sperm.
@@ -189,7 +189,7 @@ Specifically, we test the following hypotheses related to epiphytic growth in fe
 
 Moorea, French Polynesia (\ang{17;30;}S, \ang{149;50;}W) is a small (\SI{135}{\kilo\meter\squared}) tropical oceanic island more than \SI{5000}{\kilo\meter} from the nearest continental landmass.
 This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa \SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa \SI{130}{\species}, 8/11 orders; taxonomy follows @PteridophytePhylogenyGroupI2016; \tab S1).
-Ferns of Moorea include representatives of multiple Cretaceous epiphytic radiations (\eg, *Asplenium*, *Elaphoglossum*, Hymenophylloideae, Polypodiaceae, Vittarioideae; [@Schuettpelz2009]) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
+Ferns of Moorea include representatives of multiple Cretaceous epiphytic radiations (\eg, *Asplenium*, *Elaphoglossum*, Hymenophylloideae, Polypodiaceae, Vittarioideae; @Schuettpelz2009) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
 
 ### Community Survey
 
@@ -199,8 +199,8 @@ Each plot was divided into 25, \SI{2}{\meter} $\times$ \SI{2}{\meter} subplots.
 Presence/absence of all sporophytes in each subplot was scored and summed to produce an abundance ranking for each species per plot from zero (not observed) to 25 (observed in all subplots).
 Epiphytic ferns were sampled by hand to \circa \SI{2}{\meter} on tree trunks or confirmed visually from the ground.
 Species were categorized as epiphytic or terrestrial based on field observations (see Trait Selection and Measurements below).
-The list of species in each plot was split into epiphytic and terrestrial groups and treated separately during data analysis, hereafter referred to as 'epiphytic' and 'terrestrial' communities.
-Vouchers were deposited at GH and UC (abbreviations follow Index Herbariorum [@Thiers2019]).
+The list of species in each plot was split into epiphytic and terrestrial groups and treated separately during data analysis, hereafter referred to as "epiphytic" and "terrestrial" communities.
+Vouchers were deposited at GH and UC (abbreviations follow Index Herbariorum; @Thiers2019).
 
 ### Environmental Survey
 
@@ -255,7 +255,7 @@ total_sites <-
 ```
 
 Temperature and RH of epiphytic and terrestrial habitats were measured using Hobo Pro v2 dataloggers with the RS3 Solar Radiation Shield (Onset Corporation, USA).
-A pair of dataloggers was installed for each plot, one mounted at \circa \SI{2}{\meter} on a tree ('epiphytic datalogger'), and one at ground level ('terrestrial datalogger'), except for the Mt. Tohiea \SI{1200}{\meter} plot, which only had an epiphytic datalogger.
+A pair of dataloggers was installed for each plot, one mounted at \circa \SI{2}{\meter} on a tree ("epiphytic datalogger"), and one at ground level ("terrestrial datalogger"), except for the Mt. Tohiea \SI{1200}{\meter} plot, which only had an epiphytic datalogger.
 Temperature and RH were logged once every \SI{15}{\minute} during two survey periods: a preliminary survey from `r prelim_climate_survey$start` to `r prelim_climate_survey$end` at `r prelim_climate_survey$n_sites %>% english2` plots, and a final survey from `r final_climate_survey$start` to `r final_climate_survey$end` at `r final_climate_survey$n_sites %>% english2` plots.
 Two plots were not included in the environmental survey.
 We used the 2013–-2014 data for the analysis, with one exception: the terrestrial datalogger at the Mt. Tohiea \SI{393}{\meter} plot malfunctioned and was missing data for a substantial part (March 12--July 5, 2014) of the final survey period, so we used data for the same dates from the preliminary survey period for this datalogger instead.
@@ -267,7 +267,7 @@ We calculated vapor pressure deficit (VPD) from relative humidity and temperatur
 ### Trait Selection and Measurements
 
 We selected several traits relevant to epiphytic growth (\tab \@ref(tab:traits-used) and \fig \@ref(fig:traits-used-image)).
-We preferred morphological traits over physiological traits for our study because data for morphological traits are easier to gather at the scale of our study (\circa \SI{130}{\species} distributed over an elevational gradient from \SIrange{200}{2000}{\meter}).
+We preferred morphological traits over physiological traits because data for morphological traits are easier to gather at the scale of our study (\circa \SI{130}{\species} distributed over an elevational gradient from \SIrange{200}{2000}{\meter}).
 Plant morphology and physiology are closely linked, and physiological traits such as rates of photosynthesis and water use efficiency are known to be correlated with morphological traits such as stipe length in ferns [@WatkinsJr.2010].
 
 Morphological traits of sporophytes were measured from herbarium specimens, or obtained from the literature when plant material was unavailable.
@@ -285,7 +285,7 @@ Non-cordate morphotypes include elongate (strap or ribbon \sensu @Farrar2008) an
 Gametophytes were cultivated on Bold's media [@Bold1957] supplemented with Nitch's micronutrients [@Nitsch1951].
 
 Growth habit was coded as a binary trait (epiphytic or terrestrial) based on our field observations.
-Some species do not fall clearly into either category (\eg, hemi-epiphytes; [@Benzing1990; @Dubuisson2003; @Zotz2013]).
+Some species do not fall clearly into either category [\eg, hemi-epiphytes; @Benzing1990; @Dubuisson2003; @Zotz2013].
 We used connection to the soil as the criterion for defining binary growth habit; thus, epipetric plants were treated as epiphytic, and hemi-epiphytes and climbing plants were treated as terrestrial. 
 For the purposes of this study, we treated growth habit as a fixed trait and used these categories to define epiphytic and terrestrial communities.
 Other studies have demonstrated that exceptional epiphytic growth of terrestrial fern species (and vice-versa) is rare [@Cardelus2006; @Kluge2006; @WatkinsJr.2009], and we do not believe that such rare exceptions would affect our analysis.
@@ -298,15 +298,15 @@ We calculated daily maximum, mean, minimum, and standard variation of temperatur
 We analyzed correlation between the mean values with Pearson's correlation coefficient, and retained a set with correlation coefficients less than 0.9 (a single variable was arbitrarily selected from each set of correlated variables; hereafter, "climatic variables").
 Variables relating to VPD, which have no meaning if less than zero, and some other variables that had skewed distributions, were square-root transformed prior to fitting models.
 We tested for differences between epiphytic and terrestrial dataloggers while accounting for elevation with ANCOVA, using growth habit as the categorical variable and elevation as the covariate.
-We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone and their interactions, then selecting the one with the lowest corrected Akaike Information Criterion (AIC~c~) [@Akaike1973].
+We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone and their interactions, then selecting the one with the lowest corrected Akaike Information Criterion [AIC~c~; @Akaike1973].
 A single outlier plot with unusually high temperature and low humidity (Mt. Rotui, 830 m plot) was excluded from ANCOVA and linear models.
 Mt. Rotui is an isolated peak with greater exposure than the other two mountains where the rest of the plots were established (J. Nitta, pers. obs.).
 
 For comparative analyses, we used the dated plastid phylogenetic tree of @Nitta2017.
 *Microsorum maximum* (Brack.) Copel., a genetically verified hybrid between *M. grossum* (Langsd. & Fisch.) S. B. Andrews and *M. commutatum* Copel. [@Nitta2018] was excluded from analysis because it shares identical plastid sequences with *M. grossum*, so the plastid tree does not accurately represent its evolutionary distinctiveness.
 
-We tested for phylogenetic signal in quantitative traits using Blomberg's *K* [@Blomberg2003] and Pagel's $\lambda$ [@Pagel1999], with the \function{phylosig} function in the \package{phytools} R package [@Revell2012].
-$\lambda$ is a scaling parameter that ranges from 0 (traits evolving randomly) to 1 (traits evolving along branches according to Brownian motion [BM]).
+We tested for phylogenetic signal in quantitative traits using Blomberg's *K* [@Blomberg2003] and Pagel's $\lambda$ [@Pagel1999], two metrics with slightly different interpretations and sensitivity to different evolutionary scenarios [@Munkemuller2012], with the \function{phylosig} function in the \package{phytools} R package [@Revell2012].
+$\lambda$ is a scaling parameter that ranges from 0 (traits evolving randomly) to 1 (traits evolving along branches according to Brownian motion (BM)).
 \K describes the ratio between the amount of observed variance in traits vs. the amount of variance expected under BM: when $\K > 1$, traits are more conserved than expected under BM; when $\K < 1$, traits have less phylogenetic signal than expected under BM [@Blomberg2003].
 We tested for significance by comparing observed \K against a null distribution of \num{1000} trees with trait values randomized across the tips, and in $\lambda$ by conducting a likelihood ratio test comparing the log likelihoods of the observed value of $\lambda$ vs. $\lambda = 0$ (no phylogenetic signal).
 We tested for phylogenetic signal in qualitative traits using Fritz and Purvis' *D* [@Fritz2010].
@@ -345,7 +345,7 @@ We conducted standard and phylogenetically corrected PCA, using the \function{PC
 We calculated community-weighted means (CWMs) and standard deviations of quantitative traits by using the overall mean trait value of each species weighted by their abundances in each community.
 
 We used distance-based methods to analyze community phylogenetic and functional diversity.
-Mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) describe the mean distance between all species in a community (MPD) or the mean distance between the closest pairs of species in a community (MNTD) [@Webb2000; @Webb2002].
+Mean phylogenetic distance (MPD) and mean nearest taxon distance (MNTD) describe the mean distance between all species in a community (MPD) or the mean distance between the closest pairs of species in a community [MNTD; @Webb2000; @Webb2002].
 Although these metrics were originally formulated for phylogenetic distances, they can be applied in the same way to trait-based distances, enabling a direct comparison between the two [@Sessa2018].
 For phylogenetic distances, we used the tree of @Nitta2017.
 For functional distances, we log-transformed and scaled traits as in the PCA, excluded frond width and length (both frond size traits highly correlated with stipe length), then calculated the distance matrix using Gower's dissimilarity coefficient [@Gower1971] with the \function{gowdis} function in the R package \package{FD} [@Laliberte2011], with equal weighting for sporophyte and gametophyte traits.
@@ -353,20 +353,20 @@ To test for the effect of different trait selection schemes, we compared the res
 
 Raw values of MPD and MNTD are statistically related to species richness [@Swenson2014]; to obtain metrics that are uncorrelated with species richness, we calculated their standard effect sizes (SES) by comparing observed values to a distribution of \num{999} randomized communities.
 We constructed null communities using the "independent swap" algorithm [@Gotelli2000].
-We included all species of ferns from Moorea and the neighboring island of Tahiti with genetic data available (`r Ntip(phy)` \si{\species} total; [@Nitta2017]) for phylogenetic null communities, and all species with trait data available (`r fern_traits %>%pull(species) %>% n_distinct`) for functional null communities.
+We included all species of ferns from Moorea and the neighboring island of Tahiti with genetic data available [`r Ntip(phy)` \si{\species} total; @Nitta2017] for phylogenetic null communities, and all species with trait data available (`r fern_traits %>%pull(species) %>% n_distinct`) for functional null communities.
 We used the \function{ses.mpd} and \function{ses.mntd} functions in the R package \package{picante} [@Kembel2010] to calculate phylogenetic and functional diversity metrics.
 Hereafter, "MPD~phy~" and "MNTD~phy~", and "MPD~func~" and "MNTD~func~", refer to the standard effect sizes of MPD and MNTD as measured with phylogenetic and functional trait distances, respectively.
 
 We tested the effects of climate and growth habit on diversity metrics using full-subsets multiple regression with general additive models (GAMs) as implemented in the \package{FSSgamm} R package [@Fisher2018].
 For each diversity metric, we built a set of models (Gaussian family, with plot as a random effect) taking into account all combinations of explanatory variables and their pairwise interactions, and ranked these by AIC~c~ to find the models that best explain the data.
-Our dataset included `r nrow(div_metrics_all) - nrow(climate_select)` communities that lacked climate data and could not be included in full-subsets multiple regression analysis.
+Our dataset included `r (nrow(div_metrics_all) - nrow(climate_select)) %>% english2` communities that lacked climate data and could not be included in full-subsets multiple regression analysis.
 Therefore, we also constructed linear models for each diversity metric related to elevation including all sites using the same model selection procedure as in the climate analysis.
 We checked for spatial autocorrelation in the model residuals with Moran's *I* [@Moran1950] as implemented in the \package{spdep} R package [@Bivand2013].
 
 ### Data accessibility
 
 Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife.
-Data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2019a].
+Data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2020].
 
 ## Results
 
@@ -539,13 +539,13 @@ These results do not support the hypothesis that fern epiphytes have reduced fun
 For example, although epiphytes demonstrated less dissected fronds at the species level (\tab \@ref(tab:pics)), they exhibited much greater variation in this trait relative to terrestrial ferns at the community level (\fig S2).
 It is likely that the high diversity of this trait reflects different physiological adaptations to various canopy niches. 
 For instance, filmy ferns (Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have extremely thin, highly dissected fronds.
-Bird’s nest ferns (e.g., *Asplenium nidus* L.), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
+Bird’s nest ferns (\eg, *Asplenium nidus* L.), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
 At low-elevation sites on Moorea where these ferns co-occur, filmy ferns frequently grow in more humid portions of trees including near the main trunk, whereas bird’s nest ferns often grow higher in the canopy and on more exposed, drought-prone branches (J. Nitta, pers. obs.). 
 Similar predictable patterns of niche partitioning at the local scale have been reported in neotropical epiphtyic ferns as well [@Hietz1998; @Tausz2001]. 
 This distribution may reflect alternative water-usage strategies aligned to specific microhabitats in the canopy [desiccation tolerance vs. water capture; @Hietz1998]. 
 Such hypotheses need to be carefully tested with additional quantitative investigation, including more finely examining microclimatic variation and species composition across the canopy.
 
-Another trait that defied simple classification into epiphytic or terrestrial groups was specific leaf area (SLA) (\fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)).
+Another trait that defied simple classification into epiphytic or terrestrial groups was specific leaf area (SLA; \fig \@ref(fig:cwm-div), \tab \@ref(tab:pics)).
 Specific leaf area is part of the leaf economic spectrum (LES), which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans [@Wright2004a; @Diaz2015].
 We expected that epiphytes would exhibit lower SLA, given their more extreme growing conditions.
 In contrast, we observed overlapping, wide ranging SLA values in both terrestrial and epiphytic communities, with only slightly lower values in epiphytes (\fig \@ref(fig:cwm-div)).
@@ -560,7 +560,7 @@ Gemmae are asexual propagules occurring primarily in non-cordate gametophytes th
 In particular, gemmae production should be useful in an epiphytic context because they may allow gametophytes to increase their boundary layer and hedge against population loss during extreme drying [@Farrar2008].
 Gemmae can also function sexually by producing antheridia in the presence of antheridiogen secreted by other gametophytes [@Emigh1977], which may confer a selective advantage in the epiphytic environment by enabling outcrossing [@Dassler2001].
 As with our results summarized above, it is possible that the diversity of gemmae and non-gemmae producing epiphytic species reflects undetected niche variation in the canopy.
-Interestingly, when we classified gametophytes as ‘independent’ if they occurred beyond the range of conspecific sporophytes using the data of @Nitta2017, we found that gemmae production is correlated with independent growth (log likelihood dependent model = `r correlated_evo_test_gemmae$dependent.logL %>% round(1) %>% as.numeric`, log likelihood independent model = `r correlated_evo_test_gemmae$independent.logL %>% round(1) %>% as.numeric`, \pval = `r correlated_evo_test_gemmae$P %>% round(3) %>% as.numeric`, Pagel's test of correlated evolution), echoing a pattern observed in Japan of non-cordate gametophytes frequently occurring independently of their conspecific sporophytes [@Ebihara2013].
+Interestingly, when we classified gametophytes as ‘independent’ if they occurred beyond the elevational range of conspecific sporophytes using the data of @Nitta2017, we found that gemmae production is correlated with independent growth (log likelihood dependent model = `r correlated_evo_test_gemmae$dependent.logL %>% round(1) %>% as.numeric`, log likelihood independent model = `r correlated_evo_test_gemmae$independent.logL %>% round(1) %>% as.numeric`, \pval = `r correlated_evo_test_gemmae$P %>% round(3) %>% as.numeric`, Pagel's test of correlated evolution), echoing a pattern observed in Japan of non-cordate gametophytes frequently occurring independently of their conspecific sporophytes [@Ebihara2013].
 
 Finally, the presence of hairs and glands in gametophytes also exhibit very high phylogenetic signal (\ie, much greater than expected under Brownian motion; \tab \@ref(tab:phylosig-binary)), and these traits are concentrated in certain taxonomic groups [\eg, hairs, grammitid ferns; glands, Thelypteridaceae; @Stokey1951; @Nayar1971].
 Although hairs have been hypothesized to reduce rates of drying and increase water uptake after desiccation [@Kappen2007], and glands may affect rates of osmosis by modifying lipid concentrations [@Crow2011], we did not detect a correlation between hair or gland production and epiphytic growth.
@@ -597,7 +597,7 @@ Future studies characterizing within-canopy niches of epiphytic ferns should inc
 
 ### Conclusion and future directions
 
-Recent studies [e.g., @Sundue2015; @Testo2016a; @Lehtonen2017; @Testo2018a] have called into question the scenario of rapid Cretaceous radiations of epiphytic ferns posited by @Schuettpelz2009 by failing to detect increased rates of diversification associated with epiphytic growth.
+Recent studies [\eg, @Sundue2015; @Testo2016a; @Lehtonen2017; @Testo2018a] have called into question the scenario of rapid Cretaceous radiations of epiphytic ferns posited by @Schuettpelz2009 by failing to detect increased rates of diversification associated with epiphytic growth.
 Our study provides one possible explanation for this finding. 
 Here, we demonstrate that epiphytism is likely a more complex trait than previously realized, and almost certainly requires the evolution of multiple associated and dependent traits. 
 We propose that the timing and order of the evolution of such traits are related to the complex underlying diversification dynamics observed in these studies. 
@@ -648,7 +648,7 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 **\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
 
-**\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa 2 m on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
+**\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). "Epiphytic" dataloggers were placed at \circa 2 m on trees, and "terrestrial" dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
 
 **\fig \@ref(fig:pca)**: Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n = `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \si{\species}). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
 
