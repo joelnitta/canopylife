@@ -91,14 +91,24 @@ plan <- drake_plan(
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
   ### Climate data ###
-  # - Process raw climate data (rel. humidity and temperature every 15 min.)
-  # - Also calculate vapor pressure deficit (VPD) from temp and RH
-  moorea_climate_raw = process_raw_climate(
-    file_in("data/hobo_moorea_aorai_2-24-15.csv"
-    )),
   
-  # - Calculate mean climate variables
-  daily_mean_climate = get_daily_means(moorea_climate_raw),
+  # - Read in raw climate data (rel. humidity and temperature) from all dataloggers 
+  # on Moorea and Tahiti from 2012-07-18 to 2015-02-06.
+  climate_raw = read_csv(file_in("data/hobo_moorea_aorai_2-24-15.csv")),
+  
+  # - Process raw climate data: 
+  # subset to only Moorea and days without missing data,
+  # replace one chunk of missing data with same dates from previous year,
+  # calculate vapor pressure deficit (VPD) from temp and RH.
+  moorea_climate = process_raw_climate(climate_raw),
+  
+  # - Write out moorea_climate as CSV file to include with Dryad data.
+  moorea_climate_out = moorea_climate %>%
+    select(date, time, site, habit, temp, rh, vpd) %>%
+    write_csv(file_out("ms/moorea_climate.csv")),
+  
+  # - Calculate mean climate variables.
+  daily_mean_climate = get_daily_means(moorea_climate),
   grand_mean_climate = get_grand_means(daily_mean_climate),
   
   ### Phylogeny ###
@@ -417,7 +427,7 @@ plan <- drake_plan(
 
   # Set color scheme: epiphytes in green, terrestrial in brown.
   habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
-    set_names(levels(moorea_climate_raw$habit)),
+    set_names(levels(moorea_climate$habit)),
 
   # Make climate plot.
   climate_plot = make_climate_plot(

@@ -446,16 +446,12 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
 
 #' Filter raw climate data, also calculate VPD
 #'
-#' @param climate_raw_path Path to raw climate data measured with
+#' @param climate_raw Raw climate data measured with
 #' Hobo dataloggers (relative humidity and temperature) every 15 min
 #' on Moorea and Tahiti from 2012-07-18 to 2015-02-06
 #'
 #' @return Tibble
-process_raw_climate <- function (climate_raw_path) {
-  
-  # Read in raw data, includes all dataloggers from Moorea and Tahiti from
-  # 2012-07-18 to 2015-02-06
-  climate_raw <- read_csv(climate_raw_path)
+process_raw_climate <- function (climate_raw) {
   
   # Reformat data, filter out Tahiti sites (on Mt. Aorai)
   # Split apart date into components
@@ -513,7 +509,7 @@ process_raw_climate <- function (climate_raw_path) {
       ),
       habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
       site = str_remove_all(site, "_epi|_ter"),
-      vpd = plantecophys::RHtoVPD(RH, temp)
+      vpd = plantecophys::RHtoVPD(rh, temp)
     )
   
 }
@@ -548,6 +544,7 @@ process_community_matrix <- function (community_matrix_path, species_list, moore
 get_daily_means <- function (climate_raw) {
   climate_raw %>%
     group_by(site, date, habit) %>%
+    rename(RH = rh) %>%
     summarize_at(
       vars(temp, RH, vpd),
       list(

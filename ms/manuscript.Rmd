@@ -48,6 +48,7 @@ loadd(list = c(
   "best_fit_div_models",
   "climate_ancova_results",
   "climate_plot",
+  "climate_raw",
   "climate_select",
   "combined_comm_div_plots",
   "combined_cwm_plots",
@@ -60,6 +61,7 @@ loadd(list = c(
   "div_metrics_all",
   "fern_traits",
   "importance_heatmap",
+  "moorea_climate",
   "pca_plot",
   "pca_results",
   "phy",
@@ -203,31 +205,63 @@ Vouchers were deposited at GH and UC (abbreviations follow Index Herbariorum [@T
 ### Environmental Survey
 
 ```{r climate-numbers, results="hide"}
-# Count total number of days in climate data
-total_days <- daily_mean_climate %>% pull(date) %>% n_distinct()
+# Calculate summary statistics (number of sites, start date, end date) for raw 
+# climate data for preliminary survey period (until 2013-07-07) and final survey
+# period (2013-07-07 and after) separately.
 
-# Check start and end dates
-# - start July 7, 2013
-assert_that(daily_mean_climate %>% pull(date) %>% min == "2013-07-07")
-# - end July 5, 2014
-assert_that(daily_mean_climate %>% pull(date) %>% max == "2014-07-05")
- 
-# Count total number of sites in climate data
+prelim_climate_survey <-
+  # Subset to Moorea sites used in prelim survey (Mt. Tohiea only)
+  climate_raw %>%
+  filter(str_detect(site, "Aorai", negate = TRUE)) %>%
+  filter(date < "2013-07-07") %>%
+  filter(str_detect(site, "Tohiea")) %>%
+  # Only count by site name, not distinguishing between epi vs. ter dataloggers
+  mutate(site = str_remove_all(site, "_epi|_ter")) %>%
+  summarize(
+    n_sites = n_distinct(site),
+    start = min(date) %>% 
+      format('%B %e, %Y') %>%
+      str_replace_all("  ", " "),
+    end = max(date) %>% 
+      format('%B %e, %Y') %>%
+      str_replace_all("  ", " ")
+  )
+
+final_climate_survey <-
+  # Subset to Moorea sites used in final survey
+  climate_raw %>%
+  filter(str_detect(site, "Aorai", negate = TRUE)) %>%
+  filter(date >= "2013-07-07") %>%
+  # Only count by site name, not distinguishing between epi vs. ter dataloggers
+  mutate(site = str_remove_all(site, "_epi|_ter")) %>%
+  summarize(
+    n_sites = n_distinct(site),
+    start = min(date) %>% 
+      format('%B %e, %Y') %>%
+      str_replace_all("  ", " "),
+    end = max(date) %>% 
+      format('%B %e, %Y') %>%
+      str_replace_all("  ", " ")
+  )
+
+# Count total number of days in clean climate data
+total_days <- moorea_climate %>% pull(date) %>% n_distinct()
+
+# Count total number of sites / dataloggers in clean climate data
 total_sites <-
-daily_mean_climate %>%
-  select(site, habit) %>%
-  unique() %>%
+  moorea_climate %>%
+  count(site, habit) %>%
   count(habit)
 ```
 
 Temperature and RH of epiphytic and terrestrial habitats were measured using Hobo Pro v2 dataloggers with the RS3 Solar Radiation Shield (Onset Corporation, USA).
 A pair of dataloggers was installed for each plot, one mounted at \circa \SI{2}{\meter} on a tree ('epiphytic datalogger'), and one at ground level ('terrestrial datalogger'), except for the Mt. Tohiea \SI{1200}{\meter} plot, which only had an epiphytic datalogger.
-Temperature and RH were logged once every \SI{30}{\minute} during two survey periods: a preliminary survey from July 18, 2012 to July 7, 2013 at six plots, and a final survey from July 7, 2013 to July 5, 2014 at 15 plots.
+Temperature and RH were logged once every \SI{15}{\minute} during two survey periods: a preliminary survey from `r prelim_climate_survey$start` to `r prelim_climate_survey$end` at `r prelim_climate_survey$n_sites %>% english2` plots, and a final survey from `r final_climate_survey$start` to `r final_climate_survey$end` at `r final_climate_survey$n_sites %>% english2` plots.
 Two plots were not included in the environmental survey.
-We used the 2013–-2014 data for the analysis, with one exception: the terrestrial datalogger at the Mt. Tohiea \SI{393}{\meter} plot malfunctioned and was missing data for a substantial part of the final survey period (March 12--July 5, 2014), so we used data for the same dates from the preliminary survey period for this datalogger instead.
+We used the 2013–-2014 data for the analysis, with one exception: the terrestrial datalogger at the Mt. Tohiea \SI{393}{\meter} plot malfunctioned and was missing data for a substantial part (March 12--July 5, 2014) of the final survey period, so we used data for the same dates from the preliminary survey period for this datalogger instead.
 Three others also failed early during the final survey period, but lacked data from the preliminary period, so were excluded from analysis.
 Other days missing data during the final survey period were excluded from the dataset.
-The final dataset included `r total_days` days of data for `r total_sites %>% filter(habit == "epiphytic") %>% pull(n)` dataloggers and `r total_sites %>% filter(habit == "terrestrial") %>% pull(n)` terrestrial dataloggers.
+The final dataset included `r total_days` days of data for `r total_sites %>% filter(habit == "epiphytic") %>% pull(n)` epiphytic dataloggers and `r total_sites %>% filter(habit == "terrestrial") %>% pull(n)` terrestrial dataloggers.
 We calculated vapor pressure deficit (VPD) from relative humidity and temperature using the \package{plantecophys} R package [@Duursma2015].
 
 ### Trait Selection and Measurements
@@ -240,7 +274,7 @@ Morphological traits of sporophytes were measured from herbarium specimens, or o
 Measurements were made directly on plants in the field for a few species with large fronds.
 A single leaf or rhizome per individual was measured on one to three separately collected individuals per species, and mean values were calculated for each species.
 Although trait values can vary within fern species with elevation [@Kessler2007a], our study includes a broad phylogenetic sampling, so we assume intraspecific variation is outweighed by interspecies differences.
-To measure specific leaf area (SLA; \si{\square\meter\per\kilo\gram}), \circa 10--12, \SI{2}{\milli\meter} or \SI{4}{\milli\meter} \diameter punches were taken of laminae between primary veins for a single leaf per individual using biopsy punches, dried at \SI{60}{\celsius} for \SI{24}{\hour}, and weighed.
+To measure specific leaf area (SLA; \si{\square\meter\per\kilo\gram}), \circa 10--12, \SI{2}{\milli\meter} or \SI{4}{\milli\meter} diam. punches were taken of laminae between primary veins for a single leaf per individual using biopsy punches, dried at \SI{60}{\celsius} for \SI{24}{\hour}, and weighed.
 For species with \textless \SI{2}{\milli\meter} between primary veins, leaf fragments excluding primary veins were obtained by dissection, dried at \SI{60}{\celsius} for \SI{24}{\hour}, weighed, and scanned.
 ImageJ [@Abramoff2004] software was used to measure area per fragment. 
 
@@ -614,7 +648,7 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 **\fig \@ref(fig:traits-used-image)**: Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars 1 mm except for glands, which is 0.1 mm. Photographs by J. H. Nitta.
 
-**\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from July 7, 2013 to July 5, 2014. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa 2 m on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
+**\fig \@ref(fig:climate)**: Selected microclimatic variables of study plots along an elevational gradient from \SIrange{200}{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa 2 m on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval \textless \num{.05}
 
 **\fig \@ref(fig:pca)**: Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n = `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \si{\species}). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
 
