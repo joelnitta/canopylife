@@ -196,10 +196,11 @@ Specialized formats or other abbreviations used: None.
 
 moorea_climate.csv: Microclimate data (same data as
 hobo_moorea_aorai_2-24-15.csv), subsetted to only Moorea and excluding days
-missing data. Dates range from 2013-07-07 to 2014-07-05. The
-terrestrial datalogger at the "tohiea_400m" site malfunctioned and was
-missing data for a substantial part of the final survey period (2014-03-12 to 2014-07-05), so data for the same dates from 2013 were recoded as 2014 and used
-instead for this datalogger only.
+missing data. Dates range from 2013-07-07 to 2014-07-05. The terrestrial
+datalogger at the "tohiea_400m" site malfunctioned and was missing data for a
+substantial part of the final survey period (2014-03-12 to 2014-07-05), so
+data for the same dates from 2013 were recoded as 2014 and used instead for
+this datalogger only.
 
 Number of variables: 7
 
