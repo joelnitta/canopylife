@@ -487,6 +487,31 @@ mean_rich <-
     sd_rich = sd(ntaxa) %>% round_t(1)
   ) %>%
   mutate(stat = glue("{mean_rich} ± {sd_rich}"))
+
+# Do some special formatting for reporting rounded MPDfunc vs MNTDfunc P-val
+# - combine into a single value if same, or report each different value with 
+# "respectively" if different
+if(
+  magrittr::equals(
+    t_test_print %>%
+      filter(var == "mpd.obs.z.func") %>%
+      pull(p),
+    t_test_print %>%
+      filter(var == "mntd.obs.z.func") %>%
+      pull(p)
+  )
+) {
+  p_mpd_func_mntd_func <- get_mod_result(t_test_print, "mpd.obs.z.func", "p")
+  both <- "both "
+} else {
+  p_mpd_func_mntd_func <- paste0(
+    get_mod_result(t_test_print, "mpd.obs.z.func", "p"),
+    " and ",
+    get_mod_result(t_test_print, "mntd.obs.z.func", "p"),
+    ", respectively"
+  )
+  both <- ""
+}
 ```
 
 In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (\fig \ref{fig:heatmap}).
@@ -499,9 +524,9 @@ Degree of lamina dissection decreased with elevation in epiphytes, but increased
 Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (\fig \@ref(fig:cwm-div)).
 
 We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial species.
-Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species}per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r get_mod_result(t_test_print, "ntaxa", "p")`; \fig \@ref(fig:comm-div)).
+Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \si{\species} per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \si{\species} per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval = `r get_mod_result(t_test_print, "ntaxa", "p")`; \fig \@ref(fig:comm-div)).
 Species richness increased with elevation for both epiphytes and terrestrial communities (\fig \@ref(fig:comm-div)).
-Epiphytic communities were more diverse than terrestrial ones as measured by both MPD~func~ and MNTD~func~ (two-sided \tval-test, \pval `r get_mod_result(t_test_print, "mpd.obs.z.func", "p")` and `r get_mod_result(t_test_print, "mntd.obs.z.func", "p")`, respectively).
+Epiphytic communities were more diverse than terrestrial ones as measured by both MPD~func~ and MNTD~func~ (two-sided \tval-test, `r both`\pval `r p_mpd_func_mntd_func`).
 Functional diversity increased along the gradient for both terrestrial and epiphytic communities when measured with MPD~func~ (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "mpd.obs.z.func", "r")`, \pval `r get_mod_result(model_summ_print, "mpd.obs.z.func", "p")`), but not MNTD~func~.
 Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD~phy~ (two-sided \tval-test, \pval `r get_mod_result(t_test_print, "mntd.obs.z.phy", "p")`) but not MPD~phy~ (\pval = `r get_mod_result(t_test_print, "mpd.obs.z.phy", "p")`; \fig \@ref(fig:comm-div)).
 No significant trend was detected in phylogenetic community structure with elevation in either terrestrial or epiphytic communities (\fig \@ref(fig:comm-div)). 
