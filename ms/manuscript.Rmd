@@ -13,7 +13,7 @@ output:
     toc: no
     number_sections: no
     fig_caption: yes
-    keep_tex: no
+    keep_tex: yes
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
     includes:
@@ -126,7 +126,7 @@ tibble(
     count = "",
     figs_tabs = "",
     n = "",
-  ) %>% 
+  ) %>%
   as_rtf() %>%
   write_lines(here::here("ms/word_count.rtf"))
 ```

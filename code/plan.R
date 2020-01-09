@@ -508,9 +508,20 @@ plan <- drake_plan(
   cwsd_scatterplot = make_cwsd_scatterplot(cwm_long, habit_colors),
 
   # Manuscript ----
-  ms = rmarkdown::render(
+  
+  # First render to PDF, keeping the latex
+  ms_pdf = render_tracked(
     knitr_in("ms/manuscript.Rmd"),
-    quiet = TRUE),
+    quiet = TRUE,
+    tracked_output = file_out(here::here("ms/manuscript.tex"))
+    ),
+  
+  # Next use the latex to convert to docx with word
+  ms_docx = latex2docx(
+    latex = file_in(here::here("ms/manuscript.tex")),
+    docx = file_out(here::here("ms/manuscript.docx")),
+    wd = here::here("ms")
+  ),
 
   # SI ----
   si = rmarkdown::render(

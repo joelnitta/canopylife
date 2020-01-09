@@ -3132,6 +3132,42 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   
 }
 
+# MS rendering
+
+# Dummy function to track arbitary output from rmarkdown::render()
+render_tracked <- function (tracked_output, ...) {
+  rmarkdown::render(...)
+}
+
+#' Convert latex file to docx
+#' 
+#' Requires pandoc to be installed and on command line
+#'
+#' @param latex Path to input latex file
+#' @param docx Path to output docx file
+#' @param wd Working directory to run conversion. Should be same as
+#' directory containing any files needed to render latex to pdf.
+#'
+#' @return List including STDOUT of pandoc; externally, the
+#' docx file will be rendered in `wd`.
+#' 
+latex2docx <- function (latex, docx, wd) {
+  
+  assertthat::assert_that(assertthat::is.readable(latex))
+  
+  assertthat::assert_that(assertthat::is.dir(fs::path_dir(docx)))
+  
+  latex <- fs::path_abs(latex)
+  
+  docx <- fs::path_abs(docx)
+  
+  processx::run(
+    command = "pandoc",
+    args = c("-s", latex, "-o", docx),
+    wd = wd
+  )
+  
+}
 
 # Misc ----
 
