@@ -2161,7 +2161,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "standard", "x"),
       y = get_label(axis_labels, "standard", "y"),
-      subtitle = "(a)"
+      title = "(a)"
     )
   
   # Phylogenetic trait PCA 
@@ -2183,7 +2183,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "phylogenetic", "x"),
       y = get_label(axis_labels, "phylogenetic", "y"),
-      subtitle = "(b)"
+      title = "(b)"
     )
   
   c <-
@@ -2200,7 +2200,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "standard", "x"),
       y = get_label(axis_labels, "standard", "y"),
-      subtitle = "(c)"
+      title = "(c)"
     )
   
   d <-
@@ -2217,13 +2217,15 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "phylogenetic", "x"),
       y = get_label(axis_labels, "phylogenetic", "y"),
-      subtitle = "(d)"
+      title = "(d)"
     )
   
   # Combine into final plot with 0.2 in margins
   p <- a + b + c + d + plot_layout(ncol = 2, nrow = 2) &
     standard_theme2() &
-    theme(legend.position = "none")
+    theme(
+      legend.position = "none",
+      plot.title = element_text(face = "bold"))
   
   p +
     plot_annotation(theme = theme(plot.margin = margin(
