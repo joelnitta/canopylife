@@ -2662,9 +2662,16 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       legend.position = "right",
       axis.text.x = element_text(angle = 45, hjust = 0, vjust = 0, size = 24/.pt),
       axis.title.x = element_blank(),
-      axis.text.y = element_text(face = "italic", size = 11/.pt),
+      axis.text.y = element_text(
+        face = "italic", 
+        size = 11/.pt
+        ),
       legend.text = element_text(size = 20/.pt),
-      legend.title = element_text(size = 24/.pt)
+      legend.title = element_text(size = 24/.pt),
+      axis.ticks.length.y = unit(-0.1, "cm"), # Put y-axis labels right next to plot
+      axis.ticks.y = element_blank(),
+      panel.grid = element_blank(),
+      panel.background = element_blank()
     )
   
   # Extract legend for overlaying on a different subplot
