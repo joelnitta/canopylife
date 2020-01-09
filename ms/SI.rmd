@@ -224,12 +224,12 @@ mpd_corr %>%
   geom_tile() +
   geom_text(aes(label = as.character(fashion(r))), color = "white", size = 3) +
   scale_fill_scico(palette = "roma", breaks = c(-1, 1)) +
-  labs(x = NULL, y = NULL, title = "(a)") +
+  labs(x = NULL, y = NULL, subtitle = "(a)") +
   theme_minimal() +
   theme(
     panel.grid.minor = element_blank(),
     panel.grid.major = element_blank(),
-    title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "bold"),
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
   )
 
@@ -250,12 +250,12 @@ mntd_corr_plot <-
   geom_tile() +
   geom_text(aes(label = as.character(fashion(r))), color = "white", size = 3) +
   scale_fill_scico(palette = "roma", breaks = c(-1, 1)) +
-  labs(x = NULL, y = NULL, title = "(b)") +
+  labs(x = NULL, y = NULL, subtitle = "(b)") +
   theme_minimal() +
   theme(
     panel.grid.minor = element_blank(),
     panel.grid.major = element_blank(),
-    title = element_text(face = "bold"),
+    plot.subtitle = element_text(face = "bold"),
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
   )
 

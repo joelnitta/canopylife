@@ -2161,7 +2161,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "standard", "x"),
       y = get_label(axis_labels, "standard", "y"),
-      title = "(a)"
+      subtitle = "(a)"
     )
   
   # Phylogenetic trait PCA 
@@ -2183,7 +2183,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "phylogenetic", "x"),
       y = get_label(axis_labels, "phylogenetic", "y"),
-      title = "(b)"
+      subtitle = "(b)"
     )
   
   c <-
@@ -2200,7 +2200,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "standard", "x"),
       y = get_label(axis_labels, "standard", "y"),
-      title = "(c)"
+      subtitle = "(c)"
     )
   
   d <-
@@ -2217,7 +2217,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     labs(
       x = get_label(axis_labels, "phylogenetic", "x"),
       y = get_label(axis_labels, "phylogenetic", "y"),
-      title = "(d)"
+      subtitle = "(d)"
     )
   
   # Combine into final plot with 0.2 in margins
@@ -2225,7 +2225,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     standard_theme2() &
     theme(
       legend.position = "none",
-      plot.title = element_text(face = "bold"))
+      plot.subtitle = element_text(face = "bold"))
   
   p +
     plot_annotation(theme = theme(plot.margin = margin(
@@ -3006,12 +3006,12 @@ make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
   
   # Add plot part labels
   cwsd_boxplots[["stipe"]] <- cwsd_boxplots[["stipe"]] +
-    labs(title = "(a)") +
-    theme(plot.title = element_text(face = "bold"))
+    labs(subtitle = "(a)") +
+    theme(plot.subtitle = element_text(face = "bold"))
   
   cwsd_boxplots[["dissection"]] <- cwsd_boxplots[["dissection"]] +
-    labs(title = "(b)") +
-    theme(plot.title = element_text(face = "bold"))
+    labs(subtitle = "(b)") +
+    theme(plot.subtitle = element_text(face = "bold"))
   
   # Combine plots into single output
   
