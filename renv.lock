@@ -320,6 +320,18 @@
       "Repository": "CRAN",
       "Hash": "4f45f4d5b5d5c2da19decbf62fd50b17"
     },
+    "captioner": {
+      "Package": "captioner",
+      "Version": "2.2.3.9000",
+      "Source": "GitHub",
+      "RemoteType": "github",
+      "RemoteHost": "api.github.com",
+      "RemoteRepo": "captioner",
+      "RemoteUsername": "adletaw",
+      "RemoteRef": "master",
+      "RemoteSha": "5f2b435e51a46ca61768e93c6cfbd92ba87363c1",
+      "Hash": "008ec0b164eff0b631e211023b72cdb2"
+    },
     "car": {
       "Package": "car",
       "Version": "3.0-6",
@@ -1217,6 +1229,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "14dc9f7a3c91ebb14ec5bb9208a07061"
+    },
+    "pryr": {
+      "Package": "pryr",
+      "Version": "0.1.4",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "bdc2df7c4155553e5a97a56a6c9f0a0d"
     },
     "ps": {
       "Package": "ps",

@@ -6,7 +6,7 @@
 #
 # To update a single package after the image is made...
 # Launch this container: `docker-compose up -d`
-# Within container, start R: `r`
+# Within container, start R: `R`
 # Within the R session, specify repos:
 # ```
 # my_repos <- BiocManager::repositories()
@@ -72,6 +72,7 @@ cran_packages <- c(
   "phytools",
   "plantecophys",
   "picante",
+  "pryr",
   "scico",
   "sme",
   "sp",
@@ -89,6 +90,7 @@ install.packages(cran_packages)
 
 ### Install github packages ###
 github_packages <- c(
+  "adletaw/captioner",
   "joelnitta/jntools",
   "rstudio/gt",
   "thomasp85/patchwork",
