@@ -13,11 +13,11 @@ output:
     toc: no
     number_sections: no
     fig_caption: yes
-    keep_tex: yes
+    keep_tex: yes # need for converting tex to docx
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
     includes:
-      in_header: newphyt.sty
+      in_header: new-phytologist.sty
 header-includes: 
   \usepackage{float}
   \makeatletter\renewcommand*{\fps@figure}{H}\makeatother
@@ -73,10 +73,10 @@ loadd(list = c(
   cache = canopy_cache)
 ```
 
-<!-- FOR CONVERSION TO MS WORD ONLY: remove page numbers -->
-\pagenumbering{gobble}
+<!-- Uncomment to remove page numbers -->
+<!-- \pagenumbering{gobble}  -->
 
-<!-- Set left justification (better conversion to Word than default full justification) -->
+<!-- Set left justification  -->
 \raggedright
 
 <!-- Don't indent authors -->

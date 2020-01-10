@@ -520,6 +520,7 @@ plan <- drake_plan(
   ms_docx = latex2docx(
     latex = file_in(here::here("ms/manuscript.tex")),
     docx = file_out(here::here("ms/manuscript.docx")),
+    template = file_in(here::here("ms/new-phytologist.docx")),
     wd = here::here("ms")
   ),
 

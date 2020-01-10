@@ -3143,15 +3143,16 @@ render_tracked <- function (tracked_output, ...) {
 #' 
 #' Requires pandoc to be installed and on command line
 #'
-#' @param latex Path to input latex file
-#' @param docx Path to output docx file
+#' @param latex Path to input latex file.
+#' @param docx Path to output docx file.
+#' @param template Path to template docx file.
 #' @param wd Working directory to run conversion. Should be same as
 #' directory containing any files needed to render latex to pdf.
 #'
 #' @return List including STDOUT of pandoc; externally, the
 #' docx file will be rendered in `wd`.
 #' 
-latex2docx <- function (latex, docx, wd) {
+latex2docx <- function (latex, docx, template = NULL, wd = getwd()) {
   
   assertthat::assert_that(assertthat::is.readable(latex))
   
@@ -3161,9 +3162,15 @@ latex2docx <- function (latex, docx, wd) {
   
   docx <- fs::path_abs(docx)
   
+  template <- if (!is.null(template)) {
+    glue::glue("--reference-doc={fs::path_abs(template)}")
+  } else {
+    NULL
+  }
+  
   processx::run(
     command = "pandoc",
-    args = c("-s", latex, "-o", docx),
+    args = c("-s", latex, template, "-o", docx),
     wd = wd
   )
   
