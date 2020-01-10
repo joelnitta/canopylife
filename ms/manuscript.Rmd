@@ -305,10 +305,10 @@ Mt. Rotui is an isolated peak with greater exposure than the other two mountains
 For comparative analyses, we used the dated plastid phylogenetic tree of @Nitta2017.
 *Microsorum maximum* (Brack.) Copel., a genetically verified hybrid between *M. grossum* (Langsd. & Fisch.) S. B. Andrews and *M. commutatum* Copel. [@Nitta2018] was excluded from analysis because it shares identical plastid sequences with *M. grossum*, so the plastid tree does not accurately represent its evolutionary distinctiveness.
 
-We tested for phylogenetic signal in quantitative traits using Blomberg's *K* [@Blomberg2003] and Pagel's $\lambda$ [@Pagel1999], two metrics with slightly different interpretations and sensitivity to different evolutionary scenarios [@Munkemuller2012], with the \function{phylosig} function in the \package{phytools} R package [@Revell2012].
-$\lambda$ is a scaling parameter that ranges from 0 (traits evolving randomly) to 1 (traits evolving along branches according to Brownian motion (BM)).
-\K describes the ratio between the amount of observed variance in traits vs. the amount of variance expected under BM: when $\K > 1$, traits are more conserved than expected under BM; when $\K < 1$, traits have less phylogenetic signal than expected under BM [@Blomberg2003].
-We tested for significance by comparing observed \K against a null distribution of \num{1000} trees with trait values randomized across the tips, and in $\lambda$ by conducting a likelihood ratio test comparing the log likelihoods of the observed value of $\lambda$ vs. $\lambda = 0$ (no phylogenetic signal).
+We tested for phylogenetic signal in quantitative traits using Blomberg's *K* [@Blomberg2003] and Pagel's λ [@Pagel1999], two metrics with slightly different interpretations and sensitivity to different evolutionary scenarios [@Munkemuller2012], with the \function{phylosig} function in the \package{phytools} R package [@Revell2012].
+λ is a scaling parameter that ranges from 0 (traits evolving randomly) to 1 (traits evolving along branches according to Brownian motion (BM)).
+\K describes the ratio between the amount of observed variance in traits vs. the amount of variance expected under BM: when \K > 1, traits are more conserved than expected under BM; when \K < 1, traits have less phylogenetic signal than expected under BM [@Blomberg2003].
+We tested for significance by comparing observed \K against a null distribution of \num{1000} trees with trait values randomized across the tips, and in λ by conducting a likelihood ratio test comparing the log likelihoods of the observed value of λ vs. λ = 0 (no phylogenetic signal).
 We tested for phylogenetic signal in qualitative traits using Fritz and Purvis' *D* [@Fritz2010].
 Values of \D range from 0 under a model of trait evolution by BM, to 1 for random distribution of traits.
 We analyzed \D using the \function{phylo.d} function in the \package{caper} R package [@Orme2013], and conducted significance test by comparing observed \D to distributions of simulated values produced under two models: random shuffling of traits on the tree, or simulation of a binary trait under a BM model.
@@ -413,9 +413,9 @@ glands_d <- phylosig_binary_traits %>% filter(trait == "glands") %>% pull(D) %>%
 morphotype_d <- phylosig_binary_traits %>% filter(trait == "morphotype") %>% pull(D) %>% round_t(2)
 ```
 
-Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs \@ref(tab:phylosig-cont), \@ref(tab:phylosig-binary), \fig \@ref(fig:tree)), and for quantitative traits, different results were obtained for $\lambda$ and K.
-When measured with $\lambda$, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of $\lambda$ close to 1; only number of pinnae pairs had $\lambda$ close to zero (\tab \@ref(tab:phylosig-cont)).
-However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of $\K < 1$ (\tab \@ref(tab:phylosig-cont)).
+Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs \@ref(tab:phylosig-cont), \@ref(tab:phylosig-binary), \fig \@ref(fig:tree)), and for quantitative traits, different results were obtained for λ and K.
+When measured with λ, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of λ close to 1; only number of pinnae pairs had λ close to zero (\tab \@ref(tab:phylosig-cont)).
+However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of \K < 1 (\tab \@ref(tab:phylosig-cont)).
 All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D = `r hairs_d`) or more conserved (gemmae, \D = `r gemmae_d`; glands, \D = `r glands_d`; morphotype, \D = `r morphotype_d`) than expected under BM (\tab \@ref(tab:phylosig-binary)).
 Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D = `r habit_d`; \tab \@ref(tab:phylosig-binary)).
 Similar results were obtained using the "strict" dataset (\tab S4).
@@ -763,7 +763,7 @@ phylosig_cont_traits_table %>%
   rename(K = kval, `P(K)` = k_pval, `P(lambda)` = lambda_pval) %>%
   column_to_rownames("trait") %>%
   kable(caption = "Phylogenetic signal in continuous traits", format = "latex", booktabs = TRUE) %>%
-  footnote(general = "K, Blomberg's \\\\textit{K} (Blomberg \\\\textit{et al.}, 2003); lambda, Pagel's lambda (Pagel, 1999). Values of lambda or \\\\textit{K} greater than 1 indicate traits evolving according to Brownian Motion (BM); values of lambda or K near 0 indicate random distribution of traits.", general_title = "", threeparttable = TRUE, escape = FALSE)
+  footnote(general = "K, Blomberg's \\\\textit{K} (Blomberg \\\\textit{et al.}, 2003); lambda, Pagel's lambda (Pagel, 1999). Values of lambda or \\\\textit{K} greater than 1 indicate traits evolving according to Brownian Motion (BM); values of lambda or \\\\textit{K} near 0 indicate random distribution of traits.", general_title = "", threeparttable = TRUE, escape = FALSE)
 ```
 
 \clearpage
