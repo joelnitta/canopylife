@@ -740,42 +740,24 @@ Additional Supporting Information may be found online in the Supporting Informat
 ```{r traits-used}
 # Table 1: traits used in this study
 
-# Read in csv version of the table
-traits_used <- read_csv(here::here("data/table_1.csv"))
+# Use kable instead of gt because gt can't control table width,
+# and the "ecological significance" descriptions would run off the page in PDF.
 
-# Write out table in html for submitting
-# MS as word doc
-traits_used %>%
-  gt(rowname_col = "trait") %>%
-  fmt_markdown(columns = everything()) %>%
-  tab_row_group(
-    group = "Sporophyte traits",
-    rows = matches("Stipe|Frond|Rhizome|Pinna|Leaf")
-  ) %>%
-  tab_row_group(
-    group = "Gametophyte traits",
-    rows = matches("Morphotype|Gemmae|Glands|Hairs")
-  ) %>%
-  cols_label(
-    data_type = "Data type (unit)",
-    ecological_significance = "Ecological Significance",
-    reference = "Reference(s)"
-  ) %>% 
-  gtsave(here::here("ms/Table_1.html"))
-
-# Include in PDF using kableExtra to convert to latex format
-traits_used %>% 
+# FIXME: need to manually add "Sporophyte traits" and "Gametophyte traits" to
+# table in docx (this happens with gt or kable).
+read_csv(here::here("data/table_1.csv")) %>%
   rename(`Data type (unit)` = data_type, `Functional significance` = ecological_significance, `Reference(s)` = reference) %>%
   column_to_rownames("trait") %>%
-  knitr::kable(caption = "", format = "latex", booktabs = TRUE, escape = TRUE) %>%
+  knitr::kable(format = "latex", booktabs = TRUE, escape = TRUE) %>%
   kable_styling(full_width = FALSE) %>%
   pack_rows("Sporophyte traits", 1, 7) %>%
   pack_rows("Gametophyte traits", 8, 11) %>%
   column_spec(2, width = "8em") %>%
   column_spec(3, width = "12em") %>%
-  column_spec(4, width = "8em") %>%
-  footnote(general = "Noncordate gametophyte morphotypes include ribbon, strap and filamentous.", general_title = "", threeparttable = TRUE, escape = TRUE)
+  column_spec(4, width = "8em")
 ```
+
+Noncordate gametophyte morphotypes include ribbon, strap and filamentous.
 
 \clearpage
 
@@ -784,8 +766,6 @@ traits_used %>%
 ```{r phylosig-cont}
 # Table 2: Phylogenetic signal in continuous traits
 
-# Format the raw results for table presentation
-phylosig_cont_traits_table <-
 phylosig_cont_traits %>%
   mutate_at(vars(kval, lambda), ~round_t(., 2)) %>%
   mutate(lambda_pval = format_pval(lambda_pval)) %>%
@@ -797,10 +777,7 @@ phylosig_cont_traits %>%
     trait,
     new_levels = c("Stipe length", "Frond length", "Frond width", "Rhizome diam.", 
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
-  arrange(trait)
-
-# Write out table in html format
-phylosig_cont_traits_table %>%
+  arrange(trait) %>%
   gt(rowname_col = "trait") %>%
   cols_label(
     kval = md("*K*"),
@@ -808,15 +785,11 @@ phylosig_cont_traits_table %>%
     lambda_pval = md("*P*(lambda)"),
     lambda = "lambda"
   )  %>%
-  gtsave(here::here("ms/Table_2.html"))
+  as_latex
 
-# Include in PDF in latex format
-phylosig_cont_traits_table %>%
-  rename(K = kval, `P(K)` = k_pval, `P(lambda)` = lambda_pval) %>%
-  column_to_rownames("trait") %>%
-  kable(caption = "", format = "latex", booktabs = TRUE) %>%
-  footnote(general = "K, Blomberg's \\\\textit{K} (Blomberg \\\\textit{et al.}, 2003); lambda, Pagel's lambda (Pagel, 1999). Values of lambda or \\\\textit{K} greater than 1 indicate traits evolving according to Brownian Motion (BM); values of lambda or \\\\textit{K} near 0 indicate random distribution of traits.", general_title = "", threeparttable = TRUE, escape = FALSE)
 ```
+
+\K, Blomberg's *K* [@Blomberg2003]; lambda, Pagel's lambda [@Pagel1999]. Values of lambda or \K greater than 1 indicate traits evolving according to Brownian Motion (BM); values of lambda or \K near 0 indicate random distribution of traits.
 
 \clearpage
 
@@ -825,8 +798,6 @@ phylosig_cont_traits_table %>%
 ```{r phylosig-binary}
 # Table 3: Phylogenetic signal in binary traits
 
-# Format the raw results for table presentation
-phylosig_binary_traits_table <-
 phylosig_binary_traits %>%
   mutate(D = round_t(D, 2)) %>%
   mutate(trait = factor(
@@ -835,28 +806,20 @@ phylosig_binary_traits %>%
   mutate(trait = lvls_revalue(
     trait,
     new_levels = c("Epiphytic growth", "Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
-  arrange(trait)
-
-# Write out table in html
-phylosig_binary_traits_table %>%
+  arrange(trait) %>%
   gt(rowname_col = "trait") %>%
   cols_label(
     num_present = "Number of presences",
     num_absent = "Number of absences",
     D = md("*D*"),
     prob_random = md("*P*(rnd)"),
-    prob_brownian = md("*P*(bm)")
+    prob_brownian = md("*P*(BM)")
   ) %>% 
-  gtsave(here::here("ms/Table_3.html"))
+  as_latex
 
-# Include in PDF in latex format
-phylosig_binary_traits_table %>%
-  select(trait, `Number of presences` = num_present, `Number of absences` = num_absent,
-         D, `P(rnd)` = prob_random, `P(bm)` = prob_brownian) %>%
-column_to_rownames("trait") %>%
-  kable(caption = "", format = "latex", booktabs = TRUE) %>%
-  footnote(general = "D, Fritz and Purvis’ \\\\textit{D} (Fritz \\\\& Purvis, 2010); P(rnd), probability of random distribution of traits; P(bm), probability of traits evolving under Brownian motion (BM). Values of \\\\textit{D} 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution.", general_title = "", threeparttable = TRUE, escape = FALSE)
 ```
+
+\D, Fritz and Purvis' *D* [@Fritz2010]; *P*(rnd), probability of random distribution of traits; *P*(BM), probability of traits evolving under Brownian motion (BM). Values of \D 0 or less indicate evolution according to BM; values near 1 indicate random trait distribution.
 
 \clearpage
 
@@ -865,8 +828,6 @@ column_to_rownames("trait") %>%
 ```{r pics}
 # Table 4: phylogenetically independent contrasts
 
-# Format the raw results for table presentation
-pic_table <- 
 pic_results %>%
   mutate_at(vars(estimate, std.error, statistic), ~round_t(., 2)) %>%
   mutate(p.value = format_pval(p.value)) %>%
@@ -879,26 +840,18 @@ pic_results %>%
     trait,
     new_levels = c("Stipe length", "Frond length", "Frond width", "Rhizome diam.", 
                    "SLA", "Pinna no.", "Frond dissection"))) %>%
-  arrange(trait)
-
-# Write out table in html
-pic_table %>%
-gt(rowname_col = "trait") %>%
+  arrange(trait) %>%
+  gt(rowname_col = "trait") %>%
   cols_label(
     n_contrasts = "Num. constrasts",
     n_pos_con = "Num. pos. constrasts",
     statistic = md("*t*"),
     p.value = md("*P*"),
   ) %>% 
-  gtsave(here::here("ms/Table_4.html"))
-
-# Include in PDF in latex format
-pic_table %>%
-  rename(t = statistic, P = p.value, `Num. constrasts` = n_contrasts, `Num. pos. constrasts` = n_pos_con) %>%
-  column_to_rownames("trait") %>%
-  kable(caption = "", format = "latex", booktabs = TRUE) %>%
-  footnote(general = "All trait contrasts were made by subtracting epiphytic values from terrestrial values; thus, a positive contrast indicates greater values for terrestrial clades.", general_title = "", threeparttable = TRUE)
+  as_latex
 ```
+
+All trait contrasts were made by subtracting epiphytic values from terrestrial values; thus, a positive contrast indicates greater values for terrestrial clades.
 
 \clearpage
 
@@ -907,8 +860,6 @@ pic_table %>%
 ```{r corr-evo}
 # Table 5: Pagel's test of correlated evolution
 
-# Format the raw results for table presentation
-correlated_evo_test_table <-
 correlated_evo_test %>%
   mutate(pval = format_pval(pval)) %>%
   mutate_if(is.numeric, ~round_t(., 1)) %>%
@@ -918,26 +869,18 @@ correlated_evo_test %>%
   mutate(trait = lvls_revalue(
     trait,
     new_levels = c("Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
-  arrange(trait)
-
-# Write out table in rich text format
-correlated_evo_test_table %>%
-gt(rowname_col = "trait") %>%
+  arrange(trait) %>%
+  gt(rowname_col = "trait") %>%
   cols_label(
     logL_indep = "LogL(independent)",
     logL_dep = "LogL(dependent)",
     likelihood_ratio = "Likelihood ratio",
     pval = md("*P*"),
   ) %>% 
-  gtsave(here::here("ms/Table_5.html"))
-
-# Include in PDF in latex format
-correlated_evo_test_table %>%
-  rename(`LogL(independent)` = logL_indep, `LogL(dependent)` = logL_dep, `Likelihood ratio` = likelihood_ratio, P = pval) %>%
-  column_to_rownames("trait") %>%
-  kable(caption = "", format = "latex", booktabs = TRUE) %>%
-  footnote(general = "LogL, log-likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial growth). Traits with a significantly lower log likelihood for the dependent model are significantly correlated with growth habit.", general_title = "", threeparttable = TRUE)
+  as_latex
 ```
+
+LogL, log-likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial growth). Traits with a significantly lower log likelihood for the dependent model are significantly correlated with growth habit.
 
 \clearpage
 
