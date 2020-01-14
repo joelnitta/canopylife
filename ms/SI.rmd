@@ -1,12 +1,7 @@
 ---
 title: ""
 bibliography: "si_references.bib"
-mainfont: Times New Roman.ttf
 fontsize: 12pt
-mainfontoptions: 
-- BoldFont=Times New Roman Bold.ttf
-- ItalicFont=Times New Roman Italic.ttf
-- BoldItalicFont=Times New Roman Bold Italic.ttf
 output: 
   bookdown::pdf_document2:
     citation_package: none # Use pandoc default, otherwise csl can't be used for reference formatting
