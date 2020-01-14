@@ -84,4 +84,4 @@ taxa_names_with_authors <- gnr_resolve(
   )) %>%
   rename_all(~str_replace(., "_", " "))
   
-write_csv(taxa_names_with_authors, here::here("ms/Table_S1.csv"))
+write_csv(taxa_names_with_authors, here::here("results/Table_S1.csv"))

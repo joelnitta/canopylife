@@ -1,5 +1,5 @@
 ---
-title: "Life in the canopy: community trait assessments reveal substantial functional diversity among fern epiphytes"
+title: "Life in the canopy: Community trait assessments reveal substantial functional diversity among fern epiphytes"
 bibliography: "references.bib"
 mainfont: Times New Roman.ttf
 fontsize: 12pt
@@ -910,7 +910,7 @@ cairo_ps_high_res <- function(...) {
   cairo_ps(fallback_resolution = 1200, ...)
 }
 
-ggsave(plot = climate_plot, filename = here::here("ms/Fig_2.eps"), height = 4, width = 7, units = "in", device = cairo_ps_high_res)
+ggsave(plot = climate_plot, filename = here::here("results/Fig_2.eps"), height = 4, width = 7, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("climate")`
@@ -919,7 +919,7 @@ ggsave(plot = climate_plot, filename = here::here("ms/Fig_2.eps"), height = 4, w
 
 ```{r pca, fig.height = 6, fig.width = 6}
 pca_plot
-ggsave(plot = pca_plot, filename = here::here("ms/Fig_3.eps"), height = 6, width = 6, units = "in", device = cairo_ps_high_res)
+ggsave(plot = pca_plot, filename = here::here("results/Fig_3.eps"), height = 6, width = 6, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("pca")`
@@ -928,7 +928,7 @@ ggsave(plot = pca_plot, filename = here::here("ms/Fig_3.eps"), height = 6, width
 
 ```{r tree, fig.height = 8, fig.width = 6}
 traits_with_tree
-ggsave(plot = traits_with_tree, filename = here::here("ms/Fig_4.eps"), height = 8, width = 6, units = "in", device = cairo_ps_high_res)
+ggsave(plot = traits_with_tree, filename = here::here("results/Fig_4.eps"), height = 8, width = 6, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("tree")`
@@ -937,7 +937,7 @@ ggsave(plot = traits_with_tree, filename = here::here("ms/Fig_4.eps"), height = 
 
 ```{r heatmap, fig.height = 4, fig.width = 6}
 importance_heatmap
-ggsave(plot = importance_heatmap, filename = here::here("ms/Fig_5.eps"), height = 4, width = 6, units = "in", device = cairo_ps_high_res)
+ggsave(plot = importance_heatmap, filename = here::here("results/Fig_5.eps"), height = 4, width = 6, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("heatmap")`
@@ -946,7 +946,7 @@ ggsave(plot = importance_heatmap, filename = here::here("ms/Fig_5.eps"), height 
 
 ```{r cwm-div, fig.height = 4, fig.width = 7}
 combined_cwm_plots
-ggsave(plot = combined_cwm_plots, filename = here::here("ms/Fig_6.eps"), height = 4, width = 7, units = "in", device = cairo_ps_high_res)
+ggsave(plot = combined_cwm_plots, filename = here::here("results/Fig_6.eps"), height = 4, width = 7, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("cwm-div")`
@@ -955,7 +955,7 @@ ggsave(plot = combined_cwm_plots, filename = here::here("ms/Fig_6.eps"), height 
 
 ```{r comm-div, fig.height = 8, fig.width = 4}
 combined_comm_div_plots
-ggsave(plot = combined_comm_div_plots, filename = here::here("ms/Fig_7.eps"), height = 8, width = 4, units = "in", device = cairo_ps_high_res)
+ggsave(plot = combined_comm_div_plots, filename = here::here("results/Fig_7.eps"), height = 8, width = 4, units = "in", device = cairo_ps_high_res)
 ```
 
 `r fig_nums("comm-div")`

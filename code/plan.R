@@ -105,7 +105,7 @@ plan <- drake_plan(
   # - Write out moorea_climate as CSV file to include with Dryad data.
   moorea_climate_out = moorea_climate %>%
     select(date, time, site, habit, temp, rh, vpd) %>%
-    write_csv(file_out("ms/moorea_climate.csv")),
+    write_csv(file_out("results/moorea_climate.csv")),
   
   # - Calculate mean climate variables.
   daily_mean_climate = get_daily_means(moorea_climate),
@@ -306,7 +306,7 @@ plan <- drake_plan(
       traits_select_list = c(all, size, other, gameto, reduced),
     )
   ),
-
+  
   func_comm_struc_combined = target(
     bind_data(func_comm_struc_test),
     transform = combine(func_comm_struc_test)
@@ -331,11 +331,11 @@ plan <- drake_plan(
   cwm_long = calculate_cwm(fern_traits, comm, moorea_sites),
   # - and by site
   cwm_by_site = cwm_long %>% select(-sd, -el) %>% spread(trait, cwm),
-
+  
   # Modeling ----
-
+  
   ### Prepare diversity data (response variables) ###
-
+  
   # - Combine diversity metrics into single dataframe
   div_metrics_all = left_join(
     select(phy_comm_struc, 
@@ -348,18 +348,18 @@ plan <- drake_plan(
            mntd.obs.z.func = mntd.obs.z)) %>%
     left_join(cwm_by_site) %>%
     left_join(moorea_sites),
-
+  
   ### Run full-subset analysis using GAMs ###
-
+  
   # - Merge all diversity metrics and climate data for GAMs
   # (transformed version of climate, but including outlier)
   div_climate_trans = inner_join(div_metrics_all, climate_trans),
-
+  
   # - Make named vector of response variables to test
   resp_vars = div_metrics_all %>%
     select(-site, -habit, -el, -long, -lat) %>%
     colnames %>% rlang::set_names(),
-
+  
   # - Run full-subsets model analysis.
   fss_div_results = purrr::map(
     resp_vars,
@@ -368,13 +368,13 @@ plan <- drake_plan(
       indep_vars = climate_vars,
       resp_var = .)
   ),
-
+  
   # - Extract table of importance of each environmental variable.
   important_div_vars = get_important_vars(fss_div_results),
-
+  
   # - Extract table of best-fit models.
   best_fit_div_models = get_best_fss_mods(fss_div_results),
-
+  
   # - Test for spatial autocorrelation in residuals with Moran's I.
   best_fit_div_models_moran = mutate(
     best_fit_div_models,
@@ -391,29 +391,29 @@ plan <- drake_plan(
     unnest() %>%
     select(resp_var, modname, AICc, r2, delta_AICc,
            morans_I = statistic, morans_I_pval = p.value),
-
+  
   ### Run linear models of diversity metrics by elevation ###
-
+  
   # - Make full set of models including each diversity metric
   # by elevation, growth habit, and
   # their interaction, then choose the best model for each.
   div_el_models = choose_habit_elevation_models(div_metrics_all, resp_vars),
-
+  
   # - Extract fits of best models.
   div_el_model_fits = extract_model_fits(div_el_models),
-
+  
   # - Get summaries of best model parameters.
   div_el_model_parameter_summaries = extract_model_parameters(div_el_models),
-
+  
   # - Get summaries of best models.
   div_el_model_summaries = extract_model_summaries(div_el_models),
-
+  
   # - Check for spatial autocorrelation in residuals.
   div_el_model_moran = div_el_models %>%
     select(-model) %>%
     unnest %>%
     select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
-
+  
   ### Run t-tests by growth habit ###
   div_t_test_results = map_df(
     resp_vars,
@@ -422,13 +422,13 @@ plan <- drake_plan(
       data = div_metrics_all
     )
   ),
-
+  
   # Plots ----
-
+  
   # Set color scheme: epiphytes in green, terrestrial in brown.
   habit_colors = brewer.pal(9, "Set1")[c(3,7)] %>%
     set_names(levels(moorea_climate$habit)),
-
+  
   # Make climate plot.
   climate_plot = make_climate_plot(
     data = climate_select,
@@ -436,27 +436,27 @@ plan <- drake_plan(
     fits = climate_model_fits,
     summaries = climate_model_summaries,
     habit_colors = habit_colors),
-
+  
   # Make PCA plot.
   pca_plot = make_pca_plot(
     pca_results = pca_results,
     habit_colors = habit_colors,
     traits = fern_traits
   ),
-
+  
   # Make plot of traits with tree.
   traits_with_tree = plot_traits_on_tree(
     traits = fern_traits,
     phy = phy,
     ppgi = ppgi
   ),
-
+  
   # Make CWM scatterplots.
   cwm_scatterplots = map2(
     .x = c("stipe", "length", "rhizome",
-    "sla", "pinna", "dissection") %>% set_names(.),
+           "sla", "pinna", "dissection") %>% set_names(.),
     .y = c("Stipe length (cm)", "Frond length (cm)", "Rhizome dia. (cm)",
-          "SLA", "Pinna no.", "Frond dissection"),
+           "SLA", "Pinna no.", "Frond dissection"),
     ~ make_cwm_scatterplot(
       data = cwm_long,
       fits = div_el_model_fits,
@@ -482,7 +482,7 @@ plan <- drake_plan(
       yval = .,
       habit_colors = habit_colors)
   ),
-
+  
   # Make community diversity boxplots.
   div_boxplots = map(
     c("ntaxa", "mpd.obs.z.phy",  "mntd.obs.z.phy",  
@@ -493,40 +493,51 @@ plan <- drake_plan(
       yval = .,
       habit_colors = habit_colors)
   ),
-
+  
   # Combine community diversity scatterplots
   # and boxplots into final figure.
   combined_comm_div_plots = combine_comm_div_plots(
     scatterplots = div_scatterplots,
     boxplots = div_boxplots),
-
+  
   # Make heatmap of importance scores.
   importance_heatmap = make_heatmap(important_div_vars),
   
   # Make jitter plus box plot of community-wide SD values
   # for SI
   cwsd_scatterplot = make_cwsd_scatterplot(cwm_long, habit_colors),
-
+  
   # Manuscript ----
   
   # First render to PDF, keeping the latex
   ms_pdf = render_tracked(
     knitr_in("ms/manuscript.Rmd"),
     quiet = TRUE,
-    tracked_output = file_out(here::here("ms/manuscript.tex"))
-    ),
-  
-  # Next use the latex to convert to docx with word
-  ms_docx = latex2docx(
-    latex = file_in(here::here("ms/manuscript.tex")),
-    docx = file_out(here::here("ms/manuscript.docx")),
-    template = file_in(here::here("ms/new-phytologist.docx")),
-    wd = here::here("ms")
+    output_dir = here::here("results"),
+    tracked_output = file_out(here::here("results/manuscript.tex"))
   ),
-
+  
+  # Next use the latex to convert to docx with pandoc
+  ms_docx = latex2docx(
+    latex = file_in(here::here("results/manuscript.tex")),
+    docx = file_out(here::here("results/manuscript.docx")),
+    template = file_in(here::here("ms/new-phytologist.docx")),
+    wd = here::here("results")
+  ),
+  
   # SI ----
-  si = rmarkdown::render(
+  si = render_tracked(
     knitr_in("ms/SI.Rmd"),
-    quiet = TRUE)
-
+    quiet = TRUE,
+    output_dir = here::here("results"),
+    tracked_output = file_out(here::here("results/SI.tex"))
+  ),
+  
+  si_docx = latex2docx(
+    latex = file_in(here::here("results/SI.tex")),
+    docx = file_out(here::here("results/SI.docx")),
+    template = file_in(here::here("ms/new-phytologist.docx")),
+    wd = here::here("results")
+  )
+  
 )
