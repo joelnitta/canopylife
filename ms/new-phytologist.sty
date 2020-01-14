@@ -33,7 +33,6 @@
 \DeclareSIUnit{\week}{wk}
 \DeclareSIUnit{\day}{d}
 \DeclareSIUnit{\basepair}{bp}
-\DeclareSIUnit[space-before-unit=true]{\species}{spp.}
 
 % commas between digits for large numbers, starting with 10 thousands
 \sisetup{group-separator = {,}}
@@ -72,10 +71,12 @@
 % Statistics
 % Sample size
 \newcommand{\n}{\textit{n}\xspace}
+% Species
+\newcommand{\species}{spp.\xspace}
 % P value
-\newcommand{\pval}{\textit{P}\xspace}
+\newcommand{\pval}{\textit{P}}
 % R2 value
-\newcommand{\rval}{\textit{R}\xspace}
+\newcommand{\rval}{\textit{R}}
 % T test
 \newcommand{\tval}{\textit{t}\xspace}
 % Z score
@@ -95,8 +96,10 @@
 \newcommand{\K}{\textit{K}\xspace}
 % Fritz Purvis D
 \newcommand{\D}{\textit{D}\xspace}
+% Pagel's lambda
+\newcommand{\plam}{λ\xspace}
 
 % Computer commands / functions
-\newcommand{\function}[1]{``{#1}''\xspace}
+\newcommand{\function}[1]{`{#1}'\xspace}
 % R packages
-\newcommand{\package}[1]{``{#1}''\xspace}
+\newcommand{\package}[1]{`{#1}'\xspace}
