@@ -694,6 +694,12 @@ We thank members of the Davis Lab, N. Michele Holbrook, and Jonathan Losos for h
 J.H.N. conceived and carried out the study and analyzed the data. J.H.N. and C.C.D. wrote the draft with editorial input from J.E.W.
 
 ## References
+
+<!-- FIXME: for some reason, a single space is inserted before each reference when
+coverting to docx from tex by pandoc. Remove these from docx file. -->
+
+<!-- FIXME: manually remove "Jr" from inline-citations in docx file. -->
+
 <!-- Insert <div id="refs"></div> to place the refs here instead of at the end -->
 <div id="refs"></div>
 
@@ -784,8 +790,8 @@ phylosig_cont_traits %>%
   cols_label(
     kval = md("*K*"),
     k_pval = md("*P*(*K*)"),
-    lambda_pval = md("*P*(lambda)"),
-    lambda = "lambda"
+    lambda_pval = md("*P*(λ)"),
+    lambda = "λ"
   )  %>%
   as_latex
 
@@ -802,6 +808,7 @@ phylosig_cont_traits %>%
 
 phylosig_binary_traits %>%
   mutate(D = round_t(D, 2)) %>%
+  mutate_at(vars(prob_random, prob_brownian), format_pval) %>%
   mutate(trait = factor(
     trait, 
     levels = c("habit", "gemmae", "glands", "hairs","morphotype"))) %>%
