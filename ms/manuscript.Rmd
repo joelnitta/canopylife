@@ -26,21 +26,6 @@ nocite: |
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
-library(drake)
-library(gt)
-library(patchwork)
-library(knitr)
-library(kableExtra)
-library(magrittr)
-library(scales)
-library(tidyverse)
-library(captioner)
-library(jntools)
-library(conflicted)
-
-conflict_prefer("expand", "tidyr")
-conflict_prefer("select", "dplyr")
-conflict_prefer("filter", "dplyr")
 
 # Load analysis results
 loadd(list = c(
