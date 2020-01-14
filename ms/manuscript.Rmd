@@ -112,10 +112,10 @@ s_table_nums(name = "model-fit", "Best-fitting models explaining community diver
 # SI figures
 
 # Make short versions of citation functions
-citef <- pryr::partial(fig_nums, display = "cite")
-citet <- pryr::partial(table_nums, display = "cite")
-citesf <- pryr::partial(s_fig_nums, display = "cite")
-citest <- pryr::partial(s_table_nums, display = "cite")
+figure <- pryr::partial(fig_nums, display = "cite")
+table <- pryr::partial(table_nums, display = "cite")
+s_figure <- pryr::partial(s_fig_nums, display = "cite")
+s_table <- pryr::partial(s_table_nums, display = "cite")
 
 ```
 
@@ -238,7 +238,7 @@ Specifically, we test the following hypotheses related to epiphytic growth in fe
 ### Study Site
 
 Moorea, French Polynesia (17°30'S, 149°50'W) is a small (\SI{135}{\kilo\meter}^2^) tropical oceanic island more than \SI{5000}{\kilo\meter} from the nearest continental landmass.
-This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa{ }\SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa{ }130 \species, 8/11 orders; taxonomy follows @PteridophytePhylogenyGroupI2016; `r citest("species-list")`).
+This distance acts as a strong barrier to dispersal [@Carson1995; @Dassler2001], which combined with the young age of the island (\circa{ }\SI{1.5}{\ma} [@Duncan1976]) has led to a relatively small, yet phylogenetically diverse fern flora (\circa{ }130 \species, 8/11 orders; taxonomy follows @PteridophytePhylogenyGroupI2016; `r s_table("species-list")`).
 Ferns of Moorea include representatives of multiple Cretaceous epiphytic radiations (\eg, *Asplenium*, *Elaphoglossum*, Hymenophylloideae, Polypodiaceae, Vittarioideae; @Schuettpelz2009) and their terrestrial relatives, making them suitable for a comparative study of traits related to the evolution of epiphytic growth in ferns.
 
 ### Community Survey
@@ -316,7 +316,7 @@ We calculated vapor pressure deficit (VPD) from relative humidity and temperatur
 
 ### Trait Selection and Measurements
 
-We selected several traits relevant to epiphytic growth (`r citet("traits-used")` and `r citef("traits-used-image")`).
+We selected several traits relevant to epiphytic growth (`r table("traits-used")` and `r figure("traits-used-image")`).
 We preferred morphological traits over physiological traits because data for morphological traits are easier to gather at the scale of our study (\circa{ }130 \species distributed over an elevational gradient from \SI{200}{\meter} to \SI{2000}{\meter}).
 Plant morphology and physiology are closely linked, and physiological traits such as rates of photosynthesis and water use efficiency are known to be correlated with morphological traits such as stipe length in ferns [@WatkinsJr.2010].
 
@@ -328,10 +328,10 @@ To measure specific leaf area (SLA; m^2^ kg^-1^), \circa{ }10--12, \SI{2}{\milli
 For species with < \SI{2}{\milli\meter} between primary veins, leaf fragments excluding primary veins were obtained by dissection, dried at \SI{60}{\celsius} for \SI{24}{\hour}, weighed, and scanned.
 ImageJ [@Abramoff2004] software was used to measure area per fragment. 
 
-Morphological traits of gametophytes were all qualitative (either categorical or binary; `r citet("traits-used")`).
+Morphological traits of gametophytes were all qualitative (either categorical or binary; `r table("traits-used")`).
 Traits were scored by observing gametophytes that were either collected in the field and identified using DNA barcoding [@Nitta2017] or grown from spores of known species in the lab, taken from the literature, or inferred from taxonomic group (\ie, genus) if documented as a stable taxonomic character.
 For comparative analysis, gametophyte morphotypes were aggregated into two categories: either cordate (\ie, heart-shaped) or non-cordate [@Ebihara2013].
-Non-cordate morphotypes include elongate (strap or ribbon \sensu{ }@Farrar2008) and filamentous forms (`r citef("traits-used-image")`).
+Non-cordate morphotypes include elongate (strap or ribbon \sensu{ }@Farrar2008) and filamentous forms (`r figure("traits-used-image")`).
 Gametophytes were cultivated on Bold's media [@Bold1957] supplemented with Nitch's micronutrients [@Nitsch1951].
 
 Growth habit was coded as a binary trait (epiphytic or terrestrial) based on our field observations.
@@ -340,7 +340,7 @@ We used connection to the soil as the criterion for defining binary growth habit
 For the purposes of this study, we treated growth habit as a fixed trait and used these categories to define epiphytic and terrestrial communities.
 Other studies have demonstrated that exceptional epiphytic growth of terrestrial fern species (and vice-versa) is rare [@Cardelus2006; @Kluge2006; @WatkinsJr.2009], and we do not believe that such rare exceptions would affect our analysis.
 
-Trait values and data sources are summarized in `r citest("trait-values")`.
+Trait values and data sources are summarized in `r s_table("trait-values")`.
 
 ### Statistical analysis
 
@@ -423,7 +423,7 @@ Data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HE
 ### Environmental Survey
 
 Mean, maximum, and standard deviation (SD) of temperature and mean, minimum, and SD of vapor pressure deficit (VPD) were retained after excluding variables with correlation coefficients > 0.9.
-Variables related to temperature changed with elevation but did not differ significantly between epiphytic and terrestrial dataloggers (`r citest("ancova")`; `r citef("climate")`).
+Variables related to temperature changed with elevation but did not differ significantly between epiphytic and terrestrial dataloggers (`r s_table("ancova")`; `r figure("climate")`).
 Variables related to VPD differed by growth habit and elevation.
 Mean and maximum or minimum temperature and VPD all decreased with elevation, whereas SD of temperature increased, but SD of VPD decreased with elevation.
 Epiphytic dataloggers had higher values than terrestrial ones for variables related to VPD.
@@ -448,7 +448,7 @@ pca_phy_cum_var <-
   signif(2)
 ```
 
-Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (`r citef("pca")`**c**, **d**).
+Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (`r figure("pca")`**c**, **d**).
 The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively.
 In the standard PCA, size-related traits tended to load on PC1, with SLA, number of pinnae pairs, and degree of dissection on PC2.
 Loadings in the phylogenetic PCA are similar but approximately reversed relative to the standard PCA.
@@ -463,12 +463,12 @@ glands_d <- phylosig_binary_traits %>% filter(trait == "glands") %>% pull(D) %>%
 morphotype_d <- phylosig_binary_traits %>% filter(trait == "morphotype") %>% pull(D) %>% round_t(2)
 ```
 
-Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs{ }`r table_nums("phylosig-cont", display = "n")`, `r table_nums("phylosig-binary", display = "n")`, `r citef("tree")`), and for quantitative traits, different results were obtained for \plam and \K.
-When measured with \plam, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of \plam close to 1; only number of pinnae pairs had \plam close to zero (`r citet("phylosig-cont")`).
-However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of \K{ }< 1 (`r citet("phylosig-cont")`).
-All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D{ }= `r hairs_d`) or more conserved (gemmae, \D{ }= `r gemmae_d`; glands, \D{ }= `r glands_d`; morphotype, \D{ }= `r morphotype_d`) than expected under BM (`r citet("phylosig-binary")`).
-Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D{ }= `r habit_d`; `r citet("phylosig-binary")`).
-Similar results were obtained using the 'strict' dataset (`r citest("phylosig-binary-strict")`).
+Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs{ }`r table_nums("phylosig-cont", display = "n")`, `r table_nums("phylosig-binary", display = "n")`, `r figure("tree")`), and for quantitative traits, different results were obtained for \plam and \K.
+When measured with \plam, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of \plam close to 1; only number of pinnae pairs had \plam close to zero (`r table("phylosig-cont")`).
+However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of \K{ }< 1 (`r table("phylosig-cont")`).
+All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D{ }= `r hairs_d`) or more conserved (gemmae, \D{ }= `r gemmae_d`; glands, \D{ }= `r glands_d`; morphotype, \D{ }= `r morphotype_d`) than expected under BM (`r table("phylosig-binary")`).
+Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D{ }= `r habit_d`; `r table("phylosig-binary")`).
+Similar results were obtained using the 'strict' dataset (`r s_table("phylosig-binary-strict")`).
 
 ### Correlation of Traits with Growth Habit
 
@@ -479,11 +479,11 @@ dissection_pval <- pic_results %>% filter(trait == "dissection") %>% pull(p.valu
 morphotype_pval <- correlated_evo_test %>% filter(trait == "morphotype") %>% pull(pval) %>% format_pval(., equals_sign = TRUE)
 ```
 
-Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (`r citet("pics")`).
-Epiphytic species tend to have smaller values for all traits (`r citet("pics")`; contrasts were made by subtracting epiphytic from terrestrial values).
+Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (`r table("pics")`).
+Epiphytic species tend to have smaller values for all traits (`r table("pics")`; contrasts were made by subtracting epiphytic from terrestrial values).
 Short stipe length in particular appears to be strongly correlated with epiphytic growth (phylogenetically independent contrasts, \pval{ }`r stipe_pval`), as well as frond width (\pval{ }`r width_pval`) and degree of laminae dissection (\pval{ }`r dissection_pval`).
-For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval{ }`r morphotype_pval`; `r citet("corr-evo")`).
-Similar results were obtained using the 'strict' dataset (`r citest("corr-evo-strict")`).
+For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval{ }`r morphotype_pval`; `r table("corr-evo")`).
+Similar results were obtained using the 'strict' dataset (`r s_table("corr-evo-strict")`).
 
 ### Functional and Phylogenetic Diversity
 
@@ -564,33 +564,33 @@ if(
 }
 ```
 
-In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (`r citef("heatmap")`).
-Most of the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (`r citest("model-fit")`).
-Spatial autocorrelation was not detected for any of the diversity metrics (`r citest("model-fit")`).
+In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (`r figure("heatmap")`).
+Most of the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (`r s_table("model-fit")`).
+Spatial autocorrelation was not detected for any of the diversity metrics (`r s_table("model-fit")`).
 
-Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r citef("cwm-div")`).
+Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r figure("cwm-div")`).
 Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "sla", "r")`, \pval{ }`r get_mod_result(model_summ_print, "sla", "p")`).
 Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval{ }= `r get_mod_result(model_summ_print, "dissection", "p")`).
-Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (`r citef("cwm-div")`).
+Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (`r figure("cwm-div")`).
 
 We observed a total of `r traits_with_abun %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial spp.
-Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \species per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \species per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval{ }= `r get_mod_result(t_test_print, "ntaxa", "p")`; `r citef("comm-div")`).
-Species richness increased with elevation for both epiphytes and terrestrial communities (`r citef("comm-div")`).
+Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \species per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \species per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval{ }= `r get_mod_result(t_test_print, "ntaxa", "p")`; `r figure("comm-div")`).
+Species richness increased with elevation for both epiphytes and terrestrial communities (`r figure("comm-div")`).
 Epiphytic communities were more diverse than terrestrial ones as measured by both MPD~func~ and MNTD~func~ (two-sided \tval-test, `r both`\pval{ }`r p_mpd_func_mntd_func`).
 Functional diversity increased along the gradient for both terrestrial and epiphytic communities when measured with MPD~func~ (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "mpd.obs.z.func", "r")`, \pval{ }`r get_mod_result(model_summ_print, "mpd.obs.z.func", "p")`), but not MNTD~func~.
-Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD~phy~ (two-sided \tval-test, \pval{ }`r get_mod_result(t_test_print, "mntd.obs.z.phy", "p")`) but not MPD~phy~ (\pval{ }= `r get_mod_result(t_test_print, "mpd.obs.z.phy", "p")`; `r citef("comm-div")`).
-No significant trend was detected in phylogenetic community structure with elevation in either terrestrial or epiphytic communities (`r citef("comm-div")`). 
+Epiphytic communities were more phylogenetically clustered than terrestrial communities overall when measured using MNTD~phy~ (two-sided \tval-test, \pval{ }`r get_mod_result(t_test_print, "mntd.obs.z.phy", "p")`) but not MPD~phy~ (\pval{ }= `r get_mod_result(t_test_print, "mpd.obs.z.phy", "p")`; `r figure("comm-div")`).
+No significant trend was detected in phylogenetic community structure with elevation in either terrestrial or epiphytic communities (`r figure("comm-div")`). 
 
 ## Discussion
 
 Our study reveals a striking duality in the phylogenetic and functional diversity of fern epiphytes. 
-On one hand, we find that fern epiphytes are consistently smaller than terrestrial species at both the species and community level (`r citef("cwm-div")`, `r citet("pics")`), and that epiphytic communities are phylogenetically clustered (`r citef("comm-div")`).
-At the same time, we find that epiphytic fern communities are significantly more diverse functionally compared to terrestrial communities (`r citef("comm-div")`).
+On one hand, we find that fern epiphytes are consistently smaller than terrestrial species at both the species and community level (`r figure("cwm-div")`, `r table("pics")`), and that epiphytic communities are phylogenetically clustered (`r figure("comm-div")`).
+At the same time, we find that epiphytic fern communities are significantly more diverse functionally compared to terrestrial communities (`r figure("comm-div")`).
 Collectively, these results suggest that environmental filtering plays a strong role in limiting plant size, while simultaneously promoting diversification across other trait axes in epiphytic ferns.
 
 ### Convergence in sporophyte size and gametophyte morphotype in fern epiphytes
 
-Epiphytes are markedly smaller than terrestrial species as measured by stipe and frond length, frond width, and rhizome diameter at both the species and community level (`r citef("cwm-div")`, `r citet("pics")`), supporting both hypotheses (convergence in epiphytic traits and reduced functional diversity of epiphytic communities).
+Epiphytes are markedly smaller than terrestrial species as measured by stipe and frond length, frond width, and rhizome diameter at both the species and community level (`r figure("cwm-div")`, `r table("pics")`), supporting both hypotheses (convergence in epiphytic traits and reduced functional diversity of epiphytic communities).
 These results are corroborated by @Testo2018a, who similarly observed abrupt size reduction associated with epiphytic growth in a globally sampled fern phylogeny. 
 What might explain such consistent and convergent reduction in fern sporophyte size when transitioning into the canopy?
 An obvious answer is that water limitation in the canopy exerts strong selective pressure to maintain small size. 
@@ -611,7 +611,7 @@ Our study is the first to our knowledge to demonstrate that the correlation betw
 
 Despite the apparent constraints on size and the recurrence of non-cordate gametophytes exhibited by epiphytes, we observed greater morphological diversity among epiphytes versus terrestrial species for several traits.
 These results do not support the hypothesis that fern epiphytes have reduced functional diversity.
-For example, although epiphytes demonstrated less dissected fronds at the species level (`r citet("pics")`), they exhibited much greater variation in this trait relative to terrestrial ferns at the community level (`r citesf("cwsd")`).
+For example, although epiphytes demonstrated less dissected fronds at the species level (`r table("pics")`), they exhibited much greater variation in this trait relative to terrestrial ferns at the community level (`r s_figure("cwsd")`).
 It is likely that the high diversity of this trait reflects different physiological adaptations to various canopy niches. 
 For instance, filmy ferns (Hymenophyllaceae), which depend on desiccation tolerance to survive dry conditions, have extremely thin, highly dissected fronds.
 Bird's nest ferns (\eg, *Asplenium nidus* L.), in contrast, avoid desiccation by capturing detritus and water in the bases of their simple, rosette leaves. 
@@ -620,24 +620,24 @@ Similar predictable patterns of niche partitioning at the local scale have been 
 This distribution may reflect alternative water-usage strategies aligned to specific microhabitats in the canopy [desiccation tolerance vs. water capture; @Hietz1998]. 
 Such hypotheses need to be carefully tested with additional quantitative investigation, including more finely examining microclimatic variation and species composition across the canopy.
 
-Another trait that defied simple classification into epiphytic or terrestrial groups was specific leaf area (SLA; `r citef("cwm-div")`, `r citet("pics")`).
+Another trait that defied simple classification into epiphytic or terrestrial groups was specific leaf area (SLA; `r figure("cwm-div")`, `r table("pics")`).
 Specific leaf area is part of the leaf economic spectrum (LES), which posits that leaf traits including SLA, N and C content, and leaf life span vary along well-defined axes such that plants generally fall into one of two categories: fast-growing species with high SLA, low nutrient content, and short life spans vs. slow-growing species with low SLA, high nutrient content, and long life spans [@Wright2004a; @Diaz2015].
 We expected that epiphytes would exhibit lower SLA, given their more extreme growing conditions.
-In contrast, we observed overlapping, wide ranging SLA values in both terrestrial and epiphytic communities, with only slightly lower values in epiphytes (`r citef("cwm-div")`).
+In contrast, we observed overlapping, wide ranging SLA values in both terrestrial and epiphytic communities, with only slightly lower values in epiphytes (`r figure("cwm-div")`).
 This may reflect adaptations to specific niches that are not captured in the binary categorization of habitat commonly applied in ferns. 
-For example, the following species ranked among those with the five lowest SLA values (\ie, thick, well-protected leaves) on Moorea: *Humata anderssonii* (Mett.) C.Chr. (a twig epiphyte), *Acrostichum aureum* L. (a terrestrial mangrove specialist), and *Paesia divaticatissima* (Dryand.) Copel. (a terrestrial species occurring on high-elevation ridges) (`r citest("trait-values")`).
+For example, the following species ranked among those with the five lowest SLA values (\ie, thick, well-protected leaves) on Moorea: *Humata anderssonii* (Mett.) C.Chr. (a twig epiphyte), *Acrostichum aureum* L. (a terrestrial mangrove specialist), and *Paesia divaticatissima* (Dryand.) Copel. (a terrestrial species occurring on high-elevation ridges) (`r s_table("trait-values")`).
 Each of these species is likely to experience prolonged periods of drought-stress. 
 In-depth characterization of such microhabitats was beyond the scope of our study and should be investigated further in the future.
 
 We did not find that gemmae production in gametophytes was linked with epiphytism. 
-Rather, occurrence of gemmae strongly reflects phylogeny, appearing concentrated in filmy ferns (Hymenophyllaceae) and vittarioid ferns (`r citef("tree")`).
+Rather, occurrence of gemmae strongly reflects phylogeny, appearing concentrated in filmy ferns (Hymenophyllaceae) and vittarioid ferns (`r figure("tree")`).
 Gemmae are asexual propagules occurring primarily in non-cordate gametophytes that allow gametophytes to persist over multiple growing seasons and attain large population sizes, and have been hypothesized to be associated with harsh environmental conditions [@Farrar2008].
 In particular, gemmae production should be useful in an epiphytic context because they may allow gametophytes to increase their boundary layer and hedge against population loss during extreme drying [@Farrar2008].
 Gemmae can also function sexually by producing antheridia in the presence of antheridiogen secreted by other gametophytes [@Emigh1977], which may confer a selective advantage in the epiphytic environment by enabling outcrossing [@Dassler2001].
 As with our results summarized above, it is possible that the diversity of gemmae and non-gemmae producing epiphytic species reflects undetected niche variation in the canopy.
 Interestingly, when we classified gametophytes as 'independent' if they occurred beyond the elevational range of conspecific sporophytes using the data of @Nitta2017, we found that gemmae production is correlated with independent growth (log likelihood dependent model = `r correlated_evo_test_gemmae$dependent.logL %>% round(1) %>% as.numeric`, log likelihood independent model = `r correlated_evo_test_gemmae$independent.logL %>% round(1) %>% as.numeric`, \pval{ }= `r correlated_evo_test_gemmae$P %>% round(3) %>% as.numeric`, Pagel's test of correlated evolution), echoing a pattern observed in Japan of non-cordate gametophytes frequently occurring independently of their conspecific sporophytes [@Ebihara2013].
 
-Finally, the presence of hairs and glands in gametophytes also exhibit very high phylogenetic signal (\ie, much greater than expected under Brownian motion; `r citet("phylosig-binary")`), and these traits are concentrated in certain taxonomic groups [\eg, hairs, grammitid ferns; glands, Thelypteridaceae; @Stokey1951; @Nayar1971].
+Finally, the presence of hairs and glands in gametophytes also exhibit very high phylogenetic signal (\ie, much greater than expected under Brownian motion; `r table("phylosig-binary")`), and these traits are concentrated in certain taxonomic groups [\eg, hairs, grammitid ferns; glands, Thelypteridaceae; @Stokey1951; @Nayar1971].
 Although hairs have been hypothesized to reduce rates of drying and increase water uptake after desiccation [@Kappen2007], and glands may affect rates of osmosis by modifying lipid concentrations [@Crow2011], we did not detect a correlation between hair or gland production and epiphytic growth.
 Given their high phylogenetic signal, it is possible that these traits are unrelated to environment but rather reflect phylogenetically conserved developmental pathways [@Johnson2012].
 Alternatively, the possibility remains that some epiphytic species rely on hairs or glands to prevent or slow drying depending on their niche within the canopy (\eg, hair-bearing grammitid gametophytes at mid to high elevation).
@@ -646,12 +646,12 @@ Alternatively, the possibility remains that some epiphytic species rely on hairs
 
 Our results demonstrate that the canopy is far more dynamic with regard to fern epiphytism than has been previously appreciated. 
 On the one hand, the canopy appears to have served as a potent barrier to entry, strongly selecting for small size. 
-Furthermore, the results of our phylogenetic community structure analyses partially support the hypothesis of decreased phylogenetic diversity in epiphytic communities due to filtering: we observed that epiphytic fern communities were more phylogenetically clustered for MNTD~phy~, but not MPD~phy~ (`r citef("comm-div")`).
+Furthermore, the results of our phylogenetic community structure analyses partially support the hypothesis of decreased phylogenetic diversity in epiphytic communities due to filtering: we observed that epiphytic fern communities were more phylogenetically clustered for MNTD~phy~, but not MPD~phy~ (`r figure("comm-div")`).
 This makes sense given that most epiphytes have radiated within a limited number of clades [@Schuettpelz2009]; each epiphytic community we sampled tends to include closely related species from two or more epiphytic clades, but exhibits a similar overall degree of phylogenetic diversity as terrestrial communities. 
 
 However, while the canopy clearly acts as a filter, we also find that it simultaneously functions as a promoter of diversity. 
-This is evident in our analyses of MPD~func~ and MNTD~func~, which both indicate that epiphytic communities are more functionally diverse compared to terrestrial species (`r citef("comm-div")`), thus contradicting our hypothesis of decreased functional diversity in epiphytic communities.
-Additional analyses using different trait combinations support the role of non-size related traits driving this pattern (`r citesf("corr-plot")`).
+This is evident in our analyses of MPD~func~ and MNTD~func~, which both indicate that epiphytic communities are more functionally diverse compared to terrestrial species (`r figure("comm-div")`), thus contradicting our hypothesis of decreased functional diversity in epiphytic communities.
+Additional analyses using different trait combinations support the role of non-size related traits driving this pattern (`r s_figure("corr-plot")`).
 We propose that the high functional diversity of epiphytic fern communities is maintained by previously undetected niche partitioning within epiphytic habitats as follows.
 The canopy is generally drier than terrestrial habitats, exerting strong selection for small size. 
 At the same time, microclimatic conditions in trees vary rapidly over short distances with height and distance from the trunk [@Hietz1995; @Cardelus2005], contributing to greater environmental variation per unit area than terrestrial habitats [@Rojas-Hernandez2018]. 
@@ -662,10 +662,10 @@ Clearly, fine-grained characterization of canopy niches and associated adaptatio
 
 ### The primacy of growth habit in determining fern community composition as indicated by modeling
 
-The primary role of growth habit, in combination with temperature, in structuring fern communities is supported by the full-subsets model analysis (`r citef("heatmap")`).
+The primary role of growth habit, in combination with temperature, in structuring fern communities is supported by the full-subsets model analysis (`r figure("heatmap")`).
 It is somewhat puzzling that VPD did not contribute significantly to any models, as we hypothesized that this would be important for epiphytes that are frequently subjected to water stress. 
 Previous studies have shown marked variation in the air water potential across epiphytic habitats, with @WatkinsJr.2009 reporting a \circa{ }\SI{40}{\mega\pascal} shift along the trunks of emergent canopy trees. 
-Our epiphytic dataloggers only showed slightly greater VPD relative to those on the ground, with this difference largely dissipating at high elevations (`r citef("climate")`).
+Our epiphytic dataloggers only showed slightly greater VPD relative to those on the ground, with this difference largely dissipating at high elevations (`r figure("climate")`).
 One reason for such low observed variation could be due to environmental conditions at our study site and placement of dataloggers: Moorea is a generally wet site overall (average annual rainfall \SI{325}{\centi\meter}), and we placed the epiphytic dataloggers on tree trunks, not in the higher emergent portions of the canopy.
 Therefore, these measurements should be interpreted as reflecting the minimum amount of difference between terrestrial and canopy environments. 
 Future studies characterizing within-canopy niches of epiphytic ferns should include placement of dataloggers at multiple sites throughout the canopy, which will allow for more detailed tests of the hypothesis that epiphytic fern diversity is maintained by niche partitioning.
@@ -703,37 +703,37 @@ J.H.N. conceived and carried out the study and analyzed the data. J.H.N. and C.C
 
 Additional Supporting Information may be found online in the Supporting Information section at the end of the article:
 
-**`r citest("species-list")`** List of ferns from Moorea, French Polynesia included in this study.
+**`r s_table("species-list")`** List of ferns from Moorea, French Polynesia included in this study.
 
-**`r citest("trait-values")`** Trait values of ferns on Moorea, French Polynesia.
+**`r s_table("trait-values")`** Trait values of ferns on Moorea, French Polynesia.
 
-**`r citest("ancova")`** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate.
+**`r s_table("ancova")`** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate.
 
-**`r citest("phylosig-binary-strict")`** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy.
+**`r s_table("phylosig-binary-strict")`** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy.
 
-**`r citest("corr-evo-strict")`** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. 
+**`r s_table("corr-evo-strict")`** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy. 
 
-**`r citest("model-fit")`** Best-fitting models explaining community diversity metrics by climate and growth habit.
+**`r s_table("model-fit")`** Best-fitting models explaining community diversity metrics by climate and growth habit.
 
-**`r citesf("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.
+**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.
 
-**`r citesf("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia.
+**`r s_figure("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia.
 
 \clearpage
 
-**`r citef("traits-used-image")`** Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars \SI{1}{\milli\meter} except for glands, which is \SI{.1}{\milli\meter}. Photographs by J. H. Nitta.
+**`r figure("traits-used-image")`** Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars \SI{1}{\milli\meter} except for glands, which is \SI{.1}{\milli\meter}. Photographs by J. H. Nitta.
 
-**`r citef("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval{ }< 0.05.
+**`r figure("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}\meter on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval{ }< 0.05.
 
-**`r citef("pca")`** Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n{ }= `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \species). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
+**`r figure("pca")`** Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n{ }= `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \species). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
 
-**`r citef("tree")`** Time-calibrated phylogenetic tree of ferns from Moorea, French Polynesia with growth habit and associated traits mapped on the tips. Tree obtained from @Nitta2017. Relative value of quantitative (sporophyte) traits shown by heat gradient: low values are lighter, high values are darker. Stipe length and rhizome diameter were log-transformed prior to scaling. States of qualitative (gametophyte) states and growth habit indicated by colors in key. Grey indicates missing data or non-applicable trait states. Values for three leaf size traits (stipe length, frond length, and frond with) were correlated, so of these, we only present stipe length. Species missing data for six or more traits not shown. For a summary of traits, see `r citet("traits-used")`. Major epiphytic radiations identified by @Schuettpelz2009 labeled on tree in green: H, Hymenophylloideae; T, Trichomanoideae; V, Vittarioideae; A, *Asplenium*; E, *Elaphoglossum*; P, Polypodiaceae; taxonomy follows @PteridophytePhylogenyGroupI2016.
+**`r figure("tree")`** Time-calibrated phylogenetic tree of ferns from Moorea, French Polynesia with growth habit and associated traits mapped on the tips. Tree obtained from @Nitta2017. Relative value of quantitative (sporophyte) traits shown by heat gradient: low values are lighter, high values are darker. Stipe length and rhizome diameter were log-transformed prior to scaling. States of qualitative (gametophyte) states and growth habit indicated by colors in key. Grey indicates missing data or non-applicable trait states. Values for three leaf size traits (stipe length, frond length, and frond with) were correlated, so of these, we only present stipe length. Species missing data for six or more traits not shown. For a summary of traits, see `r table("traits-used")`. Major epiphytic radiations identified by @Schuettpelz2009 labeled on tree in green: H, Hymenophylloideae; T, Trichomanoideae; V, Vittarioideae; A, *Asplenium*; E, *Elaphoglossum*; P, Polypodiaceae; taxonomy follows @PteridophytePhylogenyGroupI2016.
 
-**`r citef("heatmap")`** Variable importance scores from a full-subsets analysis using general additive models exploring the effect of climate and growth habit (terrestrial vs. epiphytic growth) on community diversity of ferns on Moorea, French Polynesia. Predictor variable abbreviations: VPD, vapor pressure deficit; SD, standard deviation. Response variable abbreviations: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance; SLA, specific leaf area. All trait names refer to community-weighted mean values. Community-weighted means of frond length, frond width, stipe length, and rhizome diameter were correlated (Pearson's correlation coefficient > 0.9), so of these we only show stipe length.
+**`r figure("heatmap")`** Variable importance scores from a full-subsets analysis using general additive models exploring the effect of climate and growth habit (terrestrial vs. epiphytic growth) on community diversity of ferns on Moorea, French Polynesia. Predictor variable abbreviations: VPD, vapor pressure deficit; SD, standard deviation. Response variable abbreviations: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance; SLA, specific leaf area. All trait names refer to community-weighted mean values. Community-weighted means of frond length, frond width, stipe length, and rhizome diameter were correlated (Pearson's correlation coefficient > 0.9), so of these we only show stipe length.
 
-**`r citef("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05. \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05. Results for frond width were very similar to frond length and not shown.
+**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05. \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05. Results for frond width were very similar to frond length and not shown.
 
-**`r citef("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05.
+**`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05.
 
 \clearpage
 
