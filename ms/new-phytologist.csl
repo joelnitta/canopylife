@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <style xmlns="http://purl.org/net/xbiblio/csl" class="in-text" version="1.0" demote-non-dropping-particle="sort-only" default-locale="en-GB">
+  <!-- This style was edited with the Visual CSL Editor (https://editor.citationstyles.org/visualEditor/) -->
   <info>
-    <title>New Phytologist</title>
-    <id>http://www.zotero.org/styles/new-phytologist</id>
-    <link href="http://www.zotero.org/styles/new-phytologist" rel="self"/>
+    <title>New Phytologist JN</title>
+    <id>http://www.zotero.org/styles/new-phytologist-jn</id>
+    <link href="http://www.zotero.org/styles/new-phytologist-jn" rel="self"/>
     <link href="http://onlinelibrary.wiley.com/journal/10.1111/%28ISSN%291469-8137/homepage/ForAuthors.html" rel="documentation"/>
     <author>
       <name>Johan Asplund</name>
@@ -13,7 +14,7 @@
     <category field="biology"/>
     <issn>0028-646X</issn>
     <eissn>1469-8137</eissn>
-    <updated>2017-07-03T03:48:18+00:00</updated>
+    <updated>2020-01-15T01:18:15+00:00</updated>
     <rights license="http://creativecommons.org/licenses/by-sa/3.0/">This work is licensed under a Creative Commons Attribution-ShareAlike 3.0 License</rights>
   </info>
   <macro name="editor-translator">
@@ -115,13 +116,21 @@
                 <label form="short" prefix=", "/>
               </names>
               <text variable="collection-title"/>
-              <text variable="container-title"/>
+              <text variable="container-title" font-style="italic"/>
               <group delimiter=", ">
                 <text macro="publisher"/>
                 <text variable="page"/>
               </group>
             </group>
           </group>
+        </else-if>
+        <else-if type="webpage" match="any">
+          <group delimiter=" " prefix=" ">
+            <text variable="title" font-style="italic"/>
+            <text variable="URL" prefix="[WWW document] URL " suffix="."/>
+            <date form="text" variable="accessed" prefix="[accessed " suffix="]"/>
+          </group>
+          <group/>
         </else-if>
         <else>
           <group suffix=".">
