@@ -531,13 +531,6 @@ plan <- drake_plan(
     quiet = TRUE,
     output_dir = here::here("results"),
     tracked_output = file_out(here::here("results/SI.tex"))
-  ),
-  
-  si_docx = latex2docx(
-    latex = file_in(here::here("results/SI.tex")),
-    docx = file_out(here::here("results/SI.docx")),
-    template = file_in(here::here("ms/new-phytologist.docx")),
-    wd = here::here("results")
   )
   
 )

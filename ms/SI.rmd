@@ -15,6 +15,10 @@ output:
     pandoc_args: [ "--csl", "new-phytologist.csl"]
     includes:
       in_header: new-phytologist.sty
+header-includes: 
+  - \usepackage{float}
+  - \makeatletter\renewcommand*{\fps@figure}{H}\makeatother # Fix position of figs
+  - \makeatletter\renewcommand*{\fps@table}{H}\makeatother # Fix position of tables
 nocite: | 
   @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
 ---
@@ -58,7 +62,7 @@ Article title: Life in the canopy: Community trait assessments reveal substantia
 
 Authors: Joel H. Nitta, James E. Watkins, Jr., and Charles C. Davis
 
-Article acceptance date: 
+Article acceptance date: ADD_DATE_WHEN_ACCEPTED
 
 The following Supporting Information is available for this article:
 
@@ -189,10 +193,9 @@ best_fit_div_models_moran %>%
   write_csv(here::here("results/Table_S6.csv"))
 ```
 
-**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+\clearpage
 
-```{r fig-s2}
-library(corrr)
+```{r Fig-S1, fig.height = 8, fig.width = 4, fig.cap = ""}
 
 # Tweak names for easier viewing
 func_comm_struc_combined_renamed <-
@@ -273,14 +276,25 @@ fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 fig_s1 <- fig_s1 + plot_annotation(theme = theme(plot.margin = margin(
       0.2, 0.2, 0.2, 0.2, unit = "in")))
 
-ggsave(plot = fig_s1, filename = here::here("results/Fig_S1.eps"), height = 8, width = 4, units = "in")
+fig_s1
+
+# ggsave(plot = fig_s1, filename = here::here("results/Fig_S1.eps"), height = 8, width = 4, units = "in")
+```
+
+**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+
+\clearpage
+
+```{r Fig-S2, fig.height = 6, fig.width = 7, fig.cap = ""}
+loadd(cwsd_scatterplot, cache = canopy_cache)
+
+cwsd_scatterplot
+
+# ggsave(plot = cwsd_scatterplot, filename = here::here("results/Fig_S2.eps"), height = 6, width = 7, units = "in")
 ```
 
 **`r s_figure("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05 **(a)**, traits related to plant size **(b)**, traits not related to plant size.
 
-```{r fig-s1}
-loadd(cwsd_scatterplot, cache = canopy_cache)
-ggsave(plot = cwsd_scatterplot, filename = here::here("results/Fig_S2.eps"), height = 6, width = 7, units = "in")
-```
+\clearpage
 
 **References**
