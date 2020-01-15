@@ -10,7 +10,7 @@ latex_packages <- c(
   "colortbl",
   "environ",
   "filehook",
-  "lm-math"
+  "lm-math",
   "makecell",
   "mdwtools",
   "multirow",
