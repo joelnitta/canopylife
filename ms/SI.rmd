@@ -1,6 +1,8 @@
 ---
 title: ""
-bibliography: "si_references.bib"
+bibliography: 
+  - "references_si.bib"
+  - "references_other.yaml"
 fontsize: 12pt
 output: 
   bookdown::pdf_document2:
@@ -14,37 +16,57 @@ output:
     includes:
       in_header: new-phytologist.sty
 nocite: | 
-  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Murdock2003, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
+  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FALSE)
 
 # Load analysis results
-loadd(trait_data_for_si, cache = canopy_cache)
-loadd(climate_ancova_results, cache = canopy_cache)
-loadd(phylosig_binary_traits_strict, cache = canopy_cache)
-loadd(correlated_evo_test_strict, cache = canopy_cache)
-loadd(best_fit_div_models_moran, cache = canopy_cache)
-loadd(func_comm_struc_combined, cache = canopy_cache)
+loadd(list = c(
+  "trait_data_for_si",
+  "climate_ancova_results",
+  "phylosig_binary_traits_strict",
+  "correlated_evo_test_strict",
+  "best_fit_div_models_moran",
+  "func_comm_struc_combined"), 
+  cache = canopy_cache)
 
+# Set up captions
+# - SI figures
+s_fig_nums <- captioner(prefix = "Fig. S", auto_space = FALSE, suffix = ": ")
+s_fig_nums(name = "corr-plot", "Correlation plot comparing results of functional community diversity analyses using different sets of traits as input.")
+s_fig_nums(name = "cwsd", "Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia.")
+
+# - SI tables
+s_table_nums <- captioner(prefix = "Table S", auto_space = FALSE, suffix = ": ")
+s_table_nums(name = "species-list", "List of ferns from Moorea, French Polynesia included in this study")
+s_table_nums(name = "trait-values", "Trait values of ferns on Moorea, French Polynesia")
+s_table_nums(name = "ancova", "Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate")
+s_table_nums(name = "phylosig-binary-strict", "Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy")
+s_table_nums(name = "corr-evo-strict", "Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy")
+s_table_nums(name = "model-fit", "Best-fitting models explaining community diversity metrics by climate and growth habit")
+
+# Make short versions of citation functions
+s_figure <- pryr::partial(s_fig_nums, display = "cite")
+s_table <- pryr::partial(s_table_nums, display = "cite")
 ```
 
 ***New Phytologist*** **Supporting Information**
 
 Article title: Life in the canopy: Community trait assessments reveal substantial functional diversity among fern epiphytes
 
-Authors: Joel H. Nitta, James E. Watkins, Jr., Ravahere Taputuarai, and Charles C. Davis
+Authors: Joel H. Nitta, James E. Watkins, Jr., and Charles C. Davis
 
 Article acceptance date: 
 
 The following Supporting Information is available for this article:
 
-**Table S1** List of ferns from Moorea, French Polynesia included in this study
+**`r s_table("species-list")`** List of ferns from Moorea, French Polynesia included in this study
 
-'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith, 2003.
+'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = @Murdock2003.
 
-**Table S2** Trait values of ferns on Moorea, French Polynesia
+**`r s_table("trait-values")`** Trait values of ferns on Moorea, French Polynesia
 
 SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI.
 
@@ -53,7 +75,7 @@ trait_data_for_si %>%
   write_csv(here::here("results/Table_S2.csv"))
 ```
 
-**Table S3** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate
+**`r s_table("ancova")`** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate
 
 d.f., degrees of freedom; MS, mean squares.
 
@@ -75,7 +97,7 @@ climate_ancova_results %>%
 
 ```
 
-**Table S4** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
+**`r s_table("phylosig-binary-strict")`** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
 
 P_rnd, probability of obtaining the observed value of \D under random trait evolution; P_bm, probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
 
@@ -95,7 +117,7 @@ phylosig_binary_traits_strict %>%
   write_csv(here::here("results/Table_S4.csv"))
 ```
 
-**Table S5** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
+**`r s_table("corr-evo-strict")`** Pagel's [-@Pagel1994] test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
 
 LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. 
 
@@ -119,9 +141,9 @@ correlated_evo_test_strict %>%
   write_csv(here::here("results/Table_S5.csv"))
 ```
 
-**Table S6** Best-fitting models explaining community diversity metrics by climate and growth habit
+**`r s_table("model-fit")`** Best-fitting models explaining community diversity metrics by climate and growth habit
 
-MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, *P* value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
+MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, \pval\ value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
 
 ```{r best-fit-mods}
 # Format and write out table as CSV file
@@ -167,7 +189,7 @@ best_fit_div_models_moran %>%
   write_csv(here::here("results/Table_S6.csv"))
 ```
 
-**Fig. S1** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
 
 ```{r fig-s2}
 library(corrr)
@@ -254,7 +276,7 @@ fig_s1 <- fig_s1 + plot_annotation(theme = theme(plot.margin = margin(
 ggsave(plot = fig_s1, filename = here::here("results/Fig_S1.eps"), height = 8, width = 4, units = "in")
 ```
 
-**Fig. S2** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05 **(a)**, traits related to plant size **(b)**, traits not related to plant size.
+**`r s_figure("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05 **(a)**, traits related to plant size **(b)**, traits not related to plant size.
 
 ```{r fig-s1}
 loadd(cwsd_scatterplot, cache = canopy_cache)
