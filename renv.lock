@@ -879,8 +879,8 @@
       "RemoteRepo": "jntools",
       "RemoteUsername": "joelnitta",
       "RemoteRef": "master",
-      "RemoteSha": "531c7ce4f2c7e371ece7f47e56db9c7fd62c9143",
-      "Hash": "eccb612e54099cf6af7ca565c94501cc"
+      "RemoteSha": "5a55293dbbbf547ed32cac56481f833939bd88d0",
+      "Hash": "b82bc72e6ac40a2eb3072f2dd277ae05"
     },
     "jsonlite": {
       "Package": "jsonlite",
