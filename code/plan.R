@@ -526,7 +526,7 @@ plan <- drake_plan(
   ),
   
   # SI ----
-  si = render_tracked(
+  si_pdf = render_tracked(
     knitr_in("ms/SI.Rmd"),
     quiet = TRUE,
     output_dir = here::here("results"),
