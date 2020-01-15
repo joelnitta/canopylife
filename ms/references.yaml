@@ -1,0 +1,1656 @@
+references:
+- id: Abramoff2004
+  type: article-journal
+  author:
+  - family: Abràmoff
+    given: Michael D.
+  - family: Magalhães
+    given: Paulo J.
+  - family: Ram
+    given: Sunanda J.
+  issued:
+  - year: 2004
+  title: <span class="nocase">Image processing with imageJ</span>
+  container-title: Biophotonics International
+  page: 36-41
+  volume: '11'
+- id: Acebey2017
+  type: article-journal
+  author:
+  - family: Acebey
+    given: Amparo R.
+  - family: Krömer
+    given: Thorsten
+  - family: Kessler
+    given: Michael
+  issued:
+  - year: 2017
+  title: <span class="nocase">Species richness and vertical distribution of ferns
+    and lycophytes along an elevational gradient in Los Tuxtlas, Veracruz, Mexico</span>
+  container-title: 'Flora: Morphology, Distribution, Functional Ecology of Plants'
+  page: 83-91
+  volume: '235'
+- id: Akaike1973
+  type: paper-conference
+  author:
+  - family: Akaike
+    given: Hirotogu
+  editor:
+  - family: Petrov
+    given: B.N.
+  - family: Csaki
+    given: F.
+  issued:
+  - year: 1973
+  title: <span class="nocase">Information theory as an extension of the maximum likelihood
+    principle</span>
+  container-title: <span class="nocase">Second International Symposium on Information
+    Theory</span>
+  publisher: Akademiai Kidao
+  publisher-place: Budapest, Hungary
+  page: 267-281
+- id: Arcand2008
+  type: article-journal
+  author:
+  - family: Arcand
+    given: 'N'
+  - family: Kagawa
+    given: A
+  - family: Sack
+    given: Lawren
+  - family: Giambelluca
+    given: T
+  issued:
+  - year: 2008
+  title: '<span class="nocase">Scaling of frond form in Hawaiian tree fern Cibotium
+    glaucum: Compliance with global trends and application for field estimation</span>'
+  container-title: Biotropica
+  publisher: Association for Tropical Biology, 9600 Garsington Road
+  page: 686-691
+  volume: '40'
+- id: Benzing1990
+  type: book
+  author:
+  - family: Benzing
+    given: David H.
+  issued:
+  - year: 1990
+  title: '<span class="nocase">Vascular Epiphytes: General Biology and Related Biota</span>'
+  publisher: Cambridge University Press
+  publisher-place: Cambridge, UK
+  page: '354'
+- id: Bivand2013
+  type: book
+  author:
+  - family: Bivand
+    given: Roger S.
+  - family: Pebesma
+    given: Edzer
+  - family: Gómez-Rubio
+    given: Virgilio
+  issued:
+  - year: 2013
+  title: '<span class="nocase">Applied Spatial Data Analysis with R: Second Edition</span>'
+  publisher: Springer
+  publisher-place: New York
+- id: Blomberg2003
+  type: article-journal
+  author:
+  - family: Blomberg
+    given: Simon P
+  - family: Garland Jr.
+    given: Theodore
+  - family: Ives
+    given: Anthony R.
+  issued:
+  - year: 2003
+  title: '<span class="nocase">Testing for phylogenetic signal in comparative data:
+    Behavioral traits are more labile</span>'
+  container-title: Evolution
+  publisher: John Wiley & Sons
+  page: 717-745
+  volume: '57'
+- id: Bold1957
+  type: book
+  author:
+  - family: Bold
+    given: H C
+  issued:
+  - year: 1957
+  title: <span class="nocase">Morphology of Plants</span>
+  publisher: Harper & Row
+  publisher-place: New York
+  page: '669'
+- id: Boyce2010
+  type: article-journal
+  author:
+  - family: Boyce
+    given: C. Kevin
+  - family: Lee
+    given: Jung-Eun
+  - family: Feild
+    given: Taylor S.
+  - family: Brodribb
+    given: Tim J.
+  - family: Zwieniecki
+    given: Maciej A.
+  issued:
+  - year: 2010
+  title: '<span class="nocase">Angiosperms helped put the rain in the rainforests:
+    The impact of plant physiological evolution on tropical biodiversity</span>'
+  container-title: Annals of the Missouri Botanical Garden
+  page: 527-540
+  volume: '97'
+- id: Cardelus2006
+  type: article-journal
+  author:
+  - family: Cardelús
+    given: Catherine L
+  - family: Colwell
+    given: R
+  - family: Watkins
+    given: James E
+    dropping-particle: Jr.
+  issued:
+  - year: 2006
+  title: '<span class="nocase">Vascular epiphyte distribution patterns: Explaining
+    the mid-elevation richness peak</span>'
+  container-title: Journal of Ecology
+  page: 144-156
+  volume: '94'
+- id: Cardelus2007
+  type: article-journal
+  author:
+  - family: Cardelús
+    given: Catherine L.
+  issued:
+  - year: 2007
+  title: <span class="nocase">Vascular epiphyte communities in the inner-crown of
+    *Hyeronima alchorneoides* and *Lecythis ampla* at La Selva Biological Station,
+    Costa Rica</span>
+  container-title: Biotropica
+  page: 171-176
+  volume: '39'
+- id: Cardelus2005
+  type: article-journal
+  author:
+  - family: Cardelús
+    given: Catherine L.
+  - family: Chazdon
+    given: Robin L.
+  issued:
+  - year: 2005
+  title: <span class="nocase">Inner-crown microenvironments of two emergent tree species
+    in a lowland wet forest</span>
+  container-title: Biotropica
+  page: 238-244
+  volume: '37'
+- id: Carson1995
+  type: chapter
+  author:
+  - family: Carson
+    given: Hampton L
+  - family: Clague
+    given: David A
+  editor:
+  - family: Wagner
+    given: Warren L
+  - family: Funk
+    given: Vicki A.
+  issued:
+  - year: 1995
+  title: <span class="nocase">Geology and biogeography of the Hawaiian Islands</span>
+  container-title: '<span class="nocase">Hawaiian Biogeography: Evolution on a Hot
+    Spot Archipelago</span>'
+  publisher: Smithsonian Institution Press
+  publisher-place: Washington, DC
+  page: 14-29
+- id: Creese2011
+  type: article-journal
+  author:
+  - family: Creese
+    given: C
+  - family: Lee
+    given: A
+  - family: Sack
+    given: Lawren
+  issued:
+  - year: 2011
+  title: '<span class="nocase">Drivers of morphological diversity and distribution
+    in the Hawaiian fern flora: Trait associations with size, growth form, and environment</span>'
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 956-966
+  volume: '98'
+- id: Crow2011
+  type: article-journal
+  author:
+  - family: Crow
+    given: W
+  - family: Mack
+    given: M
+  - family: Diamond
+    given: H
+  - family: Swatzell
+    given: L
+  issued:
+  - year: 2011
+  title: <span class="nocase">Narrow substrate niche of *Cheilanthes lanosa*, the
+    Hairy Lip Fern, is determined by carbohydrate and lipid contents in gametophytes</span>
+  container-title: American Fern Journal
+  publisher: BioOne
+  page: 57-69
+  volume: '101'
+- id: Dassler2001
+  type: article-journal
+  author:
+  - family: Dassler
+    given: Cynthia L.
+  - family: Farrar
+    given: Donald R
+  issued:
+  - year: 2001
+  title: <span class="nocase">Significance of gametophyte form in long-distance colonization
+    by tropical, epiphytic ferns</span>
+  container-title: Brittonia
+  page: 352-369
+  volume: '53'
+- id: Diaz2015
+  type: article-journal
+  author:
+  - family: Díaz
+    given: Sandra
+  - family: Kattge
+    given: Jens
+  - family: Cornelissen
+    given: Johannes H. C.
+  - family: Wright
+    given: Ian J.
+  - family: Lavorel
+    given: Sandra
+  - family: Dray
+    given: Stéphane
+  - family: Reu
+    given: Björn
+  - family: Kleyer
+    given: Michael
+  - family: Wirth
+    given: Christian
+  - family: Prentice
+    given: I Colin
+  - family: Garnier
+    given: Eric
+  - family: Bönisch
+    given: Gerhard
+  - family: Westoby
+    given: Mark
+  - family: Poorter
+    given: Hendrik
+  - family: Reich
+    given: Peter B.
+  - family: Moles
+    given: Angela T.
+  - family: Dickie
+    given: John
+  - family: Gillison
+    given: Andrew N.
+  - family: Zanne
+    given: Amy E.
+  - family: Pierce
+    given: Simon
+  - family: Shipley
+    given: Bill
+  - family: Kirkup
+    given: Donald
+  - family: Casanoves
+    given: Fernando
+  - family: Joswig
+    given: Julia S
+  - family: Günther
+    given: Angela
+  - family: Falczuk
+    given: Valeria
+  - family: Rüger
+    given: Nadja
+  - family: Mahecha
+    given: Miguel D.
+  - family: Gorné
+    given: Lucas D.
+  issued:
+  - year: 2015
+  title: <span class="nocase">The global spectrum of plant form and function</span>
+  container-title: Nature
+  publisher: Nature Publishing Group
+  page: 1-17
+  volume: '529'
+- id: Dubuisson2003
+  type: article-journal
+  author:
+  - family: Dubuisson
+    given: Jean-Yves
+  - family: Hennequin
+    given: Sabine
+  - family: Douzery
+    given: Emmanuel J. P.
+  - family: Cranfill
+    given: Raymond B
+  - family: Smith
+    given: Alan R.
+  - family: Pryer
+    given: Kathleen M
+  issued:
+  - year: 2003
+  title: <span class="nocase">*rbcL* phylogeny of the fern genus *Trichomanes* (Hymenophyllaceae),
+    with special reference to neotropical taxa</span>
+  container-title: International Journal of Plant Sciences
+  publisher: JSTOR
+  page: 753-761
+  volume: '164'
+- id: Duncan1976
+  type: article-journal
+  author:
+  - family: Duncan
+    given: R. A.
+  - family: McDougall
+    given: Ian
+  issued:
+  - year: 1976
+  title: <span class="nocase">Linear volcanism in French Polynesia</span>
+  container-title: Journal of Volcanology and Geothermal Research
+  page: 197-227
+  volume: '1'
+- id: Duursma2015
+  type: article-journal
+  author:
+  - family: Duursma
+    given: Remko A.
+  issued:
+  - year: 2015
+  title: <span class="nocase">Plantecophys - An R package for analysing and modelling
+    leaf gas exchange data</span>
+  container-title: PLoS ONE
+  page: e0143346
+  volume: '10'
+- id: Ebihara2013
+  type: article-journal
+  author:
+  - family: Ebihara
+    given: Atsushi
+  - family: Yamaoka
+    given: A
+  - family: Mizukami
+    given: 'N'
+  - family: Sakoda
+    given: A
+  - family: Nitta
+    given: Joel H.
+  - family: Imaichi
+    given: Ryoko
+  issued:
+  - year: 2013
+  title: '<span class="nocase">A survey of the fern gametophyte flora of Japan: Frequent
+    independent occurrences of noncordiform gametophytes</span>'
+  container-title: American Journal of Botany
+  page: 735-743
+  volume: '100'
+- id: Emigh1977
+  type: article-journal
+  author:
+  - family: Emigh
+    given: V
+  - family: Farrar
+    given: Donald R
+  issued:
+  - year: 1977
+  title: '<span class="nocase">Gemmae: A role in sexual reproduction in the fern genus
+    *Vittaria*</span>'
+  container-title: Science
+  publisher: AAAS
+  page: 297-298
+  volume: '198'
+- id: Farrar2008
+  type: chapter
+  author:
+  - family: Farrar
+    given: Donald R
+  - family: Dassler
+    given: Cynthia L.
+  - family: Watkins Jr.
+    given: James E
+  - family: Skelton
+    given: Chanda
+  editor:
+  - family: Haufler
+    given: Christopher H
+  - family: Ranker
+    given: Tom A
+  issued:
+  - year: 2008
+  title: <span class="nocase">Gametophyte ecology</span>
+  container-title: <span class="nocase">Biology and Evolution of Ferns and Lycophytes</span>
+  publisher: Cambridge University Press
+  publisher-place: Cambridge, UK
+  page: 222-256
+- id: Feldberg2014
+  type: article-journal
+  author:
+  - family: Feldberg
+    given: Kathrin
+  - family: Schneider
+    given: Harald
+  - family: Stadler
+    given: Tanja
+  - family: Schäfer-Verwimp
+    given: Alfons
+  - family: Schmidt
+    given: Alexander R.
+  - family: Heinrichs
+    given: Jochen
+  issued:
+  - year: 2014
+  title: <span class="nocase">Epiphytic leafy liverworts diversified in angiosperm-dominated
+    forests</span>
+  container-title: Scientific Reports
+  page: '5974'
+  volume: '4'
+- id: Fisher2018
+  type: article-journal
+  author:
+  - family: Fisher
+    given: Rebecca
+  - family: Wilson
+    given: Shaun K.
+  - family: Sin
+    given: Tsai M.
+  - family: Lee
+    given: Ai C.
+  - family: Langlois
+    given: Tim J.
+  issued:
+  - year: 2018
+  title: <span class="nocase">A simple function for full-subsets multiple regression
+    in ecology with R</span>
+  container-title: Ecology and Evolution
+  page: 6104-6113
+  volume: '8'
+- id: Fritz2010
+  type: article-journal
+  author:
+  - family: Fritz
+    given: Susanne A.
+  - family: Purvis
+    given: Andy
+  issued:
+  - year: 2010
+  title: '<span class="nocase">Selectivity in mammalian extinction risk and threat
+    types: A new measure of phylogenetic signal strength in binary traits</span>'
+  container-title: Conservation Biology
+  page: 1042-1051
+  volume: '24'
+- id: Gay1993a
+  type: article-journal
+  author:
+  - family: Gay
+    given: Honor
+  issued:
+  - year: 1993
+  title: '<span class="nocase">Animal-fed plants: An investigation into the uptake
+    of ant-derived nutrients by the far-eastern epiphytic fern *Lecanopteris* Reinw.
+    (Polypodiaceae)</span>'
+  container-title: Biological Journal of the Linnean Society
+  page: 221-233
+  volume: '50'
+- id: Givnish2014a
+  type: article-journal
+  author:
+  - family: Givnish
+    given: Thomas J
+  - family: Barfuss
+    given: Michael H J
+  - family: Ee
+    given: Benjamin Van
+  - family: Riina
+    given: Ricarda
+  - family: Schulte
+    given: Katharina
+  - family: Horres
+    given: Ralf
+  - family: Gonsiska
+    given: Philip A.
+  - family: Jabaily
+    given: Rachel S.
+  - family: Crayn
+    given: Darren M.
+  - family: Smith
+    given: J. Andrew C
+  - family: Winter
+    given: Klaus
+  - family: Brown
+    given: Gregory K.
+  - family: Evans
+    given: Timothy M.
+  - family: Holst
+    given: Bruce K.
+  - family: Luther
+    given: Harry
+  - family: Till
+    given: Walter
+  - family: Zizka
+    given: Georg
+  - family: Berry
+    given: Paul E.
+  - family: Sytsma
+    given: Kenneth J.
+  issued:
+  - year: 2014
+  title: <span class="nocase">Adaptive radiation, correlated and contingent evolution,
+    and net species diversification in Bromeliaceae</span>
+  container-title: Molecular Phylogenetics and Evolution
+  publisher: Elsevier Inc.
+  page: 55-78
+  volume: '71'
+- id: Givnish2015b
+  type: article-journal
+  author:
+  - family: Givnish
+    given: Thomas J
+  - family: Spalink
+    given: Daniel
+  - family: Ames
+    given: Mercedes
+  - family: Lyon
+    given: Stephanie P
+  - family: Hunter
+    given: Steven J
+  - family: Zuluaga
+    given: Alejandro
+  - family: Iles
+    given: William J D
+  - family: Clements
+    given: Mark A
+  - family: Arroyo
+    given: Mary T K
+  - family: Leebens-Mack
+    given: James
+  - family: Endara
+    given: Lorena
+  - family: Kriebel
+    given: Ricardo
+  - family: Neubig
+    given: Kurt M
+  - family: Whitten
+    given: W Mark
+  - family: Williams
+    given: Norris H
+  - family: Cameron
+    given: Kenneth M
+  issued:
+  - year: 2015
+  title: <span class="nocase">Orchid phylogenomics and multiple drivers of their extraordinary
+    diversification</span>
+  container-title: 'Proceedings of the Royal Society B: Biological Sciences'
+  page: '20151553'
+  volume: '282'
+- id: Givnish2015
+  type: article-journal
+  author:
+  - family: Givnish
+    given: Thomas J.
+  issued:
+  - year: 2015
+  title: '<span class="nocase">Adaptive radiation versus ‘radiation’ and ‘explosive
+    diversification’: Why conceptual distinctions are fundamental to understanding
+    evolution</span>'
+  container-title: New Phytologist
+  page: 297-303
+  volume: '207'
+- id: Gotelli2000
+  type: article-journal
+  author:
+  - family: Gotelli
+    given: Nicholas J
+  issued:
+  - year: 2000
+  title: <span class="nocase">Null model analysis of species co-occurrence patterns</span>
+  container-title: Ecology
+  page: 2606-2621
+  volume: '81'
+- id: Gower1971
+  type: article-journal
+  author:
+  - family: Gower
+    given: J. C.
+  issued:
+  - year: 1971
+  title: <span class="nocase">A general coefficient of similarity and some of its
+    properties</span>
+  container-title: Biometrics
+  page: 857-871
+  volume: '27'
+- id: Hietz1998
+  type: article-journal
+  author:
+  - family: Hietz
+    given: P
+  - family: Briones
+    given: O
+  issued:
+  - year: 1998
+  title: <span class="nocase">Correlation between water relations and within-canopy
+    distribution of epiphytic ferns in a Mexican cloud forest</span>
+  container-title: Oecologia
+  publisher: Springer
+  page: 305-316
+  volume: '114'
+- id: Hietz1995
+  type: article-journal
+  author:
+  - family: Hietz
+    given: P
+  - family: Hietz-Seifert
+    given: U
+  issued:
+  - year: 1995
+  title: <span class="nocase">Composition and ecology of vascular epiphyte communities
+    along an altitudinal gradient in central Veracruz, Mexico</span>
+  container-title: Journal of Vegetation Science
+  publisher: Blackwell Publishing
+  page: 487-498
+  volume: '6'
+- id: Janssen2005
+  type: article-journal
+  author:
+  - family: Janssen
+    given: T
+  - family: Schneider
+    given: Harald
+  issued:
+  - year: 2005
+  title: <span class="nocase">Exploring the evolution of humus collecting leaves in
+    drynarioid ferns (Polypodiaceae, Polypodiidae) based on phylogenetic evidence</span>
+  container-title: Plant Systematics and Evolution
+  publisher: Springer
+  page: 175-197
+  volume: '252'
+- id: Johnson2012
+  type: article-journal
+  author:
+  - family: Johnson
+    given: A
+  - family: Rothfels
+    given: Carl J.
+  - family: Windham
+    given: Michael D
+  - family: Pryer
+    given: Kathleen M
+  issued:
+  - year: 2012
+  title: <span class="nocase">Unique expression of a sporophytic character on the
+    gametophytes of notholaenid ferns (Pteridaceae)</span>
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 1118-1124
+  volume: '99'
+- id: Kappen2007
+  type: chapter
+  author:
+  - family: Kappen
+    given: Ludger
+  - family: Valladares
+    given: Fernando
+  editor:
+  - family: Pugnaire
+    given: Francisco I.
+  - family: Valladares
+    given: Fernando
+  issued:
+  - year: 2007
+  title: '<span class="nocase">Opportunistic growth and desiccation tolerance: The
+    ecological success of poikilohydrous autotrophs.</span>'
+  container-title: Functional Plant Ecology
+  publisher: Taylor; Francis
+  publisher-place: New York
+  page: 7-66
+- id: Karst2007
+  type: article-journal
+  author:
+  - family: Karst
+    given: A
+  - family: Lechowicz
+    given: M
+  issued:
+  - year: 2007
+  title: <span class="nocase">Are correlations among foliar traits in ferns consistent
+    with those in the seed plants?</span>
+  container-title: New Phytologist
+  publisher: Blackwell Publishing Ltd., 9600 Garsington Road
+  page: 306-312
+  volume: '173'
+- id: Kembel2010
+  type: article-journal
+  author:
+  - family: Kembel
+    given: Steven W.
+  - family: Cowan
+    given: Peter D.
+  - family: Helmus
+    given: Matthew R.
+  - family: Cornwell
+    given: William K.
+  - family: Morlon
+    given: Helene
+  - family: Ackerly
+    given: David D
+  - family: Blomberg
+    given: Simon P.
+  - family: Webb
+    given: Campbell O
+  issued:
+  - year: 2010
+  title: '<span class="nocase">Picante: R tools for integrating phylogenies and ecology</span>'
+  container-title: Bioinformatics
+  publisher: Oxford Univ Press
+  page: 1463-1464
+  volume: '26'
+- id: Kenrick1997a
+  type: article-journal
+  author:
+  - family: Kenrick
+    given: Paul
+  - family: Crane
+    given: Peter R
+  issued:
+  - year: 1997
+  title: <span class="nocase">The origin and early evolution of plants on land</span>
+  container-title: Nature
+  page: 33-39
+  volume: '389'
+- id: Kessler2011a
+  type: article-journal
+  author:
+  - family: Kessler
+    given: Michael
+  - family: Kluge
+    given: Jürgen
+  - family: Hemp
+    given: Andreas
+  - family: Ohlemüller
+    given: Ralf
+  issued:
+  - year: 2011
+  title: <span class="nocase">A global comparative analysis of elevational species
+    richness patterns of ferns</span>
+  container-title: Global Ecology and Biogeography
+  publisher: Wiley Online Library
+  page: 868-880
+  volume: '20'
+- id: Kessler2007a
+  type: article-journal
+  author:
+  - family: Kessler
+    given: Michael
+  - family: Siorak
+    given: 'Y'
+  - family: Wunderlich
+    given: M
+  - family: Wegner
+    given: C
+  issued:
+  - year: 2007
+  title: <span class="nocase">Patterns of morphological leaf traits among pteridophytes
+    along humidity and temperature gradients in the Bolivian Andes</span>
+  container-title: Functional Plant Biology
+  publisher: CSIRO
+  page: 963-971
+  volume: '34'
+- id: Kluge2007
+  type: article-journal
+  author:
+  - family: Kluge
+    given: J
+  - family: Kessler
+    given: Michael
+  issued:
+  - year: 2007
+  title: '<span class="nocase">Morphological characteristics of fern assemblages along
+    an elevational gradient: Patterns and causes</span>'
+  container-title: Ecotropica.
+  page: 27-43
+  volume: '13'
+- id: Kluge2006
+  type: article-journal
+  author:
+  - family: Kluge
+    given: J
+  - family: Kessler
+    given: Michael
+  issued:
+  - year: 2006
+  title: '<span class="nocase">Fern endemism and its correlates: Contribution from
+    an elevational transect in Costa Rica</span>'
+  container-title: Diversity and Distributions
+  publisher: Blackwell Publishing Ltd
+  page: 535-545
+  volume: '12'
+- id: Kress1986
+  type: article-journal
+  author:
+  - family: Kress
+    given: W John
+  issued:
+  - year: 1986
+  title: '<span class="nocase">The systematic distribution of vascular epiphytes:
+    An update</span>'
+  container-title: Selbyana
+  page: 2-22
+  volume: '9'
+- id: Kromer2005
+  type: article-journal
+  author:
+  - family: Krömer
+    given: Thorsten
+  - family: Kessler
+    given: Michael
+  - family: Robbert Gradstein
+    given: S
+  - family: Acebey
+    given: A
+  issued:
+  - year: 2005
+  title: <span class="nocase">Diversity patterns of vascular epiphytes along an elevational
+    gradient in the Andes</span>
+  container-title: Journal of Biogeography
+  publisher: JSTOR
+  page: 1799-1809
+  volume: '32'
+- id: Le2008
+  type: article-journal
+  author:
+  - family: Lê
+    given: Sébastien
+  - family: Josse
+    given: Julie
+  - family: Husson
+    given: François
+  issued:
+  - year: 2008
+  title: '<span class="nocase">FactoMineR: an R package for multivariate analysis</span>'
+  container-title: Journal of Statistical Software
+  page: 1-18
+  volume: '25'
+- id: Lehtonen2017
+  type: article-journal
+  author:
+  - family: Lehtonen
+    given: Samuli
+  - family: Silvestro
+    given: Daniele
+  - family: Karger
+    given: Dirk Nikolaus
+  - family: Scotese
+    given: Christopher
+  - family: Tuomisto
+    given: Hanna
+  - family: Kessler
+    given: Michael
+  - family: Peña
+    given: Carlos
+  - family: Wahlberg
+    given: Niklas
+  - family: Antonelli
+    given: Alexandre
+  issued:
+  - year: 2017
+  title: <span class="nocase">Environmentally driven extinction and opportunistic
+    origination explain fern diversification patterns</span>
+  container-title: Scientific Reports
+  page: '4831'
+  volume: '7'
+- id: Lloyd2008
+  type: article-journal
+  author:
+  - family: Lloyd
+    given: Graeme T
+  - family: Davis
+    given: Katie E
+  - family: Pisani
+    given: Davide
+  - family: Tarver
+    given: James E
+  - family: Ruta
+    given: Marcello
+  - family: Sakamoto
+    given: Manabu
+  - family: Hone
+    given: David W E
+  - family: Jennings
+    given: Rachel
+  - family: Benton
+    given: Michael J
+  issued:
+  - year: 2008
+  title: <span class="nocase">Dinosaurs and the Cretaceous terrestrial revolution</span>
+  container-title: 'Proceedings of the Royal Society B: Biological Sciences'
+  page: 2483-2490
+  volume: '275'
+- id: Lowman2012
+  type: article-journal
+  author:
+  - family: Lowman
+    given: Margaret D
+  - family: Schowalter
+    given: Timothy D
+  issued:
+  - year: 2012
+  title: <span class="nocase">Plant science in forest canopies—the first 30 years
+    of advances and challenges (1980-2010)</span>
+  container-title: New Phytologist
+  page: 12-27
+  volume: '194'
+- id: Moran1950
+  type: article-journal
+  author:
+  - family: Moran
+    given: P. A. P.
+  issued:
+  - year: 1950
+  title: <span class="nocase">Notes on continuous stochastic phenomena</span>
+  container-title: Biometrika
+  page: 17-23
+  volume: '37'
+- id: Munkemuller2012
+  type: article-journal
+  author:
+  - family: Münkemüller
+    given: Tamara
+  - family: Lavergne
+    given: Sébastien
+  - family: Bzeznik
+    given: Bruno
+  - family: Dray
+    given: Stéphane
+  - family: Jombart
+    given: Thibaut
+  - family: Schiffers
+    given: Katja
+  - family: Thuiller
+    given: Wilfried
+  issued:
+  - year: 2012
+  title: <span class="nocase">How to measure and test phylogenetic signal</span>
+  container-title: Methods in Ecology and Evolution
+  page: 743-756
+  volume: '3'
+- id: Nayar1971
+  type: article-journal
+  author:
+  - family: Nayar
+    given: B. K.
+  - family: Kaur
+    given: S
+  issued:
+  - year: 1971
+  title: <span class="nocase">Gametophytes of homosporous ferns</span>
+  container-title: The Botanical Review
+  publisher: New York Botanical Garden
+  page: 295-396
+  volume: '37'
+- id: Niklas1983
+  type: article-journal
+  author:
+  - family: Niklas
+    given: Karl J
+  - family: Tiffney
+    given: Bruce H
+  - family: Knoll
+    given: Andrew H
+  issued:
+  - year: 1983
+  title: <span class="nocase">Patterns in vascular land plant diversification</span>
+  container-title: Nature
+  page: 614-616
+  volume: '303'
+- id: Nitsch1951
+  type: article-journal
+  author:
+  - family: Nitsch
+    given: J P
+  issued:
+  - year: 1951
+  title: <span class="nocase">Growth and development in vitro of excised ovaries</span>
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 566-577
+  volume: '38'
+- id: Nitta2018
+  type: article-journal
+  author:
+  - family: Nitta
+    given: Joel H.
+  - family: Amer
+    given: Saad
+  - family: Davis
+    given: Charles C
+  issued:
+  - year: 2018
+  title: <span class="nocase">Microsorum × tohieaense (Polypodiaceae), a new hybrid
+    fern from French Polynesia, with implications for the taxonomy of *Microsorum*</span>
+  container-title: Systematic Botany
+  page: 397-413
+  volume: '43'
+- id: Nitta2017
+  type: article-journal
+  author:
+  - family: Nitta
+    given: Joel H.
+  - family: Meyer
+    given: Jean-Yves
+  - family: Taputuarai
+    given: Ravahere
+  - family: Davis
+    given: Charles C
+  issued:
+  - year: 2017
+  title: '<span class="nocase">Life cycle matters: DNA barcoding reveals contrasting
+    community structure between fern sporophytes and gametophytes</span>'
+  container-title: Ecological Monographs
+  page: 278-296
+  volume: '87'
+- id: Nitta2020
+  type: no-type
+  author:
+  - family: Nitta
+    given: Joel H.
+  - family: Watkins Jr.
+    given: James E
+  - family: Davis
+    given: Charles C.
+  issued:
+  - year: 2020
+  title: '<span class="nocase">Data from: Life in the canopy: Community trait assessments
+    reveal substantial functional diversity among fern epiphytes. Dryad Digital Repository.</span>'
+- id: Pagel1994
+  type: article-journal
+  author:
+  - family: Pagel
+    given: Mark
+  issued:
+  - year: 1994
+  title: '<span class="nocase">Detecting correlated evolution on phylogenies: A general
+    method for the comparative analysis of discrete characters</span>'
+  container-title: 'Proceedings of the Royal Society B: Biological Sciences'
+  page: 37-45
+  volume: '255'
+- id: Pagel1999
+  type: article-journal
+  author:
+  - family: Pagel
+    given: Mark
+  issued:
+  - year: 1999
+  title: <span class="nocase">Inferring the historical patterns of biological evolution</span>
+  container-title: Nature
+  publisher: Nature Publishing Group
+  page: 877-884
+  volume: '401'
+- id: Parra2009
+  type: article-journal
+  author:
+  - family: Parra
+    given: Maria J.
+  - family: Acuña
+    given: Karina
+  - family: Corcuera
+    given: Luís J.
+  - family: Saldaña
+    given: Alfredo
+  issued:
+  - year: 2009
+  title: <span class="nocase">Vertical distribution of Hymenophyllaceae species among
+    host tree microhabitats in a temperate rain forest in Southern Chile</span>
+  container-title: Journal of Vegetation Science
+  publisher: Blackwell Publishing
+  page: 588-595
+  volume: '20'
+- id: Pessin1925
+  type: article-journal
+  author:
+  - family: Pessin
+    given: Louis J.
+  issued:
+  - year: 1925
+  title: <span class="nocase">An ecological study of the polypody fern *Polypodium
+    polypodioides* as an epiphyte in Mississippi</span>
+  container-title: Ecology
+  page: 17-38
+  volume: '6'
+- id: Pittermann2013
+  type: article-journal
+  author:
+  - family: Pittermann
+    given: Jarmila
+  - family: Brodersen
+    given: Craig
+  - family: Watkins Jr.
+    given: James E
+  issued:
+  - year: 2013
+  title: '<span class="nocase">The physiological resilience of fern sporophytes and
+    gametophytes: Advances in water relations offer new insights into an old lineage.</span>'
+  container-title: Frontiers in Plant Science
+  page: '285'
+  volume: '4'
+- id: PteridophytePhylogenyGroupI2016
+  type: article-journal
+  author:
+  - literal: Pteridophyte Phylogeny Group I
+  issued:
+  - year: 2016
+  title: <span class="nocase">A community-derived classification for extant lycophytes
+    and ferns</span>
+  container-title: Journal of Systematics and Evolution
+  page: 563-603
+  volume: '54'
+- id: Revell2012
+  type: article-journal
+  author:
+  - family: Revell
+    given: Liam J.
+  issued:
+  - year: 2012
+  title: '<span class="nocase">phytools: an R package for phylogenetic comparative
+    biology (and other things)</span>'
+  container-title: Methods in Ecology and Evolution
+  page: 217-223
+  volume: '3'
+- id: Schleuter2010
+  type: article-journal
+  author:
+  - family: Schleuter
+    given: D
+  - family: Daufresne
+    given: M
+  - family: Massol
+    given: F
+  - family: Argillier
+    given: C
+  issued:
+  - year: 2010
+  title: <span class="nocase">A user’s guide to functional diversity indices</span>
+  container-title: Ecological Monographs
+  page: 469-484
+  volume: '80'
+- id: Schneider2004d
+  type: article-journal
+  author:
+  - family: Schneider
+    given: Harald
+  - family: Schuettpelz
+    given: Eric
+  - family: Pryer
+    given: Kathleen M
+  - family: Cranfill
+    given: Raymond B
+  - family: Magallón
+    given: Susana
+  - family: Lupia
+    given: Richard
+  issued:
+  - year: 2004
+  title: <span class="nocase">Ferns diversified in the shadow of angiosperms</span>
+  container-title: Nature
+  publisher: Nature Publishing Group
+  page: 553-557
+  volume: '428'
+- id: Schuettpelz2009
+  type: article-journal
+  author:
+  - family: Schuettpelz
+    given: Eric
+  - family: Pryer
+    given: Kathleen M
+  issued:
+  - year: 2009
+  title: <span class="nocase">Evidence for a Cenozoic radiation of ferns in an angiosperm-dominated
+    canopy</span>
+  container-title: Proceedings of the National Academy of Sciences of the United States
+    of America
+  page: 11200-11205
+  volume: '106'
+- id: Sessa2018
+  type: article-journal
+  author:
+  - family: Sessa
+    given: Emily B.
+  - family: Chambers
+    given: Sally M.
+  - family: Li
+    given: Daijiang
+  - family: Trotta
+    given: Lauren
+  - family: Endara
+    given: Lorena
+  - family: Burleigh
+    given: J. Gordon
+  - family: Baiser
+    given: Benjamin
+  issued:
+  - year: 2018
+  title: <span class="nocase">Community assembly of the ferns of Florida</span>
+  container-title: American Journal of Botany
+  page: 549-564
+  volume: '105'
+- id: Shreve1911
+  type: article-journal
+  author:
+  - family: Shreve
+    given: Forrest
+  issued:
+  - year: 1911
+  title: <span class="nocase">Studies on Jamaican Hymenophyllaceae</span>
+  container-title: Botanical Gazette
+  publisher: JSTOR
+  page: 184-209
+  volume: '51'
+- id: Stokey1951
+  type: article-journal
+  author:
+  - family: Stokey
+    given: Alma G
+  issued:
+  - year: 1951
+  title: <span class="nocase">The contribution by the gametophyte to classification
+    of the homosporous ferns</span>
+  container-title: Phytomorphology
+  publisher: International Society of Plant Morphologists.
+  page: 39-58
+  volume: '1'
+- id: Sundue2015
+  type: article-journal
+  author:
+  - family: Sundue
+    given: Michael A
+  - family: Testo
+    given: Weston L.
+  - family: Ranker
+    given: Tom A
+  issued:
+  - year: 2015
+  title: <span class="nocase">Morphological innovation, ecological opportunity, and
+    the radiation of a major vascular epiphyte lineage</span>
+  container-title: Evolution
+  page: 2482-2495
+  volume: '69'
+- id: Swenson2014
+  type: book
+  author:
+  - family: Swenson
+    given: Nathan G.
+  issued:
+  - year: 2014
+  title: <span class="nocase">Functional and Phylogenetic Ecology in R</span>
+  publisher: Springer
+  publisher-place: New York, New York, USA
+  page: '212'
+- id: Tausz2001
+  type: article-journal
+  author:
+  - family: Tausz
+    given: M
+  - family: Hietz
+    given: P
+  - family: Briones
+    given: O
+  issued:
+  - year: 2001
+  title: <span class="nocase">The significance of carotenoids and tocopherols in photoprotection
+    of seven epiphytic fern species of a Mexican cloud forest</span>
+  container-title: Functional Plant Biology
+  publisher: CSIRO
+  page: 775-783
+  volume: '28'
+- id: Testo2018a
+  type: article-journal
+  author:
+  - family: Testo
+    given: Weston L.
+  - family: Sundue
+    given: Michael A
+  issued:
+  - year: 2018
+  title: <span class="nocase">Are rates of species diversification and body size evolution
+    coupled in the ferns?</span>
+  container-title: American Journal of Botany
+  page: 1-11
+  volume: '105'
+- id: Testo2016a
+  type: article-journal
+  author:
+  - family: Testo
+    given: Weston L.
+  - family: Sundue
+    given: Michael A
+  issued:
+  - year: 2016
+  title: <span class="nocase">A 4000-species dataset provides new insight into the
+    evolution of ferns</span>
+  container-title: Molecular Phylogenetics and Evolution
+  publisher: Elsevier Inc.
+  page: 200-211
+  volume: '105'
+- id: Vogel1968
+  type: article-journal
+  author:
+  - family: Vogel
+    given: Steven
+  issued:
+  - year: 1968
+  title: '<span class="nocase">‘Sun leaves’ and ‘shade leaves’: differences in convective
+    heat dissipation</span>'
+  container-title: Ecology
+  page: 1203-1204
+  volume: '49'
+- id: WatkinsJr.2012
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Cardelús
+    given: Catherine L
+  issued:
+  - year: 2012
+  title: '<span class="nocase">Ferns in an angiosperm world: Cretaceous radiation
+    into the epiphytic niche and diversification on the forest floor</span>'
+  container-title: International Journal of Plant Sciences
+  publisher: JSTOR
+  page: 695-710
+  volume: '173'
+- id: WatkinsJr.2009
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Cardelús
+    given: Catherine L
+  issued:
+  - year: 2009
+  title: <span class="nocase">Habitat differentiation of ferns in a lowland tropical
+    rain forest</span>
+  container-title: American Fern Journal
+  publisher: BioOne
+  page: 162-175
+  volume: '99'
+- id: WatkinsJr.2006a
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Cardelús
+    given: Catherine L
+  - family: Colwell
+    given: R
+  - family: Moran
+    given: R
+  issued:
+  - year: 2006
+  title: <span class="nocase">Species richness and distribution of ferns along an
+    elevational gradient in Costa Rica</span>
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 73-83
+  volume: '93'
+- id: WatkinsJr.2008
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Cardelús
+    given: Catherine L
+  - family: Mack
+    given: Michelle C
+  issued:
+  - year: 2008
+  title: <span class="nocase">Ants mediate nitrogen relations of an epiphytic fern</span>
+  container-title: New Phytologist
+  page: 5-8
+  volume: '180'
+- id: WatkinsJr.2010
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Holbrook
+    given: N Michele
+  - family: Zwieniecki
+    given: M
+  issued:
+  - year: 2010
+  title: '<span class="nocase">Hydraulic properties of fern sporophytes: Consequences
+    for ecological and evolutionary diversification</span>'
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 2007-2019
+  volume: '97'
+- id: WatkinsJr.2006b
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Kawahara
+    given: Akito
+  - family: Leicht
+    given: Stacy A
+  - family: Auld
+    given: Josh R
+  - family: Bicksler
+    given: Abram J
+  - family: Kaiser
+    given: Kristine
+  issued:
+  - year: 2006
+  title: <span class="nocase">Fern laminar scales protect against photoinhibition
+    from excess light</span>
+  container-title: American Fern Journal
+  publisher: BioOne
+  page: 83-92
+  volume: '96'
+- id: WatkinsJr.2007c
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Mack
+    given: Michelle C
+  - family: Sinclair
+    given: Thomas R
+  - family: Mulkey
+    given: Stephen S
+  issued:
+  - year: 2007
+  title: <span class="nocase">Ecological and evolutionary consequences of desiccation
+    tolerance in tropical fern gametophytes</span>
+  container-title: New Phytologist
+  publisher: Blackwell Publishing Ltd., 9600 Garsington Road
+  page: 708-717
+  volume: '176'
+- id: WatkinsJr.2007a
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Mack
+    given: Michelle K
+  - family: Mulkey
+    given: Stephen S
+  issued:
+  - year: 2007
+  title: <span class="nocase">Gametophyte ecology and demography of epiphytic and
+    terrestrial tropical ferns</span>
+  container-title: American Journal of Botany
+  publisher: JSTOR
+  page: 701-708
+  volume: '94'
+- id: WatkinsJr.2007b
+  type: article-journal
+  author:
+  - family: Watkins Jr.
+    given: James E
+  - family: Rundel
+    given: P
+  - family: Cardelús
+    given: Catherine L
+  issued:
+  - year: 2007
+  title: <span class="nocase">The influence of life form on carbon and nitrogen relationships
+    in tropical rainforest ferns</span>
+  container-title: Oecologia
+  publisher: Springer
+  page: 225-232
+  volume: '153'
+- id: Webb2000
+  type: article-journal
+  author:
+  - family: Webb
+    given: Campbell O
+  issued:
+  - year: 2000
+  title: '<span class="nocase">Exploring the phylogenetic structure of ecological
+    communities: an example for rain forest trees</span>'
+  container-title: American Naturalist
+  publisher: 'Selem, Mass.: Essex Institute, 1868-'
+  page: 145-155
+  volume: '156'
+- id: Webb2002
+  type: article-journal
+  author:
+  - family: Webb
+    given: Campbell O
+  - family: Ackerly
+    given: David D
+  - family: McPeek
+    given: Mark A
+  - family: Donoghue
+    given: Michael J
+  issued:
+  - year: 2002
+  title: <span class="nocase">Phylogenies and community ecology</span>
+  container-title: Annual Review of Ecology and Systematics
+  page: 475-505
+  volume: '33'
+- id: Wong1976
+  type: article-journal
+  author:
+  - family: Wong
+    given: S. C.
+  - family: Hew
+    given: C. S.
+  issued:
+  - year: 1976
+  title: <span class="nocase">Diffusive resistance, titratable acidity, and CO2 fixation
+    in two tropical epiphytic ferns</span>
+  container-title: American Fern Journal
+  page: 121-124
+  volume: '66'
+- id: Wright2004a
+  type: article-journal
+  author:
+  - family: Wright
+    given: Ian J
+  - family: Reich
+    given: Peter B
+  - family: Westoby
+    given: Mark
+  - family: Ackerly
+    given: David D
+  - family: Baruch
+    given: Zdravko
+  - family: Bongers
+    given: Frans
+  - family: Cavender-Bares
+    given: Jeannine
+  - family: Chapin
+    given: Terry
+  - family: Cornelissen
+    given: Johannes H C
+  - family: Diemer
+    given: Matthias
+  - family: Flexas
+    given: Jaume
+  - family: Garnier
+    given: Eric
+  - family: Groom
+    given: Philip K
+  - family: Gulias
+    given: Javier
+  - family: Hikosaka
+    given: Kouki
+  - family: Lamont
+    given: Byron B
+  - family: Lee
+    given: Tali
+  - family: Lee
+    given: William
+  - family: Lusk
+    given: Christopher
+  - family: Midgley
+    given: Jeremy J
+  - family: Navas
+    given: Marie-Laure
+  - family: Niinemets
+    given: Ulo
+  - family: Oleksyn
+    given: Jacek
+  - family: Osada
+    given: Noriyuki
+  - family: Poorter
+    given: Hendrik
+  - family: Poot
+    given: Pieter
+  - family: Prior
+    given: Lynda
+  - family: Pyankov
+    given: Vladimir I
+  - family: Roumet
+    given: Catherine
+  - family: Thomas
+    given: Sean C
+  - family: Tjoelker
+    given: Mark G
+  - family: Veneklaas
+    given: Erik J
+  - family: Villar
+    given: Rafael
+  issued:
+  - year: 2004
+  title: <span class="nocase">The worldwide leaf economics spectrum</span>
+  container-title: Nature
+  page: 821-827
+  volume: '428'
+- id: Zotz2013
+  type: article-journal
+  author:
+  - family: Zotz
+    given: Gerhard
+  issued:
+  - year: 2013
+  title: <span class="nocase">The systematic distribution of vascular epiphytes -
+    a critical update</span>
+  container-title: Botanical Journal of the Linnean Society
+  publisher: John Wiley & Sons
+  page: 453-481
+  volume: '171'
+- id: Zotz2001
+  type: article-journal
+  author:
+  - family: Zotz
+    given: Gerhard
+  - family: Hietz
+    given: P
+  issued:
+  - year: 2001
+  title: '<span class="nocase">The physiological ecology of vascular epiphytes: Current
+    knowledge, open questions</span>'
+  container-title: Journal of Experimental Botany
+  publisher: Soc Experiment Biol
+  page: 2067-2078
+  volume: '52'

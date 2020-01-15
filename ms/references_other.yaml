@@ -1,0 +1,78 @@
+---
+references:
+- type: webpage
+  id: Laliberte2011
+  author:
+  - family: Laliberté
+    given: Etienne
+  - family: Legendre
+    given: Pierre
+  - family: Shipley
+    given: Bill
+  issued:
+    year: 2011
+  accessed:
+    year: 2020
+    month: 01
+    day: 01
+  title: 'FD: Measuring functional diversity from multiple traits, and other tools for functional ecology. R package version 1.0-12'
+  title-short: FD
+  URL: http://CRAN.R-project.org/package=FD
+
+- type: webpage
+  id: Orme2013
+  author:
+  - family: Orme
+    given: David
+  - family: Freckleton
+    given: Rob
+  - family: Thomas
+    given: Gavin
+  - family: Petzoldt
+    given: Thomas
+  - family: Fritz
+    given: Susanne
+  - family: Isaac
+    given: Nick
+  - family: Pearse
+    given: Will
+  issued:
+    year: 2018
+  accessed:
+    year: 2020
+    month: 01
+    day: 01
+  title: 'Caper: Comparative analyses of phylogenetics and evolution in r. R package version 1.0.1'
+  title-short: Caper
+  URL: https://CRAN.R-project.org/package=caper
+
+- type: webpage
+  id: Thiers2019
+  author:
+  - family: Thiers
+    given: Barbara
+  issued:
+    year: 2020
+  accessed:
+    year: 2020
+    month: 01
+    day: 01
+  title: 'Index Herbariorum: A global directory of public herbaria and associated staff'
+  title-short: IH
+  URL: http://sweetgum.nybg.org/science/ih/
+
+- type: webpage
+  id: FloraNSW2019
+  author:
+    literal: 'Royal Botanic Gardens and Domain Trust'
+  issued:
+    year: 2004
+    month: 04
+    day: 13
+  accessed:
+    year: 2020
+    month: 01
+    day: 01
+  title: 'Flora of New South Wales. PlantNET (The NSW Plant Information Network System)'
+  title-short: FloraNSW
+  URL: http://plantnet.rbgsyd.nsw.gov.au/floraonline.htm

@@ -1,6 +1,8 @@
 ---
 title: "Life in the canopy: Community trait assessments reveal substantial functional diversity among fern epiphytes"
-bibliography: "references.bib"
+bibliography: 
+  - "references.bib"
+  - "references_other.yaml"
 fontsize: 12pt
 output: 
   bookdown::pdf_document2:
