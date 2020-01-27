@@ -2150,8 +2150,13 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     ggplot(aes(x = PC1, y = PC2)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
-    geom_point(size=3, shape=16) +
-    geom_text_repel(aes(label = trait), show.legend=FALSE, segment.colour = NA) +
+    geom_point(size=3, shape=16, color = "gray50") +
+    geom_text_repel(
+      aes(label = trait),
+      size = 3,
+      show.legend = FALSE,
+      segment.color = "transparent"
+    ) +
     scale_x_continuous(
       limits = c(-1,1)
     ) +
@@ -2172,8 +2177,13 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
     ggplot(aes(x = PC1, y = PC2)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
-    geom_point(size=3, shape=16) +
-    geom_text_repel(aes(label = trait), show.legend=FALSE, segment.colour = NA) +
+    geom_point(size=3, shape=16, color = "gray50") +
+    geom_text_repel(
+      aes(label = trait),
+      size = 3,
+      show.legend = FALSE,
+      segment.color = "transparent"
+    ) +
     scale_x_continuous(
       limits = c(-1,1)
     ) +
