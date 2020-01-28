@@ -137,12 +137,12 @@ Authors for correspondence:
 ```{r word-count table}
 tibble(
   words = c(
-    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6498",
+    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6499",
     "Summary:_199",
     "Introduction:_881",
     "Materials and Methods:_2410",
     "Results:_798",
-    "Discussion:_2409",
+    "Discussion:_2410",
     "Acknowledgements:_170"),
   figs_tabs = c(
     "No. of figures:_7 (all in color)",
@@ -620,7 +620,7 @@ Although hairs have been hypothesized to reduce rates of drying and increase wat
 Given their high phylogenetic signal, it is possible that these traits are unrelated to environment but rather reflect phylogenetically conserved developmental pathways [@Johnson2012].
 Alternatively, the possibility remains that some epiphytic species rely on hairs or glands to prevent or slow drying depending on their niche within the canopy (\eg, hair-bearing grammitid gametophytes at mid to high elevation).
 
-### The dual roles of the canopy as both a filter and promoter of diversity
+### The dual roles of the canopy as both a filter and promoter of community diversity
 
 Our results demonstrate that the canopy is far more dynamic with regard to fern epiphytism than has been previously appreciated. 
 On the one hand, the canopy appears to have served as a potent barrier to entry, strongly selecting for small size. 
@@ -655,7 +655,7 @@ Our study provides a fresh perspective on this issue.
 Here, we demonstrate that epiphytism is likely a complex trait, and almost certainly requires the evolution of multiple associated and dependent traits. 
 We propose that the timing and order of the evolution of such traits are related to the conflicting diversification dynamics observed in these studies.
 Another possibility raised by our results is that fern epiphytes have radiated morphologically without corresponding species-level diversification [@Givnish2015].
-Future research investigating the tempo and mode of the evolution of epiphytism in ferns should seek to better partition this functional diversity when exploring hypotheses of exceptional species diversification.
+Future research investigating the tempo and mode of the evolution of epiphytism in ferns should seek to better partition this morphological diversity when exploring hypotheses of exceptional species diversification.
 
 Small size appears to be a prerequisite for epiphytic growth, as indicated both by our results and by @Testo2018a.
 However, we have shown that size appears to be the exception, not the rule, when it comes to trait diversity of epiphytic communities: although epiphytes are generally small, our data suggest they are diverse in numerous other traits. 
