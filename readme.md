@@ -8,9 +8,9 @@ All code is in [R](https://cran.r-project.org/). The [drake package](https://rop
 
 All data are stored on [Dryad](https://datadryad.org/). After cloning the repository, download the following sets of zipped data to the `data/` folder (click on the "Download Dataset" button for each link below):
 
-- https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g
+- https://doi.org/10.5061/dryad.df59g
 
-- FIXME: ADD DRYAD LINK WHEN AVAILABLE
+- https://doi.org/10.5061/dryad.fqz612jps
 
 The code needs the zipped data files to run, so if you unzip them yourself to inspect them, be sure to keep the original, zipped versions in `data/`.
 
@@ -51,3 +51,9 @@ When it's finished, exit the container and take it down:
 exit
 docker-compose down
 ```
+
+## Licenses
+
+- All code in this repository is licensed under the [MIT license](LICENSE.txt)
+- [The data](https://doi.org/10.5061/dryad.fqz612jps) are licensed under the [CC0 1.0 Universal Public Domain Dedication license](https://creativecommons.org/publicdomain/zero/1.0/)
+- The [Roboto font](https://github.com/google/roboto/) is licensed under the [Apache 2.0 license](http://www.apache.org/licenses/LICENSE-2.0)
