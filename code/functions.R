@@ -3142,7 +3142,32 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   
 }
 
-# MS rendering
+#' Write out a csv file with metadata appended to start and end
+#' 
+#' Shamelessly copied from SO (and modified)
+#' https://stackoverflow.com/questions/12381117/add-header-to-file-created-by-write-csv
+#' 
+#' @param x Dataframe to write out
+#' @param file Path to write file
+#' @param header Character vector: header to append to CSV file
+#' @param footer Character vector: footer to append to CSV file
+#' @param ... Additional arguments passed to readr::write_csv()
+#'
+#' @return Nothing; externally, `x` will be writted to `file`
+#'
+write_csv_with_meta <- function(x, file, header, footer, ...){
+  # create and open the file connection
+  datafile <- file(file, open = 'wt')
+  # close on exit
+  on.exit(close(datafile))
+  # if a header is defined, write it to the file (@CarlWitthoft's suggestion)
+  if(!missing(header)) writeLines(header,con = datafile)
+  # write the file using the defined function and required addition arguments  
+  readr::write_csv(x = x, path = datafile, ...)
+  # Add footer
+  if(!missing(footer)) writeLines(footer, con = datafile)
+}
+
 
 # Dummy function to track arbitary output from rmarkdown::render()
 render_tracked <- function (tracked_output, ...) {
