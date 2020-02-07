@@ -535,11 +535,10 @@ plan <- drake_plan(
   ),
   
   # SI ----
-  si_pdf = render_tracked(
+  si_pdf = rmarkdown::render(
     knitr_in("ms/SI.Rmd"),
     quiet = TRUE,
-    output_dir = here::here("results"),
-    tracked_output = file_out(here::here("results/SI.tex"))
+    output_dir = here::here("results")
   )
   
 )
