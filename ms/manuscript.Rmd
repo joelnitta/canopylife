@@ -3,7 +3,12 @@ title: "Life in the canopy: Community trait assessments reveal substantial funct
 bibliography: 
   - "references.bib"
   - "references_other.yaml"
-fontsize: 12pt
+mainfont: Roboto-Regular.ttf
+fontsize: 11pt
+mainfontoptions: 
+- BoldFont=Roboto-Bold.ttf
+- ItalicFont=Roboto-Italic.ttf
+- BoldItalicFont=Roboto-BoldItalic.ttf
 output: 
   bookdown::pdf_document2:
     citation_package: none # Use pandoc default, otherwise csl can't be used for reference formatting
