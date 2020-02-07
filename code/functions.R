@@ -410,7 +410,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
         source == "Ferns & Fern-Allies of South Pacific Islands" ~ "National Museum of Nature and Science (2008)", 
         source == "Pteridophytes of the Society Islands" ~ "Copeland (1932)",
         source == "Hawaii's Ferns and Fern Allies" ~ "Palmer (2003)",
-        source == "Flora of New South Wales" ~ "Royal Botanic Gardens and Domain Trust (2019)",
+        source == "Flora of New South Wales" ~ "Royal Botanic Gardens and Domain Trust (2004)",
         source == "Brownsey 1987" ~ "Brownsey (1987)",
         source == "measurement" ~ "M"
       )
