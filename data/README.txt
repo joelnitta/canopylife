@@ -1,4 +1,4 @@
-This canopylife README.txt file was generated on 2020-01-08 by Joel Nitta
+This canopylife README.txt file was generated on 2020-02-06 by Joel Nitta
 
 ------------------- GENERAL INFORMATION -----------------
 
@@ -123,11 +123,25 @@ package: The following data from Nitta et al. 2017 are already in Dryad
 METHODOLOGICAL INFORMATION
 --------------------------
 
-Description of methods used for collection/generation of data: Morphological
-traits of ferns in Moorea, French Polynesia were measured from voucher
-specimens. Environmental data (relative humidity and temperature) were
-measured with data loggers. For additional details, see Nitta, Watkins, and
-Davis (2020) New Phyt. ADD_DOI_WHEN_AVAILABLE.
+Description of methods used for collection/generation of data: 
+
+Morphological traits of ferns from Moorea, French Polynesia were measured from 
+voucher specimens or obtained from literature when plant material was 
+unavailable. Sporophyte traits include: stipe length, frond length, frond
+width, rhizome diameter, frond dissection, number of pinna pairs, and specific 
+leaf area. Gametophyte traits include: morphotype and presence or absence of 
+gemmae, glands, and hairs.
+
+Temperature (celsius) and relative humidity (%) were measured every 15 minutes 
+(Moorea) or 60 minutes (Tahiti) with 33 dataloggers on Moorea and Tahiti, 
+French Polynesia from 2012-07-18 to 2015-02-06. On Moorea, Hobo Pro v2 data 
+loggers with the RS3 Solar Radiation Shield (Onset Corporation, Bourne, 
+Massachusetts, USA) were used. On Tahiti, RHTemp 1000 data loggers (MadgeTech, 
+Warner, New Hampshire, USA) protected with custom radiation shields made from 
+plastic circuit boxes were used.
+
+For additional methodological details, see Nitta, Watkins, and Davis (2020) 
+New Phyt. ADD_DOI_WHEN_AVAILABLE.
 
 --------------------------
 DATA-SPECIFIC INFORMATION
