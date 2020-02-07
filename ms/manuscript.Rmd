@@ -100,6 +100,16 @@ Authors for correspondence:
 *Tel: +1 6174960515*  
 *Email: \textnormal{cdavis@oeb.harvard.edu}*
 
+Brief heading: "Community trait assessments reveal substantial functional diversity among fern epiphytes"
+
+Social media    
+Twitter: \@joel_nitta  
+Website: \textnormal{https://joelnitta.com}
+
+Orcid IDs   
+Joel H. Nitta: \textnormal{https://orcid.org/0000-0003-4719-7472}  
+Charles C. Davis: \textnormal{https://orcid.org/0000-0001-8747-1101}
+
 <!-- FIXME: add borders to table in docx -->
 
 ```{r word-count table}
@@ -361,8 +371,8 @@ We checked for spatial autocorrelation in the model residuals with Moran's *I* [
 
 ### Data accessibility
 
-Code to replicate all analyses, figures, and this manuscript are available at https://github.com/joelnitta/canopylife.
-Data are openly available from the Dryad repository at http://doi.org/ADD_DOI_HERE_WHEN_ASSIGNED [@Nitta2020].
+Code to replicate all analyses, figures, and this manuscript is available at https://github.com/joelnitta/canopylife.
+Data are openly available from the Dryad repository at https://doi.org/10.5061/dryad.fqz612jps [@Nitta2020].
 
 ## Results
 
@@ -648,6 +658,8 @@ coverting to docx from tex by pandoc. Remove these from docx file. -->
 <!-- FIXME: The publisher "Taylor and Francis" gets converted to "Taylor; Francis" by pandoc.
 Fix this in the docx file. -->
 
+<!-- FIXME: add DOI for Dryad Nitta et al. 2020 dataset: https://doi.org/10.5061/dryad.fqz612jps -->
+
 <!-- Insert <div id="refs"></div> to place the refs here instead of at the end -->
 <div id="refs"></div>
 
@@ -657,41 +669,41 @@ Fix this in the docx file. -->
 
 Additional Supporting Information may be found online in the Supporting Information section at the end of the article:
 
-**`r s_table("species-list")`** List of ferns from Moorea, French Polynesia included in this study
+**`r s_table("species-list")`** `r s_table_cap("species-list")`
 
-**`r s_table("trait-values")`** Trait values of ferns on Moorea, French Polynesia
+**`r s_table("trait-values")`** `r s_table_cap("trait-values")`
 
-**`r s_table("ancova")`** Analysis of covariance (ANCOVA) for climate variables in response to growth habit (epiphytic vs. terrestrial) with elevation as a covariate
+**`r s_table("ancova")`** `r s_table_cap("ancova")`
 
-**`r s_table("phylosig-binary-strict")`** Phylogenetic signal in binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
+**`r s_table("phylosig-binary-strict")`** `r s_table_cap("phylosig-binary-strict")`
 
-**`r s_table("corr-evo-strict")`** Pagel's (1994) test of correlated evolution between binary traits, strict dataset excluding any species whose traits were scored based on taxonomy
+**`r s_table("corr-evo-strict")`** `r s_table_cap("corr-evo-strict")`
 
-**`r s_table("model-fit")`** Best-fitting models explaining community diversity metrics by climate and growth habit
+**`r s_table("model-fit")`** `r s_table_cap("model-fit")`
 
-**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input
+**`r s_figure("cwsd")`** `r s_figure_cap("cwsd")`
 
-**`r s_figure("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia
+**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`
 
 \clearpage
 
-**`r figure("traits-used-image")`** Examples of traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars \SI{1}{\milli\meter} except for glands, which is \SI{.1}{\milli\meter}. Photographs by J. H. Nitta.
+**`r figure("traits-used-image")`** Examples of fern traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars \SI{1}{\milli\meter} except for glands, which is \SI{.1}{\milli\meter}. Photographs by J. H. Nitta.
 
-**`r figure("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}{\meter} on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval{ }< 0.05. Partially transparent colors indicate outliers excluded from the models (see Methods).
+**`r figure("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}{\meter} on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval{ }< 0.05. Asterisks indicate statistical significance of linear model; \*\*\* = \pval{ }< 0.001; \* = \pval{ }< 0.05. Partially transparent colors indicate outliers excluded from the models (see Methods).
 
 **`r figure("pca")`** Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n{ }= `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \species). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
 
-**`r figure("tree")`** Time-calibrated phylogenetic tree of ferns from Moorea, French Polynesia with growth habit and associated traits mapped on the tips. Tree obtained from @Nitta2017. Relative value of quantitative (sporophyte) traits shown by heat gradient: low values are lighter, high values are darker. Stipe length and rhizome diameter were log-transformed prior to scaling. States of qualitative (gametophyte) states and growth habit indicated by colors in key. Grey indicates missing data or non-applicable trait states. Values for three leaf size traits (stipe length, frond length, and frond with) were correlated, so of these, we only present stipe length. Species missing data for six or more traits not shown. For a summary of traits, see `r table("traits-used")`. Major epiphytic radiations identified by @Schuettpelz2009 labeled on tree in green: H, Hymenophylloideae; T, Trichomanoideae; V, Vittarioideae; A, *Asplenium*; E, *Elaphoglossum*; P, Polypodiaceae; taxonomy follows @PteridophytePhylogenyGroupI2016.
+**`r figure("tree")`** Time-calibrated phylogenetic tree of ferns from Moorea, French Polynesia with growth habit and associated traits mapped on the tips. Tree obtained from @Nitta2017. Relative value of quantitative (sporophyte) traits shown by heat gradient: low values are lighter, high values are darker. Stipe length and rhizome diameter were log-transformed prior to scaling. States of qualitative (gametophyte) states and growth habit indicated by colors in key. Grey indicates missing data or non-applicable trait states. Values for three leaf size traits (stipe length, frond length, and frond with) were correlated, so of these, we only present stipe length. Species missing data for six or more traits not shown. For a summary of traits, see `r table("traits-used")`. Major epiphytic radiations identified by @Schuettpelz2009 labeled on tree in green: H, Hymenophylloideae; T, Trichomanoideae; V, Vittarioideae; A, *Asplenium*; E, *Elaphoglossum*; P, Polypodiaceae; taxonomy follows @PteridophytePhylogenyGroupI2016. Scale in millions of years (my).
 
 **`r figure("heatmap")`** Variable importance scores from a full-subsets analysis using general additive models exploring the effect of climate and growth habit (terrestrial vs. epiphytic growth) on community diversity of ferns on Moorea, French Polynesia. Predictor variable abbreviations: VPD, vapor pressure deficit; SD, standard deviation. Response variable abbreviations: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance; SLA, specific leaf area. All trait names refer to community-weighted mean values. Community-weighted means of frond length, frond width, stipe length, and rhizome diameter were correlated (Pearson's correlation coefficient > 0.9), so of these we only show stipe length.
 
-**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05. \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05. Results for frond width were very similar to frond length and not shown.
+**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05. \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01. Results for frond width were very similar to frond length and not shown. Response variable abbreviations: SLA, specific leaf area.
 
-**`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05.
+**`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01.
 
 \clearpage
 
-**Table `r table_nums("traits-used", display = "n")`** Traits used in this study
+**Table `r table_nums("traits-used", display = "n")`** Fern traits used in this study
 
 ```{r traits-used}
 # Table 1: traits used in this study
@@ -717,7 +729,7 @@ Noncordate gametophyte morphotypes include ribbon, strap and filamentous.
 
 \clearpage
 
-**Table `r table_nums("phylosig-cont", display = "n")`** Phylogenetic signal in continuous traits
+**Table `r table_nums("phylosig-cont", display = "n")`** Phylogenetic signal in continuous traits of ferns from Moorea, French Polynesia
 
 ```{r phylosig-cont}
 # Table 2: Phylogenetic signal in continuous traits
@@ -749,7 +761,7 @@ phylosig_cont_traits %>%
 
 \clearpage
 
-**Table `r table_nums("phylosig-binary", display = "n")`** Phylogenetic signal in binary traits
+**Table `r table_nums("phylosig-binary", display = "n")`** Phylogenetic signal in binary traits of ferns from Moorea, French Polynesia
 
 ```{r phylosig-binary}
 # Table 3: Phylogenetic signal in binary traits
@@ -780,7 +792,7 @@ phylosig_binary_traits %>%
 
 \clearpage
 
-**Table `r table_nums("pics", display = "n")`** Results of phylogenetically independent contrasts analysis of quantitative (sporophyte) traits related to epiphytic growth
+**Table `r table_nums("pics", display = "n")`** Results of phylogenetically independent contrasts analysis of quantitative (sporophyte) traits related to epiphytic growth in ferns from Moorea, French Polynesia
 
 ```{r pics}
 # Table 4: phylogenetically independent contrasts
@@ -812,7 +824,7 @@ All trait contrasts were made by subtracting epiphytic values from terrestrial v
 
 \clearpage
 
-**Table `r table_nums("corr-evo", display = "n")`** Pagel's (1994) test of correlated evolution between binary traits
+**Table `r table_nums("corr-evo", display = "n")`** Pagel's (1994) test of correlated evolution between binary traits in ferns from Moorea, French Polynesia
 
 ```{r corr-evo}
 # Table 5: Pagel's test of correlated evolution
