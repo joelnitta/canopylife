@@ -19,7 +19,7 @@ plan <- drake_plan(
   
   ### Trait data ###
   # - Read in list of accepted species to use for this study
-  # i.e., ferns of Moorea (130 spp)
+  # i.e., ferns of Moorea (129 spp)
   species_list = read_csv(file_in("data/nitta_2017/species.csv")) %>%
     clean_names() %>%
     filter(include == 1, tahiti_only == 0) %>%
@@ -131,11 +131,20 @@ plan <- drake_plan(
   ### PPGI taxonomy ###
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
   
-  ### Format trait data for SI ###
-  # Include SD and n for all quantitative (continuous) data
+  # Format data for SI ----
+  # - Traits: include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
     sla_raw, morph_cont_raw, morph_qual_raw
   ),
+  
+  # - Species names
+  # Look up scientific names (specis names with taxonomic author) using
+  # a live search of taxonomic databases via the Global Name Resolver 
+  # (https://resolver.globalnames.org/). Since results have the possibility
+  # of changing, the results are checked-in to the repo at the time of manuscript 
+  # submission.
+  taxonomic_data_for_si = reformat_species_names(species_list) %>%
+    lookup_taxonomy,
   
   # Climate analysis ----
   

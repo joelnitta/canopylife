@@ -3168,6 +3168,98 @@ write_csv_with_meta <- function(x, file, header, footer, ...){
   if(!missing(footer)) writeLines(footer, con = datafile)
 }
 
+# Wrap a vector in quotes. Useful for writing out strings to CSV file that you
+# don't want split across columns
+wrap_quotes <- function (x) {paste0("\"", x, "\"")}
+
+#' Reformat a vector of species names into a dataframe
+#' with columns for genus, specific epithet, etc
+#'
+#' @param species_list Vector of species names
+#'
+#' @return Tibble
+#' 
+reformat_species_names <- function (species_list) {
+  
+    tibble(taxon_code = species_list) %>%
+    separate(taxon_code, c("genus", "specific_epithet"), sep = "_", remove = FALSE) %>%
+    mutate(informal_variety = str_match(specific_epithet, "[0-9]") %>% map_chr(1)) %>%
+    mutate(specific_epithet = str_remove_all(specific_epithet, "[0-9]")) %>%
+    mutate(species = paste(genus, specific_epithet)) %>%
+    mutate(informal_variety = case_when(
+      specific_epithet == "sp" ~ NA_character_,
+      TRUE ~ informal_variety
+    )) %>%
+    mutate(infaspecific_epithet = case_when(
+      species == "Lindsaea repens" ~ "marquesensis",
+      species == "Davallia solida" ~ "solida",
+      species == "Ctenitis sciaphila" ~ "sciaphila",
+      species == "Dicranopteris linearis" ~ "linearis",
+      species == "Deparia petersenii" ~ "congrua",
+      TRUE ~ NA_character_
+    )) %>%
+    mutate(taxon = jntools::paste3(genus, specific_epithet, infaspecific_epithet))
+  
+}
+
+#' Lookup taxonomic data (authorship) for a df of taxon names of ferns from Moorea
+#' 
+#' Custom taxonomy added for names not in IPNI or TROPICOS
+#'
+#' @param taxa_names_df Dataframe of taxonomic names of ferns from Moorea
+#'
+#' @return Tibble
+#' 
+lookup_taxonomy <- function (taxa_names_df) {
+  
+  # Use the Global Name Resolver (https://resolver.globalnames.org/) to match the names
+  # to either IPNI or TROPICOS databases.
+  taxa_names_with_authors <- taxize::gnr_resolve(
+    names = taxa_names_df$taxon, 
+    best_match_only = TRUE, 
+    # for data_source_ids, 167 = ipni, 165 = tropicos
+    data_source_ids = c(167, 165)) %>%
+    select(species = user_supplied_name, scientific_name = matched_name, name_source = data_source_title) %>%
+    right_join(taxa_names_df) %>% 
+    select(taxon_code, genus, specific_epithet, infaspecific_epithet, informal_variety, scientific_name, name_source) %>%
+    # Manually add names from NCBI database or Murdock and Smith 2003
+    # for those missing from IPNI or TROPICOS
+    mutate(scientific_name = case_when(
+      taxon_code == "Diplazium_grantii" ~ "Diplazium grantii (Copel.) C.Chr.",
+      taxon_code == "Dryopteris_macrolepidota" ~ "Dryopteris macrolepidota Copel.",
+      taxon_code == "Psilotum_nudum" ~ "Psilotum nudum (L.) P.Beauv.",
+      taxon_code == "Archigrammitis_tahitensis" ~ "Archigrammitis tahitensis (C.Chr.) Parris",
+      taxon_code == "Hymenophyllum_polyanthos" ~ "Hymenophyllum polyanthos (Sw.) Sw.",
+      taxon_code == "Ctenitis_sciaphila" ~ "Ctenitis sciaphila (Maxon) Ching var. sciaphila",
+      taxon_code == "Davallia_solida" ~ "Davallia solida (G. Forst.) Sw. var. solida",
+      taxon_code == "Deparia_petersenii" ~ "Deparia petersenii (Kunze) M. Kato subsp. congrua (Brack.) M. Kato",
+      taxon_code == "Dicranopteris_linearis" ~ "Dicranopteris linearis (Burm. f.) Underw. var. linearis",
+      taxon_code == "Lindsaea_repens" ~ "Lindsaea repens (Bory) Thwaites var. marquesensis E. D. Br.",
+      TRUE ~ scientific_name
+    )) %>%
+    mutate(name_source = case_when(
+      taxon_code == "Diplazium_grantii" ~ "NCBI",
+      taxon_code == "Dryopteris_macrolepidota" ~ "NCBI",
+      taxon_code == "Psilotum_nudum" ~ "NCBI",
+      taxon_code == "Archigrammitis_tahitensis" ~ "NCBI",
+      taxon_code == "Hymenophyllum_polyanthos" ~ "NCBI",
+      taxon_code == "Ctenitis_sciaphila" ~ "Murdock and Smith 2003",
+      taxon_code == "Davallia_solida" ~ "Murdock and Smith 2003",
+      taxon_code == "Deparia_petersenii" ~ "Murdock and Smith 2003",
+      taxon_code == "Dicranopteris_linearis" ~ "Murdock and Smith 2003",
+      taxon_code == "Lindsaea_repens" ~ "Murdock and Smith 2003",
+      TRUE ~ name_source
+    )) %>%
+    mutate(name_source = case_when(
+      name_source == "Tropicos - Missouri Botanical Garden" ~ "TROPICOS",
+      name_source == "The International Plant Names Index" ~ "IPNI",
+      TRUE ~ name_source
+    )) %>%
+    rename_all(~str_replace(., "_", " "))
+  
+}
+
+# MS rendering ----
 
 # Dummy function to track arbitary output from rmarkdown::render()
 render_tracked <- function (tracked_output, ...) {

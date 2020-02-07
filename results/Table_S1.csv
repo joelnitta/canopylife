@@ -1,3 +1,7 @@
+New Phytologist Supporting Information
+"Authors: Joel H. Nitta, James E. Watkins, Jr., and Charles C. Davis"
+Article acceptance date: 5 February 2020
+"Table S1: List of ferns from Moorea, French Polynesia included in this study"
 taxon code,genus,specific epithet,infaspecific epithet,informal variety,scientific name,name source
 Abrodictyum_asaegrayi1,Abrodictyum,asaegrayi,NA,1,Abrodictyum asae-grayi (Bosch) Ebihara & K.Iwats.,IPNI
 Abrodictyum_asaegrayi2,Abrodictyum,asaegrayi,NA,2,Abrodictyum asae-grayi (Bosch) Ebihara & K.Iwats.,IPNI
@@ -89,7 +93,6 @@ Microsorum_grossum,Microsorum,grossum,NA,NA,Microsorum grossum (Langsd. & Fisch.
 Microsorum_membranifolium,Microsorum,membranifolium,NA,NA,Microsorum membranifolium (R. Br.) Ching,TROPICOS
 Microsorum_powellii,Microsorum,powellii,NA,NA,Microsorum powellii (Baker) Copel.,IPNI
 Microsorum_punctatum,Microsorum,punctatum,NA,NA,Microsorum punctatum,IPNI
-Microsorum_xmaximum,Microsorum,xmaximum,NA,NA,Microsorum maximum (Brack.) Copel.,TROPICOS
 Nephrolepis_biserrata,Nephrolepis,biserrata,NA,NA,Nephrolepis biserrata,IPNI
 Nephrolepis_cordifolia,Nephrolepis,cordifolia,NA,NA,Nephrolepis cordifolia,IPNI
 Nephrolepis_hirsutula,Nephrolepis,hirsutula,NA,NA,Nephrolepis hirsutula,IPNI
@@ -129,3 +132,10 @@ Tmesipteris_gracilis,Tmesipteris,gracilis,NA,NA,Tmesipteris gracilis Chinnock,IP
 Vaginularia_paradoxa,Vaginularia,paradoxa,NA,NA,Vaginularia paradoxa Mett. ex Miq.,TROPICOS
 Vandenboschia_maxima,Vandenboschia,maxima,NA,NA,Vandenboschia maxima (Blume) Copel.,TROPICOS
 Wibelia_denticulata,Wibelia,denticulata,NA,NA,Wibelia denticulata (Burm.f.) M.Kato & Tsutsumi,IPNI
+"'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned"
+"to infraspecific taxa that are morphologically and genetically distinct, but lack formal names"
+"distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI"
+"= International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden"
+"taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information"
+"taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith"
+"2003 = Murdock & Smith (2003). 'NA' indicates not applicable."
