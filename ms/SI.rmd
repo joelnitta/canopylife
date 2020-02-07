@@ -120,7 +120,7 @@ write_csv_with_meta(
 
 **`r s_table("ancova")`** `r s_table_cap("ancova")` (see separate file)
 
-d.f., degrees of freedom; MS, mean squares.
+d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable.
 
 ```{r climate-ancova}
 # Format table
@@ -144,7 +144,7 @@ header <- c(
   s_table_nums("ancova") %>% wrap_quotes
 )
 
-footer <- "d.f., degrees of freedom; MS, mean squares." %>% wrap_quotes
+footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable." %>% wrap_quotes
 
 # Write out table with metadata
 write_csv_with_meta(
@@ -400,7 +400,7 @@ fig_s2 <- fig_s2 + plot_annotation(theme = theme(plot.margin = margin(
 fig_s2
 ```
 
-**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
 
 \clearpage
 
