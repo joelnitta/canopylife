@@ -1,12 +1,14 @@
 ---
 title: ""
-bibliography: 
-  - "references_si.bib"
-  - "references_other.yaml"
-fontsize: 12pt
+mainfont: Roboto-Regular.ttf
+fontsize: 11pt
+mainfontoptions: 
+- BoldFont=Roboto-Bold.ttf
+- ItalicFont=Roboto-Italic.ttf
+- BoldItalicFont=Roboto-BoldItalic.ttf
 output: 
   bookdown::pdf_document2:
-    citation_package: none # Use pandoc default, otherwise csl can't be used for reference formatting
+    citation_package: none
     toc: no
     number_sections: no
     fig_caption: yes
@@ -19,8 +21,8 @@ header-includes:
   - \usepackage{float}
   - \makeatletter\renewcommand*{\fps@figure}{H}\makeatother # Fix position of figs
   - \makeatletter\renewcommand*{\fps@table}{H}\makeatother # Fix position of tables
-nocite: | 
-  @NMNS2008, @Copeland1932, @FloraNSW2019, @Brownsey1987, @Nayar1971, @Lloyd1980, @Zhang2008, @Bierhorst1967, @Martin2006, @Tigerschiold1989, @Tigerschiold1990, @Atkinson1975, @Palmer2003
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -28,6 +30,7 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE, cache = FA
 
 # Load analysis results
 loadd(list = c(
+  "taxonomic_data_for_si",
   "trait_data_for_si",
   "climate_ancova_results",
   "phylosig_binary_traits_strict",
@@ -389,30 +392,78 @@ mntd_corr_plot <-
     axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
   )
 
-fig_s1 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
+fig_s2 <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
 
-fig_s1 <- fig_s1 + plot_annotation(theme = theme(plot.margin = margin(
+fig_s2 <- fig_s2 + plot_annotation(theme = theme(plot.margin = margin(
       0.2, 0.2, 0.2, 0.2, unit = "in")))
 
-fig_s1
-
-# ggsave(plot = fig_s1, filename = here::here("results/Fig_S1.eps"), height = 8, width = 4, units = "in")
+fig_s2
 ```
 
-**`r s_figure("corr-plot")`** Correlation plot comparing results of functional community diversity analyses using different sets of traits as input. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
-
-\clearpage
-
-```{r Fig-S2, fig.height = 6, fig.width = 7, fig.cap = ""}
-loadd(cwsd_scatterplot, cache = canopy_cache)
-
-cwsd_scatterplot
-
-# ggsave(plot = cwsd_scatterplot, filename = here::here("results/Fig_S2.eps"), height = 6, width = 7, units = "in")
-```
-
-**`r s_figure("cwsd")`** Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01; \* = \pval{ }< 0.05 **(a)**, traits related to plant size **(b)**, traits not related to plant size.
+**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width, pinna number, SLA, degree of lamina dissection), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
 
 \clearpage
 
 **References**
+
+<!-- There is a bug somewhere in Rmd -> tex -> pdf using pandoc such that the 
+first bold words until a period in each reference do not appear bold. As a 
+work-around, first render to pdf with `bibliography` and `nocite` in the yaml, 
+then convert Rmd -> tex -> docx with pandoc, edit docx manually to fix formatting, 
+then docx -> md with pandoc, and paste properly formatted refs below -->
+
+**Atkinson L**. **1975**. The gametophyte of five Old World thelypteroid
+ferns. *Phytomorphology* **25**: 38--54.
+
+**Bierhorst DW**. **1967**. The gametophyte of *Schizaea dichotoma*.
+*American Journal of Botany* **54**: 538--549.
+
+**Brownsey PJ**. **1987**. A review of the fern genus *Hypolepis*
+(Dennstaedtiaceae) in the Malesian and Pacific regions. *Blumea* **32**:
+227--276.
+
+**Copeland EB**. **1932**. Pteridophytes of the Society Islands.
+*Bernice P. Bishop Museum Bulletin* **93**: 1--86.
+
+**Lloyd RM**. **1980**. Reproductive biology and gametophyte morphology
+of New World populations of *Acrostichum aureum*. *American Fern
+Journal* **70**: 99--110.
+
+**Martin K, Sini S, Zhang C, Slater A, Madhusoodanan P**. **2006**.
+Efficient induction of apospory and apogamy in vitro in silver fern
+(*Pityrogramma calomelanos* L.). *Plant Cell Reports* **25**:
+1300--1307.
+
+**Murdock AG, Smith AR**. **2003**. Pteridophytes of Moorea, French
+Polynesia, with a new species, *Tmesipteris gracilis* (Psilotaceae).
+*Pacific Science* **57**: 253--265.
+
+**National Museum of Nature and Science**. **2008**. *Illustrated Flora
+of Ferns and Fern Allies of South Pacific Islands* (T Nakamura and S
+Matsumoto, Eds.). Tokai University Press.
+
+**Nayar BK, Kaur S**. **1971**. Gametophytes of homosporous ferns. *The
+Botanical Review* **37**: 295--396.
+
+**Pagel M**. **1994**. Detecting correlated evolution on phylogenies: A
+general method for the comparative analysis of discrete characters.
+*Proceedings of the Royal Society B: Biological Sciences* **255**:
+37--45.
+
+**Palmer DD**. **2003**. *Hawaii's Ferns and Fern Allies*. Honolulu:
+University of Hawaii Press.
+
+**Royal Botanic Gardens and Domain Trust**. **2004**. *Flora of New
+South Wales. PlantNET (The NSW Plant Information Network System)* [WWW
+document] URL <http://plantnet.rbgsyd.nsw.gov.au/floraonline.htm>.
+[accessed 1 January 2020].
+
+**Tigerschiöld E**. **1989**. Dehiscence of antheridia in thelypteroid
+ferns. *Nordic Journal of Botany* **9**: 407--412.
+
+**Tigerschiöld E**. **1990**. Gametophytes of some Ceylonese species of
+Thelypteridaceae. *Nordic Journal of Botany* **9**: 657--664.
+
+**Zhang K, Shi L, Zhang X, Jiang C, Tim-Chun W**. **2008**. Gametophyte
+morphology and development of six chinese species of *Pteris*
+(Pteridaceae). *American Fern Journal* **98**: 33--41.
