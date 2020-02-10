@@ -236,12 +236,6 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     clean_names() %>%
     select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source )
   
-  # For some reason Prosaptia subnuda is missing. Add this.
-  qual_traits <- bind_rows(
-    qual_traits,
-    tibble(species = "Prosaptia_subnuda", habit = 1)
-  )
-  
   # Format data sources to use names instead of number codes to minimize confusion
   # original scheme:
   #1 = lab obs.
@@ -286,9 +280,14 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     mutate(habit = factor(habit)) %>%
     mutate(habit = fct_recode(habit, terrestrial = "0", epiphytic = "1"))
   
-  # keep only species in species list
+  # Filter keep only species in species list with some checks
   qual_traits %>%
-    filter(species %in% species_list)
+    # Make sure all species on the species list are included in the data,
+    # and that all species are unique and non-missing
+    verify(all(species_list %in% .$species)) %>%
+    filter(species %in% species_list) %>%
+    assert(not_na, species) %>%
+    assert(is_uniq, species)
   
 }
 
