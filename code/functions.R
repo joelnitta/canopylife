@@ -112,6 +112,16 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
     )) %>%
     mutate(specimen = str_replace(specimen, " ", "_"))
   
+  # Make sure combination of species + specimen is unique (don't have same
+  # specimen counted as different species)
+  sla_raw %>% 
+    count(specimen, species) %>%
+    assert(is_uniq, specimen, success_fun = success_logical)
+  
+  sla_filmy %>% 
+    count(specimen, species) %>%
+    assert(is_uniq, specimen, success_fun = success_logical)
+  
   #### Calculate SLA
   
   # For hole punches, use area of punch
@@ -130,25 +140,49 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
       size_of_punches = case_when(
         number_of_punches > 1 ~ 2L,
         TRUE ~ size_of_punches
-      ),
+      )) %>%
+    # Check that number_of_punches and size_of_punches aren't missing
+    assert(not_na, number_of_punches, size_of_punches) %>%
+    mutate(
       # Calculate SLA based on measured area (in sq m per kg)
       # (size_of_punches is punch diameter in mm)
-      sla = (((size_of_punches*0.05)^2*pi*number_of_punches)/mass)*0.1
+      radius_mm = 0.5 * size_of_punches,
+      radius_m = (1/1000) * radius_mm,
+      area_sq_m = number_of_punches*pi*radius_m^2,
+      mass_kg = (1/1000) * mass,
+      sla = area_sq_m / mass_kg
     )
   
   # For filmy ferns, calculate SLA based on measured area (in sq m per kg)
   sla_filmy <-
     sla_filmy %>%
     mutate(
-      area_cm2 = as.numeric(area_cm2),
-      sla = (area_cm2/mass_g) * 0.1
+      area_sq_cm = as.numeric(area_cm2),
+      area_sq_m = (1/100)^2 * area_sq_cm,
+      mass_kg = (1/1000) * mass_g,
+      sla = area_sq_m / mass_kg
     )
+  
+  # Check for outliers: SLA values outside of 4 SDs by species (could indicate
+  # mis-placed decimal point during data entry)
+  sla_raw %>%
+    group_by(species) %>%
+    add_count() %>%
+    filter(n > 1) %>%
+    nest(-species) %>%
+    mutate(
+      pass_check = map_lgl(data, ~insist(., within_n_sds(4), sla, success_fun = success_logical))
+    ) %>%
+    verify(all(pass_check == TRUE), success_fun = success_logical)
   
   # Combine the raw data (mulitple observations per individual)
   bind_rows(
     select(sla_raw, specimen, species, sla),
     select(sla_filmy, specimen, species, sla)
   ) %>%
+    # Check that SLA values are in a reasonable range:
+    # 0 to 200 (more than 100 is quite unusual)
+    assert(within_bounds(0, 200, include.lower = FALSE), sla) %>%
     mutate(
       specimen = str_replace_all(specimen, " ", "_")
     )
