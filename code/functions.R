@@ -332,7 +332,7 @@ make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
       morph_cont_mean,
       morph_qual_raw
     ),
-    full_join) %>% 
+    full_join, by = "species") %>% 
     mutate(morphotype = factor(morphotype)) %>%
     # Rename traits to simple version
     rename(
