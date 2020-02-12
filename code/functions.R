@@ -495,9 +495,13 @@ process_raw_climate <- function (climate_raw) {
       year = lubridate::year(date) %>% as.numeric) %>%
     filter(str_detect(site, "Aorai", negate = TRUE))
   
-  # Split out set of days from 2013 to use for missing Tohiea 400 m ter data
+  # Split out set of days from 2013 and 2014 to use for filling in 
+  # missing 2014 Tohiea 400 m ter data
   tohiea_400m_2013 <- climate %>%
     filter(date >= "2013-03-12" & date < "2013-07-06" & site == "Tohiea_400m_ter")
+  
+  tohiea_400m_2014 <- climate %>%
+    filter(date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter")
   
   # Replace the year 2013 with 2014 only for these dates in the Tohiea 400 m ter data
   tohiea_400m_as_2014 <-
@@ -508,8 +512,8 @@ process_raw_climate <- function (climate_raw) {
   # Do final filtering
   climate_filtered <- climate %>%
     # Remove bad Tohiea data from 2014
-    filter(!(date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter")) %>%
-    # Replace it with data from 2013
+    anti_join(tohiea_400m_2014, by = c("date", "site")) %>%
+    # Replace bad Tohiea data from 2014 with data from 2013
     bind_rows(tohiea_400m_as_2014) %>%
     # Subset to 2013-07-07 to 2014-07-05
     # - 2012-07-18 = first day have dataloggers on Tohiea
@@ -522,19 +526,26 @@ process_raw_climate <- function (climate_raw) {
     # then RH failed around 12/5/13, temp also looks suspicious)
     filter(site != "Mouaputa_800m_epi") %>%
     # Delete another chunk missing a lot of data, from 2013-11-19 to 2014-03-21
-    # ('2013-11-19'), as.Date('2014-03-21')
     filter(!(date >= "2013-11-19" & date <= "2014-03-21")) %>%
-    # missing data for Tohiea_800m_ter: 
-    # 2014-06-15, 2014-06-16, 2014-06-19, 2014-06-20 (RH = 1%)
+    # Delete 2013-07-26 to 2013-07-29 (Tohiea_600m epi temperature below 0C)
+    filter(!(date >= "2013-07-26" & date <= "2013-07-29")) %>%
+    # Delete specific additional days with bad data:
     filter(
       date != "2013-08-08", # RH = 1% at Tohiea_600m_ter
-      date != "2014-06-15",
-      date != "2014-06-16",
-      date != "2014-06-19",
-      date != "2014-06-20")
-  
-  # Reformat filtered data
-  climate_filtered %>%
+      date != "2014-06-15", # RH = 1% at Tohiea_800m_ter
+      date != "2014-06-16", # RH = 1% at Tohiea_800m_ter
+      date != "2014-06-19", # RH = 1% at Tohiea_800m_ter
+      date != "2014-06-20"  # RH = 1% at Tohiea_800m_ter
+      ) %>% 
+    # Check that there are no duplicate measurements for a given time/site/date
+    assert_rows(col_concat, is_uniq, date, time, site) %>%
+    # Check for missing data
+    assert(not_na, everything()) %>%
+    # Check for temp, RH in reasonable range 
+    # (shouldn't be any freezing, expect at least some humidity)
+    assert(within_bounds(0,50, include.lower = FALSE), temp) %>%
+    assert(within_bounds(1,100), rh) %>%
+    # Reformat filtered data, add VPD
     mutate(
       habit = case_when(
         str_detect(site, "epi") ~ "epiphytic",
@@ -544,6 +555,25 @@ process_raw_climate <- function (climate_raw) {
       site = str_remove_all(site, "_epi|_ter"),
       vpd = plantecophys::RHtoVPD(rh, temp)
     )
+  
+  # Final checks:
+  # Count the total number of dataloggers
+  n_dataloggers <- climate_filtered %>% 
+    select(site, habit) %>% 
+    unique %>%
+    nrow()
+  
+  # Check that each day has data from each datalogger (none missing)
+  climate_filtered %>% 
+    select(date, site, habit) %>% 
+    unique() %>%
+    group_by(date) %>%
+    summarize(
+      tally = n()
+    ) %>%
+    verify(tally == n_dataloggers, success_fun = success_logical)
+  
+  climate_filtered
   
 }
 
