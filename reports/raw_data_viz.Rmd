@@ -1,0 +1,120 @@
+---
+title: "Data plots"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# Load packages and custom functions
+source(here::here("code/setup.R"))
+source(here::here("code/functions.R"))
+```
+
+Visualize the data and check for any outliers.
+
+## Climate
+
+Load raw data.
+
+```{r load-climate-data}
+# Read in raw climate data
+climate_raw <- read_csv(here::here("data/hobo_moorea_aorai_2-24-15.csv"))
+
+# Subset to Moorea, format site as 
+climate_raw_moorea <- climate_raw %>%
+   filter(str_detect(site, "Aorai", negate = TRUE)) %>%
+   mutate(date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct())
+```
+
+Identify time periods with erroneous values to exclude from cleaned dataset. These are the values that will be excluded by `process_raw_climate()`. 
+
+Note the band of red from 2013-11-19 to 2014-03-21 is actually OK for most dataloggers, but not for Tohiea 1170m ter + Tohiea 2000m ter, so it is flagged to be excluded from all sites.
+
+```{r format-raw-climate}
+# Make dataframe of dates/sites to flag as having weird data.
+highlight_chunks <- 
+  climate_raw_moorea %>%
+  select(date, site) %>%
+  unique %>%
+  mutate(flag = case_when(
+    date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter" ~ TRUE,
+    site == "Rotui_600m_epi" ~ TRUE,
+    site == "Mouaputa_800m_epi" ~ TRUE,
+    date >= "2013-11-19" & date <= "2014-03-21" ~ TRUE,
+    date >= "2013-07-26" & date <= "2013-07-29" & site == "Tohiea_600m_epi"~ TRUE,
+    date == "2013-08-08" & site == "Tohiea_600m_ter" ~ TRUE,
+    date %in% c("2014-06-15", "2014-06-16", "2014-06-19", "2014-06-20") & site == "Tohiea_600m_ter" ~ TRUE,
+    TRUE ~ FALSE
+  ))
+
+# Add the "flag" column back into the original data
+climate_raw_moorea_highlight <-
+  left_join(climate_raw_moorea, highlight_chunks, by = c("site", "date")) %>%
+  # Reformat growth habit as factor, separate from site name
+   mutate(
+      habit = case_when(
+        str_detect(site, "epi") ~ "epiphytic",
+        str_detect(site,  "ter") ~ "terrestrial"
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
+      site = str_remove_all(site, "_epi|_ter")
+    )
+```
+
+Plot the raw data, highlighting the data that will be excluded from the cleaned dataset in red.
+
+```{r raw-temp-plot, fig.height = 24, fig.width = 8}
+ggplot(climate_raw_moorea_highlight, aes(x = date_time, y = temp, color = flag)) +
+  geom_line() +
+  scale_color_manual(values = c("TRUE" = "red", "FALSE" = "black")) +
+  labs(
+    title = "Moorea temperature",
+    subtitle = "raw data") +
+  theme(legend.position = "bottom") +
+  facet_grid(vars(site), vars(habit))
+```
+
+```{r raw-rh-plot, fig.height = 24, fig.width = 8}
+ggplot(climate_raw_moorea_highlight, aes(x = date_time, y = rh, color = flag)) +
+  geom_line() +
+  scale_color_manual(values = c("TRUE" = "red", "FALSE" = "black")) +
+  labs(
+    title = "Moorea rel. humidity",
+    subtitle = "raw data") +
+  theme(legend.position = "bottom") +
+  facet_grid(vars(site), vars(habit))
+```
+
+Process raw data, excluding time periods with erroneous values.
+
+```{r process-climate}
+# Process raw climate data: 
+# subset to only Moorea and days without missing data,
+# replace one chunk of missing data with same dates from previous year,
+# calculate vapor pressure deficit (VPD) from temp and RH.
+moorea_climate <- process_raw_climate(climate_raw) %>%
+  # Add date_time column for plotting
+   mutate(date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct())
+```
+
+Plot the cleaned climate data.
+
+```{r clean-temp-plot, fig.height = 24, fig.width = 8}
+ggplot(moorea_climate, aes(x = date_time, y = temp)) +
+  geom_line() +
+  labs(
+    title = "Moorea temperature",
+    subtitle = "cleaned data") +
+  facet_grid(vars(site), vars(habit))
+```
+
+```{r clean-rh-plot, fig.height = 24, fig.width = 8}
+ggplot(moorea_climate, aes(x = date_time, y = rh)) +
+  geom_line() +
+  labs(
+    title = "Moorea rel. humidity",
+    subtitle = "cleaned data") +
+  facet_grid(vars(site), vars(habit))
+```
