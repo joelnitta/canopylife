@@ -486,14 +486,14 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
 #' @return Tibble
 process_raw_climate <- function (climate_raw) {
   
-  # Reformat data, filter out Tahiti sites (on Mt. Aorai)
+  # Filter out Tahiti sites (on Mt. Aorai)
   # Split apart date into components
   climate <- climate_raw %>%
+    filter(str_detect(site, "Aorai", negate = TRUE)) %>%
     mutate(
       day = lubridate::day(date) %>% as.numeric,
       month = lubridate::month(date) %>% as.numeric,
-      year = lubridate::year(date) %>% as.numeric) %>%
-    filter(str_detect(site, "Aorai", negate = TRUE))
+      year = lubridate::year(date) %>% as.numeric)
   
   # Split out set of days from 2013 and 2014 to use for filling in 
   # missing 2014 Tohiea 400 m ter data
@@ -509,34 +509,36 @@ process_raw_climate <- function (climate_raw) {
     mutate(year = year + 1) %>%
     mutate(date = paste(year, month, day, sep = "-") %>% as.Date)
   
-  # Do final filtering
+  # Process data
   climate_filtered <- climate %>%
     # Remove bad Tohiea data from 2014
     anti_join(tohiea_400m_2014, by = c("date", "site")) %>%
     # Replace bad Tohiea data from 2014 with data from 2013
     bind_rows(tohiea_400m_as_2014) %>%
-    # Subset to 2013-07-07 to 2014-07-05
-    # - 2012-07-18 = first day have dataloggers on Tohiea
-    # - 2013-07-06 = first day had all dataloggers set up on Moorea
-    filter(date >= "2013-07-07" & date <= "2014-07-05") %>%
-    # Delete all Rotui 600m epiphytic data 
-    # (failed very early, missing for almost entire survey period)
+    # Remove two sites that have are (nearly) complete failures
     filter(site != "Rotui_600m_epi") %>%
-    # Delete all Mouaputa 800m epiphytic data (missing from 7/10/13-8/10/13, 
-    # then RH failed around 12/5/13, temp also looks suspicious)
     filter(site != "Mouaputa_800m_epi") %>%
-    # Delete another chunk missing a lot of data, from 2013-11-19 to 2014-03-21
-    filter(!(date >= "2013-11-19" & date <= "2014-03-21")) %>%
-    # Delete 2013-07-26 to 2013-07-29 (Tohiea_600m epi temperature below 0C)
-    filter(!(date >= "2013-07-26" & date <= "2013-07-29")) %>%
-    # Delete specific additional days with bad data:
-    filter(
-      date != "2013-08-08", # RH = 1% at Tohiea_600m_ter
-      date != "2014-06-15", # RH = 1% at Tohiea_800m_ter
-      date != "2014-06-16", # RH = 1% at Tohiea_800m_ter
-      date != "2014-06-19", # RH = 1% at Tohiea_800m_ter
-      date != "2014-06-20"  # RH = 1% at Tohiea_800m_ter
-      ) %>% 
+    # Crop to dates when all dataloggers were set up on Moorea
+    filter(date >= "2013-07-07" & date <= "2014-07-05") %>%
+    # Flag dates to remove:
+    mutate(
+      flag = case_when(
+        # 2013-11-19 to 2013-12-15 (Tohiea 1170m ter 0% RH)
+        date >= "2013-11-19" & date <= "2013-12-15" ~ TRUE,
+        # 2013-12-29 to 2014-03-12 (Tohiea 200m ter unusually low RH)
+        date >= "2013-12-29" & date <= "2014-03-12" ~ TRUE,
+        # 2014-03-13 to 2014-03-20 (Missing data for most Tohiea sites)
+        date >= "2014-03-13" & date <= "2014-03-20" ~ TRUE,
+        # 2014-06-15 to 2014-06-20 (Tohiea_800m_ter 0% RH)
+        date >= "2014-06-15" & date <= "2014-06-20" ~ TRUE,
+        # 2013-07-26 to 2013-07-29 (Tohiea_600m epi temperature below 0C)
+        date >= "2013-07-26" & date <= "2013-07-29" ~ TRUE,
+        # 2013-08-08 (Tohiea_600m_ter 1% RH)
+        date == "2013-08-08" ~ TRUE,
+        TRUE ~ FALSE
+      )) %>%
+    filter(flag == FALSE) %>%
+    select(-flag) %>%
     # Check that there are no duplicate measurements for a given time/site/date
     assert_rows(col_concat, is_uniq, date, time, site) %>%
     # Check for missing data
