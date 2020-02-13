@@ -6,7 +6,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 # Load packages and custom functions
 source(here::here("code/setup.R"))
 source(here::here("code/functions.R"))
@@ -22,87 +22,228 @@ Load raw data.
 # Read in raw climate data
 climate_raw <- read_csv(here::here("data/hobo_moorea_aorai_2-24-15.csv"))
 
-# Subset to Moorea, format site as 
-climate_raw_moorea <- climate_raw %>%
-   filter(str_detect(site, "Aorai", negate = TRUE)) %>%
-   mutate(date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct())
+# Subset to Moorea
+climate <- climate_raw %>%
+    filter(str_detect(site, "Aorai", negate = TRUE)) %>%
+    mutate(
+      day = lubridate::day(date) %>% as.numeric,
+      month = lubridate::month(date) %>% as.numeric,
+      year = lubridate::year(date) %>% as.numeric,
+      # add date_time col for plotting
+      date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct())
 ```
 
-Identify time periods with erroneous values to exclude from cleaned dataset. These are the values that will be excluded by `process_raw_climate()`. 
+Identify time periods with erroneous values to exclude from cleaned dataset. Do this with code first below and inspect the results.
 
-Note the band of red from 2013-11-19 to 2014-03-21 is actually OK for most dataloggers, but not for Tohiea 1170m ter + Tohiea 2000m ter, so it is flagged to be excluded from all sites.
+```{r flag-extremes}
+# Identify start and end dates of survey including all sites on Moorea
+survey_window <-
+climate %>%
+  group_by(site) %>%
+  summarize(
+    last_measured_day = max(date),
+    first_measured_day = min(date)
+  ) %>%
+  summarize(
+    end_date = min(last_measured_day),
+    start_date = max(first_measured_day)
+  ) %>%
+  mutate_all(as.POSIXct)
+
+# Tally days with extreme (possibly erroneous) data
+extremes_tally <-
+climate %>%
+  # Exclude two sites completely that are mostly missing data
+  filter(site != "Rotui_600m_epi") %>%
+  filter(site != "Mouaputa_800m_epi") %>%
+  # Crop start and end dates
+  filter(date > as.Date(survey_window$start_date) & date < as.Date(survey_window$end_date)) %>%
+  # Flag any days as possible bad data if values are extremely low or high
+  mutate(
+    temp_hi = ifelse(temp > 50, TRUE, FALSE),
+    temp_low = ifelse(temp < 5, TRUE, FALSE),
+    rh_low = ifelse(rh < 10, TRUE, FALSE)) %>%
+  group_by(site, date) %>%
+  summarize(
+    temp_hi = sum(temp_hi),
+    temp_low = sum(temp_low),
+    rh_low = sum(rh_low)
+  ) %>%
+  ungroup %>%
+  filter_at(vars(temp_hi, temp_low, rh_low), any_vars(. > 0)) %>%
+  mutate(flag = TRUE) %>%
+  arrange(site, date)
+
+extremes_tally %>% DT::datatable()
+```
+
+After inspecting raw data plots and the points identified above, flag days for removal by hard-coding.
 
 ```{r format-raw-climate}
 # Make dataframe of dates/sites to flag as having weird data.
-highlight_chunks <- 
-  climate_raw_moorea %>%
+climate_data_flags <- 
+  climate %>%
   select(date, site) %>%
   unique %>%
-  mutate(flag = case_when(
-    date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter" ~ TRUE,
-    site == "Rotui_600m_epi" ~ TRUE,
-    site == "Mouaputa_800m_epi" ~ TRUE,
-    date >= "2013-11-19" & date <= "2014-03-21" ~ TRUE,
-    date >= "2013-07-26" & date <= "2013-07-29" & site == "Tohiea_600m_epi"~ TRUE,
+  mutate(flag_rh = case_when(
+    # Flag 2013-11-19 to 2013-12-15 (Tohiea 1170m ter 0% RH)
+    date >= "2013-11-19" & date <= "2013-12-15" & site == "Tohiea_1170m_ter" ~ TRUE,
+    # Flag 2013-12-29 to 2014-03-12 (Tohiea 200m ter unusually low RH)
+    date >= "2013-12-29" & date <= "2014-03-12" & site == "Tohiea_200m_ter" ~ TRUE,
+    # Flag 2014-06-15 to 2014-06-20 (Tohiea_800m_ter 0% RH)
+    date >= "2014-06-15" & date <= "2014-06-20" & site == "Tohiea_800m_ter" ~ TRUE,
+    # Flag 2013-08-08 (Tohiea_600m_ter 1% RH)
     date == "2013-08-08" & site == "Tohiea_600m_ter" ~ TRUE,
-    date %in% c("2014-06-15", "2014-06-16", "2014-06-19", "2014-06-20") & site == "Tohiea_600m_ter" ~ TRUE,
+    # Flag Tohiea sites missing data
+    date >= "2014-03-13" & date <= "2014-03-20" & str_detect(site, "Tohiea") ~ TRUE,
+    TRUE ~ FALSE
+  )) %>%
+  mutate(flag_temp = case_when(
+    # Delete 2013-07-26 to 2013-07-29 (Tohiea_600m epi temperature below 0C)
+    date >= "2013-07-26" & date <= "2013-07-29" & site == "Tohiea_600m_epi" ~ TRUE,
+    # Flag Tohiea sites missing data
+    date >= "2014-03-13" & date <= "2014-03-20" & str_detect(site, "Tohiea") ~ TRUE,
     TRUE ~ FALSE
   ))
 
 # Add the "flag" column back into the original data
-climate_raw_moorea_highlight <-
-  left_join(climate_raw_moorea, highlight_chunks, by = c("site", "date")) %>%
-  # Reformat growth habit as factor, separate from site name
-   mutate(
-      habit = case_when(
-        str_detect(site, "epi") ~ "epiphytic",
-        str_detect(site,  "ter") ~ "terrestrial"
-      ),
-      habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
-      site = str_remove_all(site, "_epi|_ter")
-    )
+climate_flagged <- left_join(climate, climate_data_flags, by = c("site", "date"))
 ```
 
-Plot the raw data, highlighting the data that will be excluded from the cleaned dataset in red.
+Plot the raw data, highlighting the data that will be excluded from the cleaned dataset in red, and lines indicating cropped starting and ending dates in blue.
 
 ```{r raw-temp-plot, fig.height = 24, fig.width = 8}
-ggplot(climate_raw_moorea_highlight, aes(x = date_time, y = temp, color = flag)) +
+ggplot(climate_flagged, aes(x = date_time, y = temp, color = flag_temp)) +
   geom_line() +
   scale_color_manual(values = c("TRUE" = "red", "FALSE" = "black")) +
+  annotate("segment", 
+           x = survey_window$start_date,
+           xend = survey_window$start_date, 
+           y = -Inf, yend = Inf, color = "blue") +
+  annotate("segment", 
+           x = survey_window$end_date, 
+           xend = survey_window$end_date, 
+           y = -Inf, yend = Inf, color = "blue") +
   labs(
     title = "Moorea temperature",
     subtitle = "raw data") +
   theme(legend.position = "bottom") +
-  facet_grid(vars(site), vars(habit))
+  facet_wrap(vars(site), ncol = 2)
 ```
 
 ```{r raw-rh-plot, fig.height = 24, fig.width = 8}
-ggplot(climate_raw_moorea_highlight, aes(x = date_time, y = rh, color = flag)) +
+ggplot(climate_flagged, aes(x = date_time, y = rh, color = flag_rh)) +
   geom_line() +
   scale_color_manual(values = c("TRUE" = "red", "FALSE" = "black")) +
+  annotate("segment", 
+           x = survey_window$start_date,
+           xend = survey_window$start_date, 
+           y = -Inf, yend = Inf, color = "blue") +
+  annotate("segment", 
+           x = survey_window$end_date, 
+           xend = survey_window$end_date, 
+           y = -Inf, yend = Inf, color = "blue") +
   labs(
     title = "Moorea rel. humidity",
     subtitle = "raw data") +
   theme(legend.position = "bottom") +
-  facet_grid(vars(site), vars(habit))
+  facet_wrap(vars(site), ncol = 2)
 ```
 
-Process raw data, excluding time periods with erroneous values.
+Process raw data, excluding time periods with erroneous values. Any day with erroneous values for any site will be excluded from ALL sites.
 
 ```{r process-climate}
-# Process raw climate data: 
-# subset to only Moorea and days without missing data,
-# replace one chunk of missing data with same dates from previous year,
-# calculate vapor pressure deficit (VPD) from temp and RH.
-moorea_climate <- process_raw_climate(climate_raw) %>%
-  # Add date_time column for plotting
-   mutate(date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct())
+# Process climate using same code as function in analysis:
+
+# Subset to Moorea
+climate_moorea <- climate_raw %>%
+    filter(str_detect(site, "Aorai", negate = TRUE)) %>%
+    mutate(
+      day = lubridate::day(date) %>% as.numeric,
+      month = lubridate::month(date) %>% as.numeric,
+      year = lubridate::year(date) %>% as.numeric)
+      
+# Split out set of days from 2013 and 2014 to use for filling in 
+# missing 2014 Tohiea 400 m ter data
+tohiea_400m_2013 <- climate_moorea %>%
+  filter(date >= "2013-03-12" & date < "2013-07-06" & site == "Tohiea_400m_ter")
+
+tohiea_400m_2014 <- climate_moorea %>%
+  filter(date >= "2014-03-12" & date < "2014-07-06" & site == "Tohiea_400m_ter")
+
+# Replace the year 2013 with 2014 only for these dates in the Tohiea 400 m ter data
+tohiea_400m_as_2014 <-
+  tohiea_400m_2013 %>%
+  mutate(year = year + 1) %>%
+  mutate(date = paste(year, month, day, sep = "-") %>% as.Date)
+
+# Process data
+climate_filtered <- climate_moorea %>%
+  # Remove bad Tohiea data from 2014
+  anti_join(tohiea_400m_2014, by = c("date", "site")) %>%
+  # Replace bad Tohiea data from 2014 with data from 2013
+  bind_rows(tohiea_400m_as_2014) %>%
+  # Remove two sites that have are (nearly) complete failures
+  filter(site != "Rotui_600m_epi") %>%
+  filter(site != "Mouaputa_800m_epi") %>%
+  # Crop to dates when all dataloggers were set up on Moorea
+  filter(date >= "2013-07-07" & date <= "2014-07-05") %>%
+  # Flag dates to remove:
+  mutate(
+    flag = case_when(
+      # 2013-11-19 to 2013-12-15 (Tohiea 1170m ter 0% RH)
+      date >= "2013-11-19" & date <= "2013-12-15" ~ TRUE,
+      # 2013-12-29 to 2014-03-12 (Tohiea 200m ter unusually low RH)
+      date >= "2013-12-29" & date <= "2014-03-12" ~ TRUE,
+      # 2014-03-13 to 2014-03-20 (Missing data for most Tohiea sites)
+      date >= "2014-03-13" & date <= "2014-03-20" ~ TRUE,
+      # 2014-06-15 to 2014-06-20 (Tohiea_800m_ter 0% RH)
+      date >= "2014-06-15" & date <= "2014-06-20" ~ TRUE,
+      # 2013-07-26 to 2013-07-29 (Tohiea_600m epi temperature below 0C)
+      date >= "2013-07-26" & date <= "2013-07-29" ~ TRUE,
+      # 2013-08-08 (Tohiea_600m_ter 1% RH)
+      date == "2013-08-08" ~ TRUE,
+      TRUE ~ FALSE
+    )) %>%
+  # Instead of filtering out flagged data, set temp and RH for these to NA
+  # this will make them appear as gaps in the plot
+  mutate(
+    rh = case_when(
+      flag == FALSE ~ rh,
+      flag == TRUE ~ NaN
+    )
+  ) %>%
+  mutate(
+    temp = case_when(
+      flag == FALSE ~ temp,
+      flag == TRUE ~ NaN
+    )
+  ) %>%
+  select(-flag) %>%
+  # Check that there are no duplicate measurements for a given time/site/date
+  assert_rows(col_concat, is_uniq, date, time, site) %>%
+  # Check for temp, RH in reasonable range 
+  # (shouldn't be any freezing, expect at least some humidity)
+  assert(within_bounds(0,50, include.lower = FALSE), temp) %>%
+  assert(within_bounds(1,100), rh) %>%
+  # Reformat filtered data, add VPD
+  mutate(
+    habit = case_when(
+      str_detect(site, "epi") ~ "epiphytic",
+      str_detect(site,  "ter") ~ "terrestrial"
+    ),
+    habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
+    site = str_remove_all(site, "_epi|_ter"),
+    vpd = plantecophys::RHtoVPD(rh, temp),
+    # add date_time col for plotting
+    date_time = (lubridate::ymd(date) + lubridate::hms(time)) %>% as.POSIXct()
+  )
 ```
 
 Plot the cleaned climate data.
 
 ```{r clean-temp-plot, fig.height = 24, fig.width = 8}
-ggplot(moorea_climate, aes(x = date_time, y = temp)) +
+ggplot(climate_filtered, aes(x = date_time, y = temp)) +
   geom_line() +
   labs(
     title = "Moorea temperature",
@@ -111,10 +252,92 @@ ggplot(moorea_climate, aes(x = date_time, y = temp)) +
 ```
 
 ```{r clean-rh-plot, fig.height = 24, fig.width = 8}
-ggplot(moorea_climate, aes(x = date_time, y = rh)) +
+ggplot(climate_filtered, aes(x = date_time, y = rh)) +
   geom_line() +
   labs(
     title = "Moorea rel. humidity",
     subtitle = "cleaned data") +
   facet_grid(vars(site), vars(habit))
+```
+
+## Traits
+
+Load raw data and prepare for plotting.
+
+```{r load-trait-data}
+# Read in species list
+species_list <- read_csv(here::here("data/nitta_2017/species.csv")) %>%
+    clean_names() %>%
+    filter(include == 1, tahiti_only == 0) %>%
+    # Exclude Microsorum_xmaximum (hybrid between M. grossum and M. commutatum)
+    filter(genus_sp != "Microsorum_xmaximum") %>%
+    pull(genus_sp)
+
+# Process raw continuous trait data
+# (includes one measure per specimen,
+#  multiple specimens per species).
+# All measurements in cm, except number of pinna pairs.
+  morph_cont_raw <- process_raw_cont_morph(
+    here::here("data/morph_measurements_2020-02-10.csv"),
+    species_list
+  )
+
+# Angiopteris evecta is much bigger than other species, obscures
+# points in plot. Exclude this outlier for plotting.
+morph_cont_raw_no_evecta <-
+  morph_cont_raw %>%
+  filter(!str_detect(species, "evecta"))  
+
+# Define a function for plotting trait data
+
+plot_raw_quant_morph <- function(morph_cont_raw, trait_select) {
+  
+  # Subset to selected trait
+  trait_select_enquo <- enquo(trait_select)
+
+  morph_cont_sel <- select(morph_cont_raw, species, !!trait_select_enquo)
+  
+  # Calculate mean trait value to arrange species box plots by mean
+  means <-
+    morph_cont_sel %>%
+    group_by(species) %>%
+    summarize(
+      mean = mean(!!trait_select_enquo, na.rm = TRUE)
+    )
+  
+  morph_cont_sel %>%
+    left_join(means) %>%
+    mutate(species = as.factor(species) %>% fct_reorder(mean)) %>%
+    ggplot(aes(x = species, y = !!trait_select_enquo)) +
+    geom_boxplot() +
+    coord_flip()
+  
+}
+```
+
+Plot raw quantitative trait data.
+
+```{r plot-stipe, fig.height = 16, fig.width = 6}
+plot_raw_quant_morph(morph_cont_raw_no_evecta, stipe_length) +
+  labs(title = "Stipe length")
+```
+
+```{r plot-frond, fig.height = 16, fig.width = 6}
+plot_raw_quant_morph(morph_cont_raw_no_evecta, frond_length) +
+  labs(title = "Frond length")
+```
+
+```{r plot-lamina-width, fig.height = 16, fig.width = 6}
+plot_raw_quant_morph(morph_cont_raw_no_evecta, lamina_width) +
+  labs(title = "Lamina width")
+```
+
+```{r plot-rhizome, fig.height = 16, fig.width = 6}
+plot_raw_quant_morph(morph_cont_raw_no_evecta, rhizome_dia) +
+  labs(title = "Rhizome diameter")
+```
+
+```{r plot-pinna-pairs, fig.height = 16, fig.width = 6}
+plot_raw_quant_morph(morph_cont_raw_no_evecta, pinna_pairs) +
+  labs(title = "No. pinna pairs")
 ```
