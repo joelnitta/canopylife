@@ -987,6 +987,8 @@ analyze_binary_phylosig <- function (traits, phy) {
   traits_binary %>%
     gather(trait, value, -species) %>%
     nest(-trait) %>%
+    # Remove NAs for individual trait observations
+    remove_missing(na.rm = TRUE) %>%
     mutate(
       # Construct a comparative data object for each
       # binary trait
