@@ -362,14 +362,14 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
   sla_mean <- 
     sla_raw %>%
     group_by(species, specimen) %>%
-    summarize(sla = mean(sla, na.rm = TRUE) , sd = sd(sla, na.rm = TRUE), n = n()) %>%
+    summarize(sla = mean(sla, na.rm = TRUE), n = n()) %>%
     ungroup()
   
   # Calculate grand mean for each species based on individual means
   sla_grand_mean <- 
     sla_mean %>%
     group_by(species) %>%
-    summarize(mean = mean(sla, na.rm = TRUE) , sd = sd(sla, na.rm = TRUE), n = n()) %>%
+    summarize(mean = mean(sla, na.rm = TRUE), sd = sd(sla, na.rm = TRUE), n = n()) %>%
     mutate(trait = "sla")
   
   ### Other traits ###
@@ -387,7 +387,8 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
   morph_mean <- 
     morph_long %>%
     group_by(species, trait) %>%
-    summarise(mean = mean(measurement) , sd = sd(measurement), n = n())
+    summarise(mean = mean(measurement), sd = sd(measurement), n = n()) %>%
+    ungroup()
   
   # Merge with SLA grand means
   morph_mean <- bind_rows(morph_mean, sla_grand_mean)
@@ -413,8 +414,8 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     # Add column for mean +/- sd (n) formatted for printing
     mutate(
       print = case_when(
-        n > 1 ~ glue("{mean}, {sd} ({n})"),
-        n == 1 ~ glue("{mean} ({n})")
+        n > 1 ~ glue("{mean}, {sd} ({n})") %>% as.character,
+        n == 1 ~ glue("{mean} ({n})") %>% as.character
       )
     ) %>%
     # Spread back into wide format
@@ -422,7 +423,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     spread(trait, print)
   
   ### Merge into final data table ###
-  morph_table <- full_join(morph_mean, morph_qual_raw) %>%
+  morph_table <- full_join(morph_mean, morph_qual_raw, by = "species") %>%
     mutate(gameto_source = jntools::paste3(source_1, source_2) %>%
              str_replace(" ", ", ")) %>%
     select(-source_1, -source_2) %>%
@@ -456,7 +457,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     )
   
   # Add measurment sources and reformat column names/order
-  left_join(morph_table, meas_sources) %>%
+  left_join(morph_table, meas_sources, by = "species") %>%
     select(
       `taxon code` = species,
       `growth habit` = habit,
@@ -471,7 +472,7 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
       `frond width (cm)` = lamina_width, 
       `stipe length (cm)` = stipe_length, 
       `rhizome diam. (cm)` = rhizome_dia, 
-      SLA = sla, 
+      `SLA (sq m per kg)` = sla, 
       `sporophyte data source` = sporo_source
     )
   
