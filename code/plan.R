@@ -275,7 +275,7 @@ plan <- drake_plan(
     phy = phy, 
     traits = fern_traits,
     null_model = "independentswap",
-    iterations = 1000
+    iterations = 10000
   ),
   
   # Functional community diversity ----
