@@ -152,7 +152,7 @@ plan <- drake_plan(
   # coefficients less than 0.9,
   # and add elevation.
   climate_select = select_climate_vars(grand_mean_climate) %>%
-    left_join(moorea_sites),
+    left_join(moorea_sites, by = "site"),
   
   # Make three versions of climate data for further analysis:
   # - Square-root transform selected variables

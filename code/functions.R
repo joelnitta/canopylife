@@ -661,27 +661,59 @@ get_grand_means <- function(daily_means) {
 #' 
 select_climate_vars <- function (climate_data) {
   
+  # Helper function to check correlations:
+  #
+  # Given a set of correlations and variables that we think are
+  # correlated, return TRUE if this is the case.
+  #
+  # corr_df is output of corrr::correlate()
+  # corr_pairs is vector of pairs of correlated variables (variable
+  # names separated by hyphen; should include pairs in both directions)
+  # cutoff is default correlation value to check
+  check_corr <- function (corr_df, corr_pairs, cutoff = 0.9) {
+    corr_df %>%
+      gather(-rowname, key = "var2", value = "correlation") %>%
+      filter(abs(correlation) > cutoff) %>%
+      unite("comparison", rowname, var2, sep = "-") %>%
+      assert(
+        assertr::in_set(corr_pairs), 
+        comparison,
+        success_fun = success_logical)
+  }
+  
   # Calculate total correlation for all climatic variables
   climate_corr_all <-
     climate_data %>%
     # filter(is_outlier == "no") %>%
     select_if(is.numeric) %>%
-    corrr::correlate()
+    corrr::correlate(method = "pearson", use = "pairwise.complete.obs")
   
   # Mean and min temp are correlated
   temp_corr <-
     climate_corr_all %>%
     corrr::focus(contains("temp"), mirror = TRUE)
   
+  # - check correlation with assertr
+  check_corr(temp_corr, c("temp_min-temp_mean", "temp_mean-temp_min"))
+  
   # (mean and min RH) and (min and SD RH) are correlated.
   rh_corr <-
     climate_corr_all %>%
     corrr::focus(contains("RH"), mirror = TRUE)
   
+  # - check correlation with assertr
+  check_corr(rh_corr, 
+             c("RH_min-RH_mean", "RH_mean-RH_min",
+               "RH_sd-RH_min", "RH_min-RH_sd"))
+  
   # max VPD and sd VPD are correlated.
   vpd_corr <-
     climate_corr_all %>%
     corrr::focus(contains("vpd"), mirror = TRUE)
+  
+  # - check correlation with assertr
+  check_corr(vpd_corr, 
+             c("vpd_max-vpd_sd", "vpd_sd-vpd_max"))
   
   # VPD and rel. hum. are almost all correlated.
   temp_rh_corr <-
