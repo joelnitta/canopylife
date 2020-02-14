@@ -1558,7 +1558,7 @@ choose_habit_elevation_models <- function (data, resp_vars) {
       moran_results = map2(
         .x = residuals,
         .y = dist_mat,
-        ~spdep::moran.mc(.x, .y, 10000) %>% broom::tidy()
+        ~spdep::moran.mc(x = .x, listw = .y, nsim = 10000) %>% broom::tidy()
       )
     ) %>%
     select(var, model_type, model, AICc, moran_results)
@@ -1601,7 +1601,7 @@ extract_model_summaries <- function (supported_models) {
 #' elevation as covariate
 #'
 #' @param data Dataframe including site names, growth habit
-#' (epiphytic or terrestrial), elevatoin, and climate (response) variables
+#' (epiphytic or terrestrial), elevation, and climate (response) variables
 #' @param resp_vars Vector of response variables to test
 #'
 #' @return Dataframe
