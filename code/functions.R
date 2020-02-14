@@ -1111,6 +1111,8 @@ run_pic <- function (traits, phy) {
   ### Run PICs using brunch
   traits %>%
     gather(trait, value, -species, -habit) %>%
+    # Remove NAs for individual trait observations
+    remove_missing(na.rm = TRUE) %>%
     nest(-trait) %>%
     mutate(
       # Construct a comparative data object for each trait
