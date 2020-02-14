@@ -169,7 +169,7 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
     group_by(species) %>%
     add_count() %>%
     filter(n > 1) %>%
-    nest(-species) %>%
+    nest(data = -species) %>%
     mutate(
       pass_check = map_lgl(data, ~insist(., within_n_sds(4), sla, success_fun = success_logical))
     ) %>%
@@ -986,7 +986,7 @@ analyze_binary_phylosig <- function (traits, phy) {
   # data for ANY trait will get dropped
   traits_binary %>%
     gather(trait, value, -species) %>%
-    nest(-trait) %>%
+    nest(data = -trait) %>%
     # Remove NAs for individual trait observations
     remove_missing(na.rm = TRUE) %>%
     mutate(
@@ -1018,7 +1018,7 @@ analyze_binary_phylosig <- function (traits, phy) {
       )
     ) %>%
     select(trait, phylo_d_summary) %>%
-    unnest()
+    unnest(cols = phylo_d_summary)
   
 }
 
@@ -1113,7 +1113,7 @@ run_pic <- function (traits, phy) {
     gather(trait, value, -species, -habit) %>%
     # Remove NAs for individual trait observations
     remove_missing(na.rm = TRUE) %>%
-    nest(-trait) %>%
+    nest(data = -trait) %>%
     mutate(
       # Construct a comparative data object for each trait
       # so none are missing any data.
@@ -1143,7 +1143,7 @@ run_pic <- function (traits, phy) {
     ) %>%
     # Select only results and format as output dataframe
     select(trait, tidy_summary, contrasts_summary) %>%
-    unnest
+    unnest(cols = c(tidy_summary, contrasts_summary))
 }
 
 # Community and functional diversity ----
@@ -1576,7 +1576,7 @@ extract_model_fits <- function (supported_models) {
       fits = map(model, augment)
     ) %>%
     select(var, model_type, fits) %>%
-    unnest
+    unnest(cols = fits)
 }
 
 # Extract model parameter summaries (slope, intersect, etc)
@@ -1586,7 +1586,7 @@ extract_model_parameters <- function (supported_models) {
       summary = map(model, tidy)
     ) %>%
     select(var, model_type, summary) %>%
-    unnest
+    unnest(cols = summary)
 }
 
 # Extract model summaries (pvalue, rsquared of model)
@@ -1596,7 +1596,7 @@ extract_model_summaries <- function (supported_models) {
       summary = map(model, glance)
     ) %>%
     select(var, model_type, AICc, summary) %>%
-    unnest
+    unnest(cols = summary)
 }
 
 #' Run ANCOVA on climate data
@@ -1615,13 +1615,13 @@ run_ancova <- function(data, resp_vars) {
   data %>%
     select(site, habit, el, resp_vars) %>%
     gather(variable, value, -site, -habit, -el) %>%
-    nest(-variable) %>%
+    nest(data = -variable) %>%
     mutate(
       cov_model = map(data, ~aov(value ~ habit * el, .)),
       summary = map(cov_model, broom::tidy)
     ) %>%
     select(variable, summary) %>%
-    unnest
+    unnest(cols = summary)
 }
 
 #' Run a t-test comparing values between epiphytic and terrestrial

@@ -206,7 +206,7 @@ plan <- drake_plan(
   # - Check for spatial autocorrelation in residuals.
   climate_model_moran = climate_models %>%
     select(-model) %>%
-    unnest %>%
+    unnest(col = moran_results) %>%
     select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
   
   # Principal components analysis ----
@@ -397,7 +397,7 @@ plan <- drake_plan(
       )
     )
   ) %>%
-    unnest() %>%
+    unnest(cols = moran_test) %>%
     select(resp_var, modname, AICc, r2, delta_AICc,
            morans_I = statistic, morans_I_pval = p.value),
   
