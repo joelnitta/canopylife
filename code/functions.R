@@ -1040,13 +1040,20 @@ analyze_binary_phylosig <- function (traits, phy) {
 test_corr_evo <- function (selected_trait, traits, phy) {
   
   # Make morphotype binary
-  traits <- mutate (traits, morphotype = case_when (
-    morphotype == "cordate" ~ "cordate",
-    morphotype != "cordate" ~ "noncordate"))
+  traits <- 
+    traits %>%
+    assert(not_na, morphotype) %>%
+    mutate (
+      morphotype = case_when (
+        morphotype == "cordate" ~ "cordate",
+        morphotype != "cordate" ~ "noncordate")
+    )
   
   # Trim data to non-missing trait values and
   # make sure species in same order in tree and traits
-  traits_select <- traits %>% select(species, habit, selected_trait) %>%
+  traits_select <- 
+    traits %>% 
+    select(species, habit, selected_trait) %>%
     remove_missing(na.rm = TRUE)
   
   traits_trim <- match_traits_and_tree(traits = traits_select, phy = phy, "traits") 
@@ -1061,7 +1068,8 @@ test_corr_evo <- function (selected_trait, traits, phy) {
     set_names(traits_trim$species)
   
   # run fitPagel() on selected trait vs. growth habit
-  model <- fitPagel(tree = phy_trim, x = trait_vec, y = habit_vec)
+  model <- fitPagel(tree = phy_trim, x = trait_vec, y = habit_vec,
+                    method = "fitMk", model = "ARD", dep.var = "xy")
   
   # get model results
   list(trait = selected_trait,
