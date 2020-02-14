@@ -354,15 +354,20 @@ plan <- drake_plan(
     select(func_comm_struc,
            site, habit, 
            mpd.obs.z.func = mpd.obs.z, 
-           mntd.obs.z.func = mntd.obs.z)) %>%
-    left_join(cwm_by_site) %>%
-    left_join(moorea_sites),
+           mntd.obs.z.func = mntd.obs.z),
+    by = c("site", "habit")) %>%
+    left_join(cwm_by_site, by = c("site", "habit")) %>%
+    left_join(moorea_sites, by = "site"),
   
   ### Run full-subset analysis using GAMs ###
   
-  # - Merge all diversity metrics and climate data for GAMs
-  # (transformed version of climate, but including outlier)
-  div_climate_trans = inner_join(div_metrics_all, climate_trans),
+  # - Merge all diversity metrics and climate data 
+  # (transformed version of climate, including outlier)
+  # inner_join will keep only sites with env. data
+  div_climate_trans = inner_join(
+    select(div_metrics_all, -lat, -long, -el),
+    climate_trans,
+    by = c("site", "habit")),
   
   # - Make named vector of response variables to test
   resp_vars = div_metrics_all %>%
