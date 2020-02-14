@@ -231,11 +231,6 @@ process_raw_cont_morph <- function (raw_morph_path, species_list) {
 #'
 process_raw_qual_morph <- function (raw_morph_path, species_list) {
   
-  # Read in raw trait data
-  qual_traits <- read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
-    clean_names() %>%
-    select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source )
-  
   # Format data sources to use names instead of number codes to minimize confusion
   # original scheme:
   #1 = lab obs.
@@ -250,8 +245,19 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
   #10 = Tigerschiöld 1990 "Gametophytes of some Ceylonese species of Thelypteridaceae" Nordic Journal of Botany [@Tigerschiold1990]
   #11 = Atkinson 1975 "The gametophyte of five Old World thelypteroid ferns" Phytomorphology [@Atkinson1975]
   #12 = Chen et al 2014 "First insights into the evolutionary history of the Davallia repens complex" Blumea [@Chen2014a]
-  qual_traits <-
-    qual_traits %>%
+
+  # Read in raw trait data
+  read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
+    clean_names() %>%
+    select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source) %>%
+    # Make sure all species on the species list are included in the data,
+    # and that all species are unique and non-missing
+    verify(all(species_list %in% .$species)) %>%
+    # Filter only species in species list
+    filter(species %in% species_list) %>%
+    assert(not_na, species) %>%
+    assert(is_uniq, species) %>%
+    # Reformat references
     separate(source, c("source_1", "source_2"), ",", fill = "right") %>%
     mutate_at(vars(source_1, source_2), ~str_remove_all(., " ") %>% as.numeric) %>%
     mutate_at(vars(source_1, source_2), ~str_pad(., 2, "left", "0")) %>%
@@ -272,23 +278,18 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
         . == "12" ~ "Chen2014a",
         TRUE ~ as.character(.))
       )
+    ) %>%
+    # Make binary habit a factor (order = epi, ter)
+    assert(not_na, habit) %>%
+    assert(assertr::in_set(0,1), habit) %>%
+    mutate(
+      habit = case_when(
+        habit == 1 ~ "epiphytic",
+        habit == 0 ~ "terrestrial"
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial"))
     )
-  
-  # Make binary habit a factor
-  qual_traits <-
-    qual_traits %>%
-    mutate(habit = factor(habit)) %>%
-    mutate(habit = fct_recode(habit, terrestrial = "0", epiphytic = "1"))
-  
-  # Filter keep only species in species list with some checks
-  qual_traits %>%
-    # Make sure all species on the species list are included in the data,
-    # and that all species are unique and non-missing
-    verify(all(species_list %in% .$species)) %>%
-    filter(species %in% species_list) %>%
-    assert(not_na, species) %>%
-    assert(is_uniq, species)
-  
+
 }
 
 #' Combine trait data into trait matrix
@@ -1093,14 +1094,18 @@ test_corr_evo <- function (selected_trait, traits, phy) {
 run_pic <- function (traits, phy) {
   
   ### Setup
-  # Make sure growth habit is factor with levels set as we expect
-  assert_that(isTRUE(all.equal(levels(traits$habit), c("terrestrial", "epiphytic"))))
-  
+
   # Keep only species, habit, and quantitative traits to test
   traits <- traits %>%
     select(species, habit, stipe, length, width, rhizome, dissection, pinna, sla) %>%
+    # For this function set growth habit levels in order ter, epi
+    # (so contrasts show ter minus epi)
+    mutate(habit = fct_relevel(habit, c("terrestrial", "epiphytic"))) %>%
     # Keep only species in phylogeny
     match_traits_and_tree(traits = ., phy = phy, "traits") 
+  
+  # Make sure growth habit is factor with levels set as we expect
+  assert_that(isTRUE(all.equal(levels(traits$habit), c("terrestrial", "epiphytic"))))
   
   # Trim to only species with trait data
   phy <- match_traits_and_tree(traits, phy, "tree")
@@ -1280,11 +1285,14 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
     select(mntd_out, site, starts_with("mntd")),
     by = "site"
   ) %>%
-    # Convert back to site and growth habit as separate columns
-    mutate(habit = case_when(
-      str_detect(site, "_E") ~ "epiphytic",
-      str_detect(site, "_T") ~ "terrestrial",
-    )) %>%
+    # Convert back to site and growth habit (as factor) as separate columns
+    mutate(
+      habit = case_when(
+        str_detect(site, "_E") ~ "epiphytic",
+        str_detect(site, "_T") ~ "terrestrial",
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial"))
+    ) %>%
     mutate(
       site = str_remove_all(site, "_E|_T")
     ) %>% 
@@ -1395,11 +1403,14 @@ analyze_func_struc_by_habit <- function (
     select(mntd_out, site, starts_with("mntd")),
     by = "site"
   ) %>%
-    # Convert back to site and growth habit as separate columns
-    mutate(habit = case_when(
-      str_detect(site, "_E") ~ "epiphytic",
-      str_detect(site, "_T") ~ "terrestrial",
-    )) %>%
+    # Convert back to site and growth habit (as factor) as separate columns
+    mutate(
+      habit = case_when(
+        str_detect(site, "_E") ~ "epiphytic",
+        str_detect(site, "_T") ~ "terrestrial",
+      ),
+      habit = fct_relevel(habit, c("epiphytic", "terrestrial"))
+    ) %>%
     mutate(
       site = str_remove_all(site, "_E|_T")
     ) %>% 
@@ -1673,9 +1684,8 @@ run_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
   
   diversity_data_select <- select(data, response := !!resp_var, site, habit, indep_vars) %>%
     # Make sure site and habit are factors
-    mutate(
-      site = as.factor(site),
-      habit = as.factor(habit)) %>%
+    mutate(site = as.factor(site)) %>%
+    verify(is.factor(habit)) %>%
     # gam needs a data.frame, not a tibble
     as.data.frame()
   
@@ -1683,10 +1693,10 @@ run_full_subset_canopy_mods <- function (data, resp_var, indep_vars) {
     diversity_data_select %>%
     dplyr::select(-response, -site, -habit) %>% colnames
   
-  # Define basic model with random effect.
+  # Define basic model with random effect (site).
   # Set k = 3 to avoid over-fitting.
   basic_model <- mgcv::gam(
-    response ~ s(site,bs="re"), 
+    response ~ s(site, bs = "re"), 
     family = gaussian(), 
     data = diversity_data_select)
   
