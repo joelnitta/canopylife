@@ -1166,32 +1166,35 @@ make_epi_ter_comm <- function (comm, traits, drop_zero_abun = FALSE) {
   # - Add growth habit to community data
   comm <- left_join(
     comm,
-    select(traits, species, habit)
+    select(traits, species, habit),
+    by = "species"
   ) %>%
     # Make sure habit isn't missing for any species
-    assert(not_na, habit)
+    assert(not_na, habit, species) %>%
+    assert(in_set("terrestrial", "epiphytic"), habit) %>%
+    assert(is_uniq, species)
   
   # - Rename columns with _E or _T at end for epiphytic or terrestrial
   # Set species abundances to 0, e.g. for terrestrial species 
   # in an epiphytic community.
   comm_by_habit <- left_join(
+    # Epiphytic communities: abundances for all terrestrial species set to 0
     comm %>%
       mutate_at(
         vars(-species, -habit), 
         ~ case_when(habit == "terrestrial" ~ 0, TRUE ~ .)) %>%
       rename_at(vars(-species, -habit), ~ paste0(., "_E")) %>%
       select(-habit),
+    # Terrestrial communities: abundances for all epiphytic species set to 0
     comm %>%
       mutate_at(
         vars(-species, -habit), 
         ~ case_when(habit == "epiphytic" ~ 0, TRUE ~ .)) %>%
       rename_at(vars(-species, -habit), ~ paste0(., "_T")) %>%
-      select(-habit)
+      select(-habit),
+    by = "species"
   ) %>%
-    # For FD::dbFD(), input community data needs to be data.frame with
-    # rows as sites (and rownames) and columns as species
-    gather(site, abundance, -species) %>%
-    group_by(species)
+    gather(site, abundance, -species)
   
   if(isTRUE(drop_zero_abun)) comm_by_habit <- filter(comm_by_habit, sum(abundance) > 0)
   
@@ -1274,9 +1277,10 @@ analyze_phy_struc_by_habit <- function (comm, phy, traits, null_model = "phyloge
   ### Merge results ###
   left_join(
     select(mpd_out, site, ntaxa, starts_with("mpd")),
-    select(mntd_out, site, starts_with("mntd"))
-    # Convert back to site and growth habit as separate columns
+    select(mntd_out, site, starts_with("mntd")),
+    by = "site"
   ) %>%
+    # Convert back to site and growth habit as separate columns
     mutate(habit = case_when(
       str_detect(site, "_E") ~ "epiphytic",
       str_detect(site, "_T") ~ "terrestrial",
