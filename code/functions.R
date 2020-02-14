@@ -1436,9 +1436,9 @@ calculate_cwm <- function (traits, comm, site_data,
     filter(species %in% traits$species) %>%
     gather(site, abundance, -species) %>%
     filter(abundance > 0) %>%
-    left_join(traits) %>% 
+    left_join(traits, by = "species") %>% 
     uncount(abundance) %>%
-    left_join(site_data) %>%
+    left_join(site_data, by = "site") %>%
     select(site, species, habit, el, traits_select) %>%
     gather(trait, value, -site, -species, -el, -habit) %>%
     group_by(habit, trait, site, el) %>%
@@ -1794,23 +1794,24 @@ check_moran_fss <- function (model_set, resp_var, best_mod, site_data) {
   # Extract best-fitting model residuals from fss results, and add long-lats.
   model_fits <- model_set[[resp_var]][["success.models"]][[best_mod]] %>%
     broom::augment() %>%
-    dplyr::left_join(site_data)
+    mutate(site = as.character(site)) %>%
+    dplyr::left_join(site_data, by = "site")
   
   # Convert to spatial dataframe
   sp::coordinates(model_fits) <- c("long", "lat")
   sp::proj4string(model_fits) <- sp::CRS("+proj=longlat +datum=WGS84 +no_defs")
   
   # Make distance matrix
-  dist_mat <- 1/as.matrix(dist(sp::coordinates(model_fits)))
-  diag(dist_mat) <- 0
-  # Some sites have the exact same GPS points; repalce Inf values for these with 0
-  dist_mat[is.infinite(dist_mat)] <- 0
+  dist_mat <- make_dist_mat(model_fits)
   
   # Conduct Moran's test on the residuals.
   # This will tell us if there is any remaining unexplained variation
   # in the model fit that is due to spatial autocorrelation
   # spdep::moran.test(model_fits$.resid, spdep::mat2listw(dist_mat)) %>% broom::tidy()
-  spdep::moran.mc(model_fits$.resid, spdep::mat2listw(dist_mat), 10000) %>% broom::tidy()
+  spdep::moran.mc(
+    x = model_fits$.resid, 
+    listw = spdep::mat2listw(dist_mat), 
+    nsim = 10000) %>% broom::tidy()
 }
 
 # Plotting ----
