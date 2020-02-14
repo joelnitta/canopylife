@@ -815,14 +815,6 @@ run_trait_PCA <- function (traits, phy,
   traits <- traits %>%
     # Make sure all selected continuous traits are in the trait data
     verify(all(cont_traits %in% colnames(.))) %>%
-    # Log-transform and scale
-    transform_traits(
-      trans_select = c("rhizome"),
-      scale_select = c("sla", "dissection", "stipe", "length", 
-                       "width", "rhizome", "pinna"),
-      log_trans = FALSE,
-      scale_traits = TRUE
-    ) %>%
     # Subset to continuous traits
     select(species, habit, cont_traits) %>%
     # Keep only completely sampled species
@@ -838,12 +830,11 @@ run_trait_PCA <- function (traits, phy,
   
   # Both standard and phylo PCA expect data frames with row names
   traits_df_for_pca <- select(traits, species, cont_traits) %>%
-    as.data.frame
-  rownames(traits_df_for_pca) <- traits_df_for_pca$species
-  traits_df_for_pca$species <- NULL
+    column_to_rownames("species")
   
   ### Standard PCA ###
-  pca_std_results <- PCA(traits_df_for_pca, graph=FALSE)
+  # values have already been scaled, so don't need to scale again.
+  pca_std_results <- PCA(traits_df_for_pca, graph = FALSE, scale = FALSE)
   
   # Get position of species along PC axes
   pca_std_species_locs <- pca_std_results$ind$coord %>%
@@ -882,7 +873,8 @@ run_trait_PCA <- function (traits, phy,
     )
   
   ### Phylogenetic PCA ###
-  pca_phy_results <- phyl.pca(phy, traits_df_for_pca, method="BM")
+  # Use covariance matrix since values have already been transformed and scaled.
+  pca_phy_results <- phyl.pca(phy, traits_df_for_pca, method="BM", mode = "cov")
   
   # Get position of species along PC axes
   pca_phy_species_locs <- pca_phy_results$S %>%
@@ -3433,7 +3425,8 @@ match_traits_and_tree <- function (traits, phy, return = c("traits", "tree")) {
   # Get traits in same order as tips
   traits <- left_join(
     tibble(species = phy$tip.label),
-    traits
+    traits,
+    by = "species"
   )
   
   # Make sure that worked
