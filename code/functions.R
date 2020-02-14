@@ -3180,8 +3180,9 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
     mutate(site = str_remove_all(site, "_S") %>% str_remove_all("_G")) %>%
     # Keep only sites on Moorea
     filter(site %in% moorea_sites$site) %>%
-    left_join(moorea_sites) %>%
+    left_join(moorea_sites, by = "site") %>%
     filter(abundance > 0) %>%
+    assert(not_na, el) %>%
     group_by(species, generation) %>%
     summarize(
       min_range = min(el),
@@ -3202,8 +3203,10 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
       filter(generation == "gametophyte") %>% 
       select(-generation) %>%
       spread(variable, value) %>%
-      rename_at(vars(max_range, min_range), ~paste("gameto", ., sep = "_"))
+      rename_at(vars(max_range, min_range), ~paste("gameto", ., sep = "_")),
+    by = "species"
   ) %>%
+    assert(is_uniq, species) %>%
     mutate(
       gameto_beyond_sporo = case_when(
         gameto_max_range > sporo_max_range ~ "yes",
@@ -3215,7 +3218,8 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   
   # Add growth habit
   range_comp <- inner_join(
-    traits, range_comp
+    traits, range_comp,
+    by = "species"
   ) %>%
     select(species, gameto_beyond_sporo, gemmae) %>%
     mutate(gemmae = case_when(
@@ -3230,7 +3234,7 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
   phy_trim <- match_traits_and_tree(traits = range_comp, phy = phy, "tree") 
   
   # Format input data for phytools
-  # - Extract named vector of trait values
+  # - Extract named vector of trait values (presence of gametophyte beyond sporophyte)
   trait_vec <- pull(traits_trim, gameto_beyond_sporo) %>%
     set_names(traits_trim$species)
   # - Extract named vector of gemmae presence/absence
@@ -3238,7 +3242,8 @@ test_corr_evo_range_gemmae <- function(community_matrix_path, phy, traits, moore
     set_names(traits_trim$species)
   
   # run fitPagel() on widespread growth vs. presence/absence of gemmae
-  fitPagel(tree = phy_trim, x = trait_vec, y = gemmae_vec)
+  fitPagel(tree = phy_trim, x = trait_vec, y = gemmae_vec,
+           method = "fitMk", model = "ARD", dep.var = "xy")
   
 }
 
