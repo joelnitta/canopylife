@@ -52,6 +52,10 @@ exit
 docker-compose down
 ```
 
+## Editing with R Studio Server
+
+If you want to interact with the code in R Studio Server within the docker container, open a browser and navigate to http://localhost:8787/ after running `docker-compose up -d`. In your session, be sure to run `.libPaths("/renv")` to set the library correctly before loading any packages (for some reason, this happens automatically with R at the command line, but not within R Studio).
+
 ## Licenses
 
 - All code in this repository is licensed under the [MIT license](LICENSE.txt)
