@@ -1338,9 +1338,16 @@ analyze_func_struc_by_habit <- function (
   traits_df <- select(traits, species, traits_select) %>%
     column_to_rownames("species")
   
+  # Check that all species are present in both data sets
+  assert_that(isTRUE(all.equal(
+    sort(rownames(traits_df)), 
+    sort(colnames(comm_by_habit))
+  )))
+  
   # Match species order in community data
   traits_df <- traits_df[colnames(comm_by_habit), ]
-  
+
+  # Calculate distance matrix
   if (!is.null(weights)) {
     dist_mat <- FD::gowdis(traits_df, w = weights) 
   } else {
@@ -1385,9 +1392,10 @@ analyze_func_struc_by_habit <- function (
   ### Tidy results ###
   left_join(
     select(mpd_out, site, ntaxa, starts_with("mpd")),
-    select(mntd_out, site, starts_with("mntd"))
-    # Convert back to site and growth habit as separate columns
+    select(mntd_out, site, starts_with("mntd")),
+    by = "site"
   ) %>%
+    # Convert back to site and growth habit as separate columns
     mutate(habit = case_when(
       str_detect(site, "_E") ~ "epiphytic",
       str_detect(site, "_T") ~ "terrestrial",
