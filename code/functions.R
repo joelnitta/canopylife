@@ -1840,6 +1840,61 @@ check_moran_fss <- function (model_set, resp_var, best_mod, site_data) {
     nsim = 10000) %>% broom::tidy()
 }
 
+#' Make a spatially explicit model for SLA against elevation plus growth habit
+#'
+#' @param sla_data Tibble; input data frame with the columns 
+#' "sla" (specific leaf area), "habit" (growth habit, factor either 'terrestrial' or 'epiphytic'), 
+#' "el" (elevation), "site" (site name), "long" (longitude), "lat" (latitude)
+#'
+#' @return Tibble including model, Moran's I and p-value for Moran's I.
+#' 
+make_spatial_sla_model <- function (sla_data) {
+  
+  # Subset data to SLA values, spatial data, elevation, growth habit, and site
+  sla_data <- select(sla_data, value = sla, habit, el, site, long, lat)
+  
+  # Construct spatial model with spaMM
+  sla_spatial_model <- spaMM::fitme(value ~ habit + el + Matern(1 | long + lat), data = sla_data, family = "gaussian")
+  
+  # Check for spatial autocorrelation in the residuals with Moran's I
+  
+  # First make distance matrix for spdep::moran.mc()
+  # - convert to spatial dataframe
+  coordinates(sla_data) <- c("long", "lat")
+  proj4string(sla_data) <- CRS("+proj=longlat +datum=WGS84 +no_defs")
+  # - make distance matrix, convert to format for spdep
+  dist_mat_listw <- make_dist_mat(sla_data) %>% spdep::mat2listw()
+  
+  # Next, extract residuals from model
+  moran_results <-
+    spdep::moran.mc(x = residuals(sla_spatial_model), listw = dist_mat_listw, nsim = 10000) %>% 
+    broom::tidy() %>%
+    select(morans_I = statistic, I_pval = p.value)
+  
+  tibble(
+    var = "sla",
+    model_type = "both_spatial",
+    model = list(sla_spatial_model)
+  ) %>%
+    bind_cols(moran_results)
+  
+}
+
+#' Check that no models have a significant Moran's I value
+#'
+#' @param model_df Dataframe with one row per model. Must include column
+#' 'I_pval', which is the p-value of Moran's I for that model.
+#'
+#' @return TRUE if p-value not significant, error otherwise
+#' 
+check_moran_pval <- function (model_df) {
+  assertr::assert(
+    data = model_df, 
+    predicate = within_bounds(0.05, 1.0, include.lower = FALSE),
+    I_pval,
+    success_fun = success_logical)
+}
+
 # Plotting ----
 
 #' Define ggplot theme
