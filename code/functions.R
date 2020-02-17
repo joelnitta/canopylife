@@ -2238,21 +2238,27 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
   model_type <- pull(summaries, model_type)
   
   # Plot lines only for models with a significant elevation effect
-  if(model_type == "el_only") {
-    plot <- ggplot(data, aes(x = !!xval_sym))
-    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
-    plot <- plot + geom_point(aes(y = !!yval_sym, color = habit))
-  } else if(model_type == "interaction") {
-    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
-    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
-    plot <- plot + geom_point(aes(y = !!yval_sym))
-  } else {
-    plot <- ggplot(data, aes(x = !!xval_sym, color = habit)) +
-      geom_point(aes(y = !!yval_sym))
-  }
+  # First make sure we can deal with the type of model passed to this function
+  assertthat::assert_that(
+    model_type %in% c("interaction", "el_only", "habit_only", "both"),
+    msg = "model_type not in valid set for plotting") 
+  
+  # Base plot
+  plot <- ggplot(data, aes(x = !!xval_sym))
+  
+  # Add single line if model is elevation only
+  if(model_type == "el_only" & p < 0.05) plot <- plot + 
+    geom_line(data = fits, aes(y = .fitted))
+  
+  # Add lines by growth habit if model has both elevation and habit
+  if((model_type == "interaction" | model_type == "both") & p < 0.05) plot <- plot +
+    geom_line(data = fits, aes(y = .fitted, color = habit))
+  
+  # Add points
+  plot <- plot + geom_point(aes(y = !!yval_sym, color = habit))  
   
   # Set location of where to print R-squared
-  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
+  if((model_type == "el_only" | model_type == "interaction") & !is.na(p) & p < 0.05) {
     if (isTRUE(r_upper)) {
       plot <- plot +
         annotate("text", x = Inf, y = Inf, 
@@ -2331,15 +2337,15 @@ make_boxplot <- function (yval, ylab = yval, xlab = "Growth habit",
   # Make basic boxplot by habit
   # Add asterisk for t-test result between the bars only if they
   # differ by habit (will print nothing if not signif.)
-  plot <- ggplot(data, aes(x = habit))
+  plot <- ggplot(data, aes(x = habit, y = !!yval_sym, color = habit))
   
   if(isTRUE(include_points)) {
     plot <- plot +
-      geom_jitter(aes(y = !!yval_sym, color = habit))
+      geom_jitter()
   }
   
   plot +
-    geom_boxplot(aes(y = !!yval_sym, color = habit), fill = "transparent") +
+    geom_boxplot(fill = "transparent") +
     annotate(
       "text", label = asterisk, size = 5, fontface = "bold",
       x = 1.5, 
@@ -2455,7 +2461,7 @@ make_climate_plot <- function (data, resp_vars,
   p +
     plot_annotation(theme = theme(plot.margin = margin(
       mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
-
+  
 }
 
 make_pca_plot <- function (pca_results, habit_colors, traits) {
@@ -2644,16 +2650,22 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
   model_type <- pull(summaries, model_type)
   
   # Plot lines only for models with a significant elevation effect
-  if(model_type == "el_only") {
+  if(str_detect(model_type, "el_only")) {
     plot <- ggplot(data, aes(x = !!xval_sym))
-    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    if (!is.na(p) & p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + 
       geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
       geom_point(aes(y = cwm))
-  } else if(model_type == "interaction") {
+  } else if(model_type == "interaction" | model_type == "both") {
     plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
-    if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
+    if (!is.na(p) & p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + 
+      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
+      geom_point(aes(y = cwm))
+    # spatial models don't have a p-value, so don't check
+  } else if(model_type == "interaction_spatial" | model_type == "both_spatial") {
+    plot <- ggplot(data, aes(x = !!xval_sym, color = habit)) +
+      geom_line(data = fits, aes(y = .fitted)) +
       geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
       geom_point(aes(y = cwm))
   } else {
@@ -2665,7 +2677,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
   
   # Print t and r2 statistics:
   # both R2 and t if model is interaction and both signif.
-  if (p < 0.05 & t_test_p < 0.05 & model_type == "interaction") {
+  if (!is.na(p) & p < 0.05 & t_test_p < 0.05 & model_type == "interaction") {
     plot <- plot +
       annotate("text", x = Inf, y = Inf, 
                label = glue::glue("italic(R) ^ 2 == {r2}"),
@@ -2678,7 +2690,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                parse = TRUE,
                size = 9 / .pt)
     # R2 only if model is significant for elevation or interaction but not t
-  } else if (p < 0.05 & t_test_p > 0.05 & model_type %in% c("el_only", "interaction")) {
+  } else if (!is.na(p) & p < 0.05 & t_test_p > 0.05 & model_type %in% c("el_only", "interaction")) {
     plot <- plot +
       annotate("text", x = Inf, y = Inf, 
                label = glue::glue("italic(R) ^ 2 == {r2}"),
@@ -2686,7 +2698,7 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                parse = TRUE,
                size = 9 / .pt)
     # T-value only if t is significant and model type is growth habit only
-  } else if (t_test_p < 0.05 & model_type == "habit_only") {
+  } else if (!is.na(p) & t_test_p < 0.05 & model_type == "habit_only") {
     plot <- plot +
       annotate("text", x = Inf, y = Inf, 
                label = glue::glue("italic(t) == {t}"),
@@ -2772,7 +2784,7 @@ make_heatmap <- function(important_div_vars, vars_select = c(
     theme(
       axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
       plot.margin = margin(0.2, 0.2, 0.2, 0.2, unit = "in")
-  )
+    )
 }
 
 #' Plot sporophyte and gametophyte traits on phylogenetic tree
@@ -2808,7 +2820,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     ) %>%
     # Instead of scaling by standard deviation, rescale between 0 and 1.
     mutate_at(vars(dissection, sla, stipe, length, width, rhizome, pinna),
-               ~rescale(., c(0,1)))
+              ~rescale(., c(0,1)))
   
   # For phylogeny, only keep species in traits
   phy <- match_traits_and_tree(traits, phy, "tree")
@@ -3007,7 +3019,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       axis.text.y = element_text(
         face = "italic", 
         size = 11/.pt
-        ),
+      ),
       legend.text = element_text(size = 20/.pt),
       legend.title = element_text(size = 24/.pt),
       axis.ticks.length.y = unit(-0.1, "cm"), # Put y-axis labels right next to plot
@@ -3186,7 +3198,7 @@ combine_cwm_plots <- function (scatterplots) {
   p +
     plot_annotation(theme = theme(plot.margin = margin(
       mar_out[1], mar_out[2], mar_out[3], mar_out[4], unit = "in")))
-
+  
 }
 
 #' Combine functional diveristy plots into final figure
@@ -3298,7 +3310,7 @@ make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
   
   # Make vector of y-axis labels IN SAME ORDER
   quant_labs <- c("Stipe length (cm)", "Frond length (cm)", "Frond width (cm)", "Rhizome dia. (cm)",
-    "SLA", "Pinna no.", "Frond dissection")
+                  "SLA", "Pinna no.", "Frond dissection")
   
   # Convert community-weighted values to wide, only keep standard deviation
   sd_wide <-
@@ -3328,7 +3340,6 @@ make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
       habit_colors = habit_colors,
       include_points = TRUE)
   )
-  
   
   # Tweak plot elements
   # - remove redundant x-axis labels
@@ -3518,7 +3529,7 @@ wrap_quotes <- function (x) {paste0("\"", x, "\"")}
 #' 
 reformat_species_names <- function (species_list) {
   
-    tibble(taxon_code = species_list) %>%
+  tibble(taxon_code = species_list) %>%
     separate(taxon_code, c("genus", "specific_epithet"), sep = "_", remove = FALSE) %>%
     mutate(informal_variety = str_match(specific_epithet, "[0-9]") %>% map_chr(1)) %>%
     mutate(specific_epithet = str_remove_all(specific_epithet, "[0-9]")) %>%
