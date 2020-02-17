@@ -2105,11 +2105,11 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
   model_type <- pull(summaries, model_type)
   
   # Plot lines only for models with a significant elevation effect
-  if(model_type == "el_only") {
+  if(str_detect(model_type, "el_only")) {
     plot <- ggplot(data, aes(x = !!xval_sym))
     if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + geom_point(aes(y = !!yval_sym, alpha = is_outlier, color = habit))
-  } else if(model_type == "interaction") {
+  } else if(str_detect(model_type, "interaction|both")) {
     plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
     if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
     plot <- plot + geom_point(aes(y = !!yval_sym, alpha = is_outlier))
@@ -2119,7 +2119,7 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
   }
   
   # Set location of where to print R-squared
-  if((model_type == "el_only" | model_type == "interaction") & p < 0.05) {
+  if(str_detect(model_type, "el_only|interaction|both") & p < 0.05) {
     if (r_position == "upper_right") {
       plot <- plot +
         annotate("text", x = Inf, y = Inf, 
