@@ -189,6 +189,9 @@ plan <- drake_plan(
     data = climate_trans_no_outlier,
     resp_vars = climate_vars),
   
+  # - Check for spatial autocorrelation in models
+  check_climate_model_spatial_autocorr = check_moran_pval(climate_models),
+  
   # - Extract fits of best models.
   # Transform fit of square-rooted variables back for plotting.
   climate_model_fits = extract_model_fits(climate_models) %>%
@@ -202,12 +205,6 @@ plan <- drake_plan(
   
   # - Get summaries of best models.
   climate_model_summaries = extract_model_summaries(climate_models),
-  
-  # - Check for spatial autocorrelation in residuals.
-  climate_model_moran = climate_models %>%
-    select(-model) %>%
-    unnest(col = moran_results) %>%
-    select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
   
   # Principal components analysis ----
   pca_results = run_trait_PCA(
@@ -405,14 +402,27 @@ plan <- drake_plan(
     unnest(cols = moran_test) %>%
     select(resp_var, modname, AICc, r2, delta_AICc,
            morans_I = statistic, morans_I_pval = p.value),
-  
+
   ### Run linear models of diversity metrics by elevation ###
   
   # - Make full set of models including each diversity metric
   # by elevation, growth habit, and
   # their interaction, then choose the best model for each.
-  div_el_models = choose_habit_elevation_models(div_metrics_all, resp_vars),
+  # Also checks for spatial autocorrelation in the residuals.
+  div_el_models_nonspatial = choose_habit_elevation_models(div_metrics_all, resp_vars),
   
+  # - Only SLA showed spatial autocorrelation, 
+  # so make a spatially-explicit model for this
+  spatial_sla_model = make_spatial_sla_model(div_metrics_all),
+  
+  # - Replace SLA model in model list with the spatial version
+  div_el_models = div_el_models_nonspatial %>%
+    filter(var != "sla") %>%
+    bind_rows(spatial_sla_model),
+  
+  # - Check for spatial autocorrelation in models
+  check_div_el_model_spatial_autocorr = check_moran_pval(div_el_models),
+
   # - Extract fits of best models.
   div_el_model_fits = extract_model_fits(div_el_models),
   
@@ -421,12 +431,6 @@ plan <- drake_plan(
   
   # - Get summaries of best models.
   div_el_model_summaries = extract_model_summaries(div_el_models),
-  
-  # - Check for spatial autocorrelation in residuals.
-  div_el_model_moran = div_el_models %>%
-    select(-model) %>%
-    unnest %>%
-    select(var, model_type, AICc, morans_I = statistic, I_pval = p.value),
   
   ### Run t-tests by growth habit ###
   div_t_test_results = map_df(
