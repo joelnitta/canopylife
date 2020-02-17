@@ -1618,34 +1618,160 @@ choose_habit_elevation_models <- function (data, resp_vars) {
   
 }
 
-# Extract model fits
+#' Extract model fits
+#'
+#' @param supported_models A tibble of models. The "model" should be a
+#' list-column of models. "model_type" should indicate spatial models with
+#' "spatial" in their names.
+#'
+#' @return Tibble of predicted points based on the models.
+#' 
 extract_model_fits <- function (supported_models) {
-  supported_models %>%
+  
+  # Helper function to add predictions to a dataframe given a model of the data
+  # re.form = NA is passed to spaMM's implementation of predict() to 
+  # remove the spatial effect of the model.
+  predict_from_data <- function (data, model) {
+    mutate(data, .fitted = as.numeric(predict(object = model, newdata = data, re.form = NA)))
+  }
+  
+  # broom::augment() is not implemented for spaMM models yet.
+  # So first split the models into non-spatial and spatial.
+  
+  spatial_models <-
+    supported_models %>%
+    filter(str_detect(model_type, "spatial"))
+  
+  non_spatial_models <- supported_models %>%
+    filter(str_detect(model_type, "spatial", negate = TRUE))
+  
+  # We can use broom::augment() for non-spatial models
+  non_spatial_fits <-
+    non_spatial_models %>%
     mutate(
       fits = map(model, augment)
     ) %>%
     select(var, model_type, fits) %>%
     unnest(cols = fits)
+  
+  # Early exit if there are no spatial models
+  if(nrow(spatial_models) == 0) return(non_spatial_fits)
+  
+  # For the spatial models, use custom code to extract the fits
+  spatial_fits <-
+    spatial_models %>%
+    mutate(data = map(model, "data")) %>%
+    mutate(predictions = map2(data, model, predict_from_data)) %>%
+    select(var, model_type, predictions) %>%
+    unnest(cols = predictions) %>%
+    select(-site, -long, -lat)
+  
+  # Combine the results
+  bind_rows(non_spatial_fits, spatial_fits)
+  
 }
 
-# Extract model parameter summaries (slope, intersect, etc)
+#' Extract model parameter summaries (slope, intersect, etc)
+#'
+#' @param supported_models A tibble of models. The "model" should be a
+#' list-column of models. "model_type" should indicate spatial models with
+#' "spatial" in their names.
+#'
+#' @return Tibble of model parameter summaries.
+#' 
 extract_model_parameters <- function (supported_models) {
-  supported_models %>%
-    mutate(
-      summary = map(model, tidy)
-    ) %>%
+  # Helper function to get a tidy summary of a spatial model from spaMM
+  # (note that spaMM doesn't provide p-values for model terms, but it does provide t-values)
+  tidy_spatial <- function (model) {
+    model %>%
+      summary %>%
+      purrr::pluck("beta_table") %>% 
+      as.data.frame() %>% 
+      rownames_to_column("term") %>% 
+      as_tibble %>%
+      janitor::clean_names() %>%
+      rename(std.error = cond_se)
+  }
+  
+  # broom::tidy() is not implemented for spaMM models yet.
+  # So first split the models into non-spatial and spatial.
+  
+  spatial_models <-
+    supported_models %>%
+    filter(str_detect(model_type, "spatial"))
+  
+  non_spatial_models <- supported_models %>%
+    filter(str_detect(model_type, "spatial", negate = TRUE))
+  
+  # We can use broom::tidy() for non-spatial models
+  non_spatial_summaries <-
+    non_spatial_models %>%
+    mutate(summary = map(model, tidy)) %>%
     select(var, model_type, summary) %>%
     unnest(cols = summary)
+  
+  # Early exit if there are no spatial models
+  if(nrow(spatial_models) == 0) return(non_spatial_summaries)
+  
+  # For the spatial models, use custom code to extract the fits
+  spatial_summaries <-
+    spatial_models %>%
+    mutate(summary = map(model, tidy_spatial)) %>%
+    select(var, model_type, summary) %>%
+    unnest(cols = summary)
+  
+  # Combine the results
+  bind_rows(non_spatial_summaries, spatial_summaries)
 }
 
-# Extract model summaries (pvalue, rsquared of model)
+
+#' Extract model summaries (pvalue, rsquared of model)
+#'
+#' @param supported_models A tibble of models. The "model" should be a
+#' list-column of models. "model_type" should indicate spatial models with
+#' "spatial" in their names.
+#'
+#' @return Tibble of model parameter summaries.
+#' 
 extract_model_summaries <- function (supported_models) {
-  supported_models %>%
-    mutate(
-      summary = map(model, glance)
-    ) %>%
+  # Helper function to get a tidy summary of a spatial model from spaMM
+  # most of the standard summary values for non-spatial models don't apply
+  # here anyways...
+  glance_spatial <- function (model) {
+    tibble(
+      df = extractAIC(model)[["edf"]], 
+      AIC = extractAIC(model)[["AIC"]])
+  }
+  
+  # broom::glance() is not implemented for spaMM models yet.
+  # So first split the models into non-spatial and spatial.
+  
+  spatial_models <-
+    supported_models %>%
+    filter(str_detect(model_type, "spatial"))
+  
+  non_spatial_models <- supported_models %>%
+    filter(str_detect(model_type, "spatial", negate = TRUE))
+  
+  # We can use broom::glance() for non-spatial models
+  non_spatial_summaries <-
+    non_spatial_models %>%
+    mutate(summary = map(model, glance)) %>%
     select(var, model_type, AICc, summary) %>%
     unnest(cols = summary)
+  
+  # Early exit if there are no spatial models
+  if(nrow(spatial_models) == 0) return(non_spatial_summaries)
+  
+  # For the spatial models, use custom code to extract the fits
+  spatial_summaries <-
+    spatial_models %>%
+    mutate(summary = map(model, glance_spatial)) %>%
+    select(var, model_type, summary) %>%
+    unnest(cols = summary)
+  
+  # Combine the results
+  bind_rows(non_spatial_summaries, spatial_summaries)
 }
 
 #' Run ANCOVA on climate data
