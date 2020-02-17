@@ -245,7 +245,7 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
   #10 = Tigerschiöld 1990 "Gametophytes of some Ceylonese species of Thelypteridaceae" Nordic Journal of Botany [@Tigerschiold1990]
   #11 = Atkinson 1975 "The gametophyte of five Old World thelypteroid ferns" Phytomorphology [@Atkinson1975]
   #12 = Chen et al 2014 "First insights into the evolutionary history of the Davallia repens complex" Blumea [@Chen2014a]
-
+  
   # Read in raw trait data
   read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
     clean_names() %>%
@@ -289,7 +289,7 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
       ),
       habit = fct_relevel(habit, c("epiphytic", "terrestrial"))
     )
-
+  
 }
 
 #' Combine trait data into trait matrix
@@ -1094,7 +1094,7 @@ test_corr_evo <- function (selected_trait, traits, phy) {
 run_pic <- function (traits, phy) {
   
   ### Setup
-
+  
   # Keep only species, habit, and quantitative traits to test
   traits <- traits %>%
     select(species, habit, stipe, length, width, rhizome, dissection, pinna, sla) %>%
@@ -1354,7 +1354,7 @@ analyze_func_struc_by_habit <- function (
   
   # Match species order in community data
   traits_df <- traits_df[colnames(comm_by_habit), ]
-
+  
   # Calculate distance matrix
   if (!is.null(weights)) {
     dist_mat <- FD::gowdis(traits_df, w = weights) 
@@ -1530,6 +1530,20 @@ analyze_cwm_by_habit <- function (traits, comm) {
 #' @return Dataframe.
 choose_habit_elevation_models <- function (data, resp_vars) {
   
+  # Helper function: check if any terms of a model are non-significant
+  any_nonsignif_terms <- function(model) {
+    broom::tidy(model) %>%
+      dplyr::summarize(any(p.value > 0.05)) %>%
+      dplyr::pull(1)
+  }
+  
+  # Helper function: check if all terms of a model are non-significant
+  all_nonsignif_terms <- function(model) {
+    broom::tidy(model) %>%
+      dplyr::summarize(all(p.value > 0.05)) %>%
+      dplyr::pull(1)
+  }
+  
   # Reformat data into nested set by response variable
   data_long <- 
     data %>%
@@ -1552,27 +1566,37 @@ choose_habit_elevation_models <- function (data, resp_vars) {
     )
   
   # Make all combinations of models including each response variable
-  # by elevation only, by growth habit only, and by the interaction of
-  # growth habit and elevation.
+  # by elevation only, by growth habit only, by growth habit and elevation,
+  # and by their interaction.
   all_models <-
     data_tibble %>%
     # Construct a linear model for each variable
     mutate(
       interaction = map(data, ~lm(value ~ el * habit, .)),
+      both = map(data, ~lm(value ~ el + habit, .)),
       habit_only = map(data, ~lm(value ~ habit, .)),
       el_only = map(data, ~lm(value ~ el, .)),
     ) %>%
     gather(model_type, model, -var, -data)
   
-  # Calculate the AICc for each model,
-  # and select model with lowest AICc
+  # Calculate the AICc and delta AICc for each model,
+  # retain models within delta AICc 2,
+  # then select model based on fewest non-significant terms and best AICc
+  # (in that order)
   all_models <-
     all_models %>% 
-    mutate(AICc = map_dbl(model, sme::AICc)) %>%
+    mutate(
+      AICc = map_dbl(model, sme::AICc),
+      any_nonsignif = map_lgl(model, any_nonsignif_terms),
+      all_nonsignif = map_lgl(model, all_nonsignif_terms)
+    ) %>%
     group_by(var) %>%
-    arrange(var, AICc) %>%
-    slice(1) %>%
-    ungroup
+    mutate(
+      min_AICc = min(AICc),
+      delta_AICc = AICc - min_AICc) %>%
+    filter(delta_AICc < 2) %>%
+    arrange(any_nonsignif, AICc, .by_group = TRUE) %>%
+    slice(1)
   
   # For each model, make a distance matrix,
   # extract the residuals, and run Moran's I
@@ -1588,7 +1612,9 @@ choose_habit_elevation_models <- function (data, resp_vars) {
         ~spdep::moran.mc(x = .x, listw = .y, nsim = 10000) %>% broom::tidy()
       )
     ) %>%
-    select(var, model_type, model, AICc, moran_results)
+    unnest(col = moran_results) %>%
+    select(var, model_type, model, AICc, delta_AICc, morans_I = statistic, I_pval = p.value) %>%
+    ungroup()
   
 }
 
