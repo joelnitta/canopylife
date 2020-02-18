@@ -304,7 +304,7 @@ We calculated daily maximum, mean, minimum, and standard variation of temperatur
 We analyzed correlation between the mean values with Pearson's correlation coefficient, and retained a set with correlation coefficients less than 0.9 (a single variable was arbitrarily selected from each set of correlated variables; hereafter, 'climatic variables').
 Variables relating to VPD, which have no meaning if less than zero, and some other variables that had skewed distributions, were square-root transformed prior to fitting models.
 We tested for differences between epiphytic and terrestrial dataloggers while accounting for elevation with ANCOVA, using growth habit as the categorical variable and elevation as the covariate.
-We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone and their interactions, then selecting the one with the lowest corrected Akaike Information Criterion [AIC~c~; @Akaike1973].
+We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone, in combination, and in combination with their interactions. We then calculated the corrected Akaike Information Criterion [AIC~c~; @Akaike1973] and selected the best model with the combination of the fewest non-significant parameters and lowest AIC~c~.
 A single outlier plot with unusually high temperature and low humidity (Mt. Rotui, 830 m plot) was excluded from ANCOVA and linear models.
 Mt. Rotui is an isolated peak with greater exposure than the other two mountains where the rest of the plots were established (J. Nitta, pers. obs.).
 
@@ -339,7 +339,7 @@ For quantitative traits, we used the \function{brunch} function in the \package{
 For qualitative (binary) traits, we used Pagel's test of correlated evolution [@Pagel1994] as implemented with the \function{fitPagel} function in the \package{phytools} package [@Revell2012].
 This method compares likelihoods between alternative models for a pair of binary traits.
 In the first model, rates of evolution of the two traits are independent.
-In the second model, the rate of evolution of one trait depends on the other.
+In the second model, the rate of evolution of each trait depends on the other.
 A significantly better fit of the second model indicates that evolution of the two traits is correlated.
 The same analyses were also done on the 'strict' dataset.
 
@@ -366,8 +366,9 @@ Hereafter, 'MPD~phy~' and 'MNTD~phy~', and 'MPD~func~' and 'MNTD~func~', refer t
 We tested the effects of climate and growth habit on diversity metrics using full-subsets multiple regression with general additive models (GAMs) as implemented in the \package{FSSgamm} R package [@Fisher2018].
 For each diversity metric, we built a set of models (Gaussian family, with plot as a random effect) taking into account all combinations of explanatory variables and their pairwise interactions, and ranked these by AIC~c~ to find the models that best explain the data.
 Our dataset included `r (nrow(div_metrics_all) - nrow(climate_select)) %>% english2()` communities that lacked climate data and could not be included in full-subsets multiple regression analysis.
-Therefore, we also constructed linear models for each diversity metric related to elevation including all sites using the same model selection procedure as in the climate analysis.
-We checked for spatial autocorrelation in the model residuals with Moran's *I* [@Moran1950] as implemented in the \package{spdep} R package [@Bivand2013].
+Therefore, we also constructed linear models for each diversity metric in response to elevation and growth habit including all sites using the same model selection procedure as in the climate analysis.
+We checked for spatial autocorrelation in the model residuals with Moran's *I* [@Moran1950] as implemented in the \package{spdep} R package [@Bivand2013]. 
+In the case the spatial autocorrelation was detected, a generalized linear mixed model was fit with a Mátern spatial correlation structure using the \package{spAMM} R package [@Rousset2014].
 
 ### Data accessibility
 
@@ -408,7 +409,7 @@ pca_phy_cum_var <-
 Terrestrial and epiphytic species are partly differentiated in trait space, occupying mostly distinct areas but overlapping in the middle regardless of method used (standard or phylogenetic PCA) (`r figure("pca")`**c**, **d**).
 The first two PC axes explained `r percent(pca_std_cum_var)` and `r percent(pca_phy_cum_var)` of the variation in the trait data when analyzed using standard and phylogenetic PCA, respectively.
 In the standard PCA, size-related traits tended to load on PC1, with SLA, number of pinnae pairs, and degree of dissection on PC2.
-Loadings in the phylogenetic PCA are similar but approximately reversed relative to the standard PCA.
+Loadings in the phylogenetic PCA are similar, but size-related traits are approximately reversed relative to the standard PCA.
 
 ### Phylogenetic signal
 
@@ -436,7 +437,7 @@ dissection_pval <- pic_results %>% filter(trait == "dissection") %>% pull(p.valu
 morphotype_pval <- correlated_evo_test %>% filter(trait == "morphotype") %>% pull(pval) %>% format_pval(., equals_sign = TRUE)
 ```
 
-Most sporophyte traits, including all those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (`r table("pics")`).
+Most sporophyte traits, particularly those related to plant size, are significantly correlated with growth habit while taking phylogeny into account (`r table("pics")`).
 Epiphytic species tend to have smaller values for all traits (`r table("pics")`; contrasts were made by subtracting epiphytic from terrestrial values).
 Short stipe length in particular appears to be strongly correlated with epiphytic growth (phylogenetically independent contrasts, \pval{ }`r stipe_pval`), as well as frond width (\pval{ }`r width_pval`) and degree of laminae dissection (\pval{ }`r dissection_pval`).
 For the gametophyte traits, only morphotype (non-cordate vs. cordate) was significantly correlated with growth habit (Pagel's test of correlated evolution, \pval{ }`r morphotype_pval`; `r table("corr-evo")`).
@@ -702,7 +703,7 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 **`r figure("heatmap")`** Variable importance scores from a full-subsets analysis using general additive models exploring the effect of climate and growth habit (terrestrial vs. epiphytic growth) on community diversity of ferns on Moorea, French Polynesia. Predictor variable abbreviations: VPD, vapor pressure deficit; SD, standard deviation. Response variable abbreviations: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance; SLA, specific leaf area. All trait names refer to community-weighted mean values. Community-weighted means of frond length, frond width, stipe length, and rhizome diameter were correlated (Pearson's correlation coefficient > 0.9), so of these we only show stipe length.
 
-**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05. \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01. Results for frond width were very similar to frond length and not shown. Response variable abbreviations: SLA, specific leaf area.
+**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Response variable abbreviations: SLA, specific leaf area. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05 (\rval^2^ not shown for SLA, which was fit with a spatial generalized linear mixed model; see Methods). \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01. Results for frond width were very similar to frond length and not shown.
 
 **`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01.
 
