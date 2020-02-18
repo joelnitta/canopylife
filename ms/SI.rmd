@@ -36,7 +36,12 @@ loadd(list = c(
   "phylosig_binary_traits_strict",
   "correlated_evo_test_strict",
   "best_fit_div_models_moran",
-  "func_comm_struc_combined"), 
+  "func_comm_struc_combined",
+  "climate_model_summaries",
+  "climate_models",
+  "div_el_models",
+  "div_el_model_summaries",
+  "cwsd_scatterplot"), 
   cache = canopy_cache)
 
 # Load captions
@@ -86,9 +91,13 @@ footer <- "'taxon code' is the name used for that taxon in analyses. 'informal v
   purrr::map_chr(wrap_quotes)
 
 # Write out table with metadata
+filename <- s_table("species-list") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
 write_csv_with_meta(
   taxonomic_data_for_si, 
-  here::here("results/Table_S1.csv"), 
+  here::here("results", filename), 
   header,
   footer)
 ```
@@ -111,9 +120,13 @@ footer <- "SLA, specific leaf area. Continuous measurements shown as mean, stand
   purrr::map_chr(wrap_quotes)
 
 # Write out table with metadata
+filename <- s_table("trait-values") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
 write_csv_with_meta(
   trait_data_for_si, 
-  here::here("results/Table_S2.csv"), 
+  here::here("results", filename), 
   header,
   footer)
 ```
@@ -147,9 +160,104 @@ header <- c(
 footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable." %>% wrap_quotes
 
 # Write out table with metadata
+filename <- s_table("ancova") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
 write_csv_with_meta(
   climate_ancova_results_formatted, 
-  here::here("results/Table_S3.csv"), 
+  here::here("results", filename), 
+  header,
+  footer)
+```
+
+**`r s_table("linear-fit")`** `r s_table_cap("linear-fit")` (see separate file)
+
+MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable.
+
+```{r linear-fit}
+# Combine summaries of models for diversity metrics
+div_summaries <-
+  div_el_model_summaries %>%
+  left_join(
+    select(div_el_models,
+           var, model_type, delta_AICc, morans_I, I_pval), 
+    by = c("var", "model_type")
+  )
+
+# Combine summaries of models for climate metrics
+climate_summaries <-
+  climate_model_summaries %>%
+  left_join(
+    select(climate_models,
+           var, model_type, delta_AICc, morans_I, I_pval), 
+    by = c("var", "model_type")
+  )
+
+# Combine summaries of diversity and climate metrics, reformat model names
+table <-
+  bind_rows(div_summaries, climate_summaries) %>%
+  mutate(
+    model_type = model_type %>% 
+      str_replace_all("el_only", "Elevation") %>%
+      str_replace_all("both", "Elevation + Growth habit") %>%
+      str_replace_all("habit_only", "Growth habit") %>%
+      str_replace_all("interaction", "Elevation + Growth habit + Elevation x Growth habit")
+    )
+
+# Reformat variable names and put in preferred order by joining
+linear_fit_table <-
+tribble(
+  ~var, ~Response,
+  "temp_max", "Max. temp.",
+  "temp_mean", "Mean temp.",
+  "vpd_mean", "Mean VPD",
+  "vpd_min", "Min. VPD",
+  "temp_sd", "SD temp.",
+  "vpd_sd", "SD VPD",
+  "ntaxa", "Richness",
+  "mpd.obs.z.phy", "MPDphy",
+  "mntd.obs.z.phy", "MNTDphy",
+  "mpd.obs.z.func", "MPDfunc",
+  "mntd.obs.z.func", "MNTDfunc",
+  "dissection", "Dissection",
+  "length", "Frond length",
+  "pinna", "Pinna no.",
+  "rhizome", "Rhizome diam.",
+  "stipe", "Stipe length",
+  "sla", "SLA",
+  "width", "Frond width"
+) %>%
+  left_join(table, by = "var") %>%
+  select(
+    Response,
+    Model = model_type,
+    AICc,
+    f = statistic,
+    `Adjusted R2` = adj.r.squared,
+    P = p.value,
+    `d.f.` = df,
+    delta_AICc,
+    `Moran's I` = morans_I,
+    P_moran = I_pval
+  )
+
+# Set header and footer
+header <- c(
+  si_table_header,
+  s_table_nums("linear-fit") %>% wrap_quotes
+)
+
+footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable." %>% wrap_quotes
+
+filename <- s_table("linear-fit") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
+# Write out table with metadata
+write_csv_with_meta(
+  linear_fit_table, 
+  here::here("results", filename), 
   header,
   footer)
 ```
@@ -186,9 +294,14 @@ footer <- "P_rnd, probability of obtaining the observed value of D under random 
   purrr::map_chr(wrap_quotes)
 
 # Write out table with metadata
+filename <- s_table("phylosig-binary-strict") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
+# Write out table with metadata
 write_csv_with_meta(
   phylosig_binary_traits_strict_formatted, 
-  here::here("results/Table_S4.csv"), 
+  here::here("results", filename), 
   header,
   footer)
 ```
@@ -229,18 +342,23 @@ footer <- "LL, log likelihood. Each gametophyte trait was coded as a binary trai
   purrr::map_chr(wrap_quotes)
 
 # Write out table with metadata
+filename <- s_table("corr-evo-strict") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
+# Write out table with metadata
 write_csv_with_meta(
   correlated_evo_test_strict_formatted, 
-  here::here("results/Table_S5.csv"), 
+  here::here("results", filename), 
   header,
   footer)
 ```
 
-**`r s_table("model-fit")`** `r s_table_cap("model-fit")` (see separate file)
+**`r s_table("gam-fit")`** `r s_table_cap("gam-fit")` (see separate file)
 
 MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, \pval\ value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
 
-```{r model-fit}
+```{r gam-fit}
 # Format table
 best_fit_div_models_moran_formatted <-
 best_fit_div_models_moran %>%
@@ -286,7 +404,7 @@ best_fit_div_models_moran %>%
 # Set header and footer
 header <- c(
   si_table_header,
-  s_table_nums("model-fit") %>% wrap_quotes
+  s_table_nums("gam-fit") %>% wrap_quotes
 )
 
 footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods." %>%
@@ -296,19 +414,21 @@ footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, 
   purrr::map_chr(wrap_quotes)
 
 # Write out table with metadata
+filename <- s_table("gam-fit") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
+# Write out table with metadata
 write_csv_with_meta(
   best_fit_div_models_moran_formatted, 
-  here::here("results/Table_S6.csv"), 
+  here::here("results", filename), 
   header,
   footer)
-
 ```
 
 \clearpage
 
 ```{r Fig-S1, fig.height = 6, fig.width = 7, fig.cap = ""}
-loadd(cwsd_scatterplot, cache = canopy_cache)
-
 cwsd_scatterplot
 ```
 

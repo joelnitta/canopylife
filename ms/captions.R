@@ -28,9 +28,10 @@ s_table_nums <- captioner::captioner(prefix = "Table S", auto_space = FALSE, suf
 s_table_nums(name = "species-list", "List of ferns from Moorea, French Polynesia included in this study")
 s_table_nums(name = "trait-values", "Trait values of ferns on Moorea, French Polynesia")
 s_table_nums(name = "ancova", "Analysis of covariance (ANCOVA) for differences between climatic variables measured with dataloggers placed on the ground (terrestrial growth habit) vs. mounted at 2 m on trees (epiphytic growth habit) on Moorea, French Polynesia, with elevation as a covariate")
+s_table_nums(name = "linear-fit", "Best-fitting linear models explaining climate and community diversity metrics of ferns on Moorea, French Polynesia by elevation and growth habit")
 s_table_nums(name = "phylosig-binary-strict", "Phylogenetic signal in binary traits of ferns on Moorea, French Polynesia, strict dataset excluding any species whose traits were scored based on taxonomy")
 s_table_nums(name = "corr-evo-strict", "Pagel's (1994) test of correlated evolution between binary traits of ferns on Moorea, French Polynesia, strict dataset excluding any species whose traits were scored based on taxonomy")
-s_table_nums(name = "model-fit", "Best-fitting models explaining community diversity metrics of ferns on Moorea, French Polynesia by climate and growth habit")
+s_table_nums(name = "gam-fit", "Best-fitting models explaining community diversity metrics of ferns on Moorea, French Polynesia by climate and growth habit")
 
 # Make short versions of citation functions
 # - Just the number
