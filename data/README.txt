@@ -398,3 +398,64 @@ fern epiphytes. New Phytologist. ADD_DOI_WHEN_AVAILABLE
 
 Pteridophyte Phylogeny Group I. 2016. A community-derived classification for
 extant lycophytes and ferns. Journal of Systematics and Evolution 54:563–603.
+
+--------------------------
+CHANGE LOG
+--------------------------
+
+2020-02-18
+
+SLA_measurements.csv
+
+- Nitta_2740 Humata_pectinata (original row 728): change mass from 0.000109 to 0.00109 (error in data entry; original value had an extra 0) 
+- Nitta_2474 Asplenium_australasicum: change collection number to Nitta_2473 (mix-up in last digit; Nitta_2474 is actually Bolbitis_lonchophora)
+- Nitta_2819 Oreogrammitis_raiateensis: change collection number to Nitta_2818 (mix-up in last digit; Nitta_2819 is actually Christella_dentata)
+- Nitta_2413  Wibelia_denticulata: change species to Davallia_solida (original species was mis-identified)
+- Nitta_2473 Polyphlebium_endlicherianum (original rows 410-418): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is Asplenium_australasicum)
+- Nitta_2543 Ptisana_salicina (original rows 1023-1031): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is Sphaerostephanos_subpectinatus)
+
+filmy_SLA.csv
+
+- Nitta_3078 Hypolepis_dicksonioides: change species to Dryopteris_dicksonioides (mix-up between genera; Nitta_3078 is actually Dryopteris)
+- Nitta_2095 Crepidomanes_bipunctatum (original rows 11-12): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is gametophyte from Costa Rica)
+
+morph_measurements.csv
+
+- Nitta_677  Nephrolepis_hirsutula: change species to Nephrolepis_cordifolia (original species was mis-identified)
+- Nitta_0227 Ophioglossum_falcatum: change species to Ophioglossum_pendulum (original species was mis-identified)
+- Nitta_0610 Ophioglossum_pendulum: change species to Ophioglossum_pendulum (original species was mis-identified)
+- Nitta_634 Archigrammitis_tahitensis: change stipe length to from 62.478 to 0.714 (original data entered incorrectly)
+
+morph_qual_traits.csv
+
+- Change dissection from a number code to a description of each type of leaf dissection
+- Remove habit_binary column
+- Add growth_habit column, which describes growth habit as "terrestrial", "climbing", "hemiepiphytic", "epipetric", or "epiphytic"
+- Add data for Prosaptia_subnuda (missing from original data)
+
+When recoding growth habit, 0 was treated as terrestrial and 1 as epiphytic. The following additional changes were made:
+- Adiantum_hispidulum: score growth habit as epipetric
+- Adiantum_raddianum: score growth habit as epipetric
+- Arthropteris_palisotii: score growth habit as hemiepiphytic
+- Cheilanthes_nudiuscula: score growth habit as terrestrial
+- Crepidomanes_kurzii: score growth habit as epipetric
+- Lomagramma_tahitensis: score growth habit as hemiepiphytic
+- Lomariopsis_brackenridgei: score growth habit as hemiepiphytic
+- Lygodium_reticulatum: score growth habit as climbing
+- Teratophyllum_wilkesianum: score growth habit as climbing
+
+The following corrections were made to species trait scorings:
+- Asplenium_affine: change dissection from once-pinnate to two-pinnate-pinnatifid
+- Tmesipteris_gracilis: change dissection from simple to pinnatifid
+- Humata_anderssonii: change dissection from once-pinnate-pinnatifid to two-pinnate-pinnatifid
+- Crepidomanes_kurzii: change dissection from once-pinnate to pinnatifid
+- Diplopterygium_longissimum: change dissection from missing to two-pinnate
+- Hymenophyllum_braithwaitei: change dissection from missing to bipinnatifid_or_tripinnatifid
+- Hypolepis_sp1: change dissection from missing to three-pinnate-pinnatifid
+- Lindsaea_propinqua: change dissection from missing to two-pinnate
+- Calymmodon_orientalis: change morphotype from ribbon to strap
+- Grammitis_marginelloides: change morphotype from ribbon to strap
+- Humata_anderssonii: change morphotype from ribbon to strap
+- Humata_pectinata: change morphotype from ribbon to strap
+
+--------------------------
