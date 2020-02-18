@@ -249,7 +249,7 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
   # Read in raw trait data
   read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
     clean_names() %>%
-    select(species, habit = habit_binary, dissection, morphotype, glands, hairs, gemmae, source) %>%
+    select(species, habit = growth_habit, dissection, morphotype, glands, hairs, gemmae, source) %>%
     # Make sure all species on the species list are included in the data,
     # and that all species are unique and non-missing
     verify(all(species_list %in% .$species)) %>%
@@ -281,15 +281,31 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     ) %>%
     # Make binary habit a factor (order = epi, ter)
     assert(not_na, habit) %>%
-    assert(assertr::in_set(0,1), habit) %>%
+    assert(in_set("epiphytic", "epipetric", "terrestrial", "hemiepiphytic", "climbing"), habit) %>%
     mutate(
       habit = case_when(
-        habit == 1 ~ "epiphytic",
-        habit == 0 ~ "terrestrial"
+        # Consider species with connection to soil terrestrial, else epiphytic
+        habit %in% c("epiphytic", "epipetric") ~ "epiphytic",
+        habit %in% c("terrestrial", "hemiepiphytic", "climbing") ~ "terrestrial",
       ),
       habit = fct_relevel(habit, c("epiphytic", "terrestrial"))
+    ) %>%
+    # Make lamina dissection numeric
+    mutate(
+      dissection = case_when(
+        dissection == "simple" ~ 1,
+        dissection == "pinnatifid" ~ 2,
+        dissection == "one-pinnate" ~ 3,
+        dissection == "one-pinnate-pinnatifid" ~ 4,
+        dissection == "two-pinnate" ~ 5,
+        dissection == "two-pinnate-pinnatifid" ~ 6,
+        dissection == "bipinnatifid_or_tripinnatifid" ~ 7,
+        dissection == "three-pinnate" ~ 8,
+        dissection == "three-pinnate-pinnatifid" ~ 9,
+        dissection == "more_divided" ~ 10,
+        TRUE ~ NaN
+      )
     )
-  
 }
 
 #' Combine trait data into trait matrix
