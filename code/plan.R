@@ -128,8 +128,13 @@ plan <- drake_plan(
     species_list,
     moorea_sites),
   
-  ### PPGI taxonomy ###
+  ### Taxonomy ###
+  
+  # - Pteridophyte Phylogeny Group 2016 taxonomic system
   ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
+  
+  # - Updated synonymy for some species
+  updated_names = read_csv(file_in("data/name_update.csv")),
   
   # Format data for SI ----
   # - Traits: include SD and n for all quantitative (continuous) data
@@ -143,7 +148,7 @@ plan <- drake_plan(
   # (https://resolver.globalnames.org/). Since results have the possibility
   # of changing, the results are checked-in to the repo at the time of manuscript 
   # submission.
-  taxonomic_data_for_si = reformat_species_names(species_list) %>%
+  taxonomic_data_for_si = reformat_species_names(species_list, updated_names) %>%
     lookup_taxonomy,
   
   # Climate analysis ----
@@ -479,7 +484,8 @@ plan <- drake_plan(
   traits_with_tree = plot_traits_on_tree(
     traits = fern_traits,
     phy = phy,
-    ppgi = ppgi
+    ppgi = ppgi,
+    updated_names = updated_names
   ),
   
   # Make CWM scatterplots.

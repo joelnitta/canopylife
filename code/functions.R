@@ -2832,10 +2832,35 @@ make_heatmap <- function(important_div_vars, vars_select = c(
 #' @param traits Dataframe with traits of fern sporophytes and gametophytes
 #' including growth habit and others
 #' @param phy Phylogeny
+#' @param ppgi Dataframe with Pteridophyte Phylogeny Group I taxonomy
+#' @param updated_names Dataframe with new synonyms to use to replace original
+#' species names in `traits` and `phy`.
 #'
 #' @return ggplot object
 #' 
-plot_traits_on_tree <- function (traits, phy, ppgi) {
+plot_traits_on_tree <- function (traits, phy, ppgi, updated_names) {
+  
+  # Update species names in traits
+  traits <-
+  traits %>%
+    left_join(updated_names, by = c(species = "original_name")) %>%
+    mutate(species = case_when(
+      !is.na(new_name) ~ new_name,
+      TRUE ~ species
+    )) %>%
+    select(-new_name)
+  
+  # Update species names in tree
+  new_tip_labs <-
+  tibble(species = phy$tip.label) %>%
+    left_join(updated_names, by = c(species = "original_name")) %>%
+    mutate(species = case_when(
+      !is.na(new_name) ~ new_name,
+      TRUE ~ species
+    )) %>%
+    pull(species)
+  
+  phy$tip.label <- new_tip_labs
   
   # Subset and transform traits
   traits <-
@@ -2920,7 +2945,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     ) %>%
     gather(trait, value, -species) %>%
     # reorder species by phylo order when plotting tree
-    left_join(phy_order) %>%
+    left_join(phy_order, by = "species") %>%
     mutate(
       species = fct_reorder(species, phy_order),
       trait = factor(trait, levels = c("habit", "morphotype", "gemmae", "glands", "hairs")),
@@ -2939,7 +2964,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     select(species, habit, c("sla", "dissection", "stipe", "rhizome", "pinna")) %>%
     gather(trait, value, -species, -habit) %>%
     # reorder species by phylo order when plotting tree
-    left_join(phy_order) %>%
+    left_join(phy_order, by = "species") %>%
     mutate(species = fct_reorder(species, phy_order))
   
   ### Format data: phylogenetic tree
@@ -2952,23 +2977,15 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
     rename(species = label) %>%
     mutate(genus = str_split(species, "_") %>% map_chr(1)) %>%
     left_join(
-      select(ppgi, genus, family)
-    ) %>%
-    mutate(
-      family = case_when(
-        genus == "Amphineuron" ~ "Thelypteridaceae",
-        genus == "Wibelia" ~ "Davalliaceae",
-        genus == "Humata" ~ "Davalliaceae",
-        genus == "Belvisia" ~ "Polypodiaceae",
-        TRUE ~ family
-      )
+      select(ppgi, genus, family),
+      by = "genus"
     )
   
   # Make tibble of fern families to plot along y-axis.
   # Order must match tips of tree.
   family_bars_data <-
     phy_tax_data %>%
-    remove_missing() %>%
+    remove_missing(na.rm = TRUE) %>%
     group_by(family) %>%
     summarize(
       start = min(y),
@@ -3058,7 +3075,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi) {
       axis.title.x = element_blank(),
       axis.text.y = element_text(
         face = "italic", 
-        size = 11/.pt
+        size = 10/.pt
       ),
       legend.text = element_text(size = 20/.pt),
       legend.title = element_text(size = 24/.pt),
@@ -3564,13 +3581,22 @@ wrap_quotes <- function (x) {paste0("\"", x, "\"")}
 #' with columns for genus, specific epithet, etc
 #'
 #' @param species_list Vector of species names
+#' @param updated_names Dataframe with new synonyms to use to replace original
+#' species names in `species_list`
 #'
-#' @return Tibble
+#' @return Tibble. `taxon_code` is the original names in species_list;
+#' `genus`, `specific_epithet`, and `infraspecific_epithet` are based on
+#' the new name from `updated_names`.
 #' 
-reformat_species_names <- function (species_list) {
+reformat_species_names <- function (species_list, updated_names) {
   
   tibble(taxon_code = species_list) %>%
-    separate(taxon_code, c("genus", "specific_epithet"), sep = "_", remove = FALSE) %>%
+    left_join(updated_names, by = c(taxon_code = "original_name")) %>%
+    mutate(new_taxon_code = case_when(
+      !is.na(new_name) ~ new_name,
+      TRUE ~ taxon_code
+    )) %>%
+    separate(new_taxon_code, c("genus", "specific_epithet"), sep = "_", remove = FALSE) %>%
     mutate(informal_variety = str_match(specific_epithet, "[0-9]") %>% map_chr(1)) %>%
     mutate(specific_epithet = str_remove_all(specific_epithet, "[0-9]")) %>%
     mutate(species = paste(genus, specific_epithet)) %>%
@@ -3578,7 +3604,7 @@ reformat_species_names <- function (species_list) {
       specific_epithet == "sp" ~ NA_character_,
       TRUE ~ informal_variety
     )) %>%
-    mutate(infaspecific_epithet = case_when(
+    mutate(infraspecific_epithet = case_when(
       species == "Lindsaea repens" ~ "marquesensis",
       species == "Davallia solida" ~ "solida",
       species == "Ctenitis sciaphila" ~ "sciaphila",
@@ -3586,7 +3612,8 @@ reformat_species_names <- function (species_list) {
       species == "Deparia petersenii" ~ "congrua",
       TRUE ~ NA_character_
     )) %>%
-    mutate(taxon = jntools::paste3(genus, specific_epithet, infaspecific_epithet))
+    mutate(taxon = jntools::paste3(genus, specific_epithet, infraspecific_epithet)) %>%
+    select(-new_name, -new_taxon_code)
   
 }
 
@@ -3607,9 +3634,9 @@ lookup_taxonomy <- function (taxa_names_df) {
     best_match_only = TRUE, 
     # for data_source_ids, 167 = ipni, 165 = tropicos
     data_source_ids = c(167, 165)) %>%
-    select(species = user_supplied_name, scientific_name = matched_name, name_source = data_source_title) %>%
-    right_join(taxa_names_df) %>% 
-    select(taxon_code, genus, specific_epithet, infaspecific_epithet, informal_variety, scientific_name, name_source) %>%
+    select(taxon = user_supplied_name, scientific_name = matched_name, name_source = data_source_title) %>%
+    right_join(taxa_names_df, by = "taxon") %>% 
+    select(taxon_code, genus, specific_epithet, infraspecific_epithet, informal_variety, scientific_name, name_source) %>%
     # Manually add names from NCBI database or Murdock and Smith 2003
     # for those missing from IPNI or TROPICOS
     mutate(scientific_name = case_when(
