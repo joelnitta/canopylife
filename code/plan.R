@@ -185,9 +185,19 @@ plan <- drake_plan(
   # each climate var by elevation, growth habit, and
   # their interaction, then choose the best model for each.
   # Exclude single outlier site.
-  climate_models = choose_habit_elevation_models(
+  temperature_models = choose_habit_elevation_models(
     data = climate_trans_no_outlier,
-    resp_vars = climate_vars),
+    resp_vars = climate_vars[str_detect(climate_vars, "temp")],
+    prefer_positive = FALSE),
+  
+  # Prefer models within 2 delta AICc that have 
+  # non-negative predicted values for VPD.
+  vpd_models = choose_habit_elevation_models(
+    data = climate_trans_no_outlier,
+    resp_vars = climate_vars[str_detect(climate_vars, "vpd")],
+    prefer_positive = TRUE),
+  
+  climate_models = bind_rows(temperature_models, vpd_models),
   
   # - Check for spatial autocorrelation in models
   check_climate_model_spatial_autocorr = check_moran_pval(climate_models),
@@ -409,7 +419,10 @@ plan <- drake_plan(
   # by elevation, growth habit, and
   # their interaction, then choose the best model for each.
   # Also checks for spatial autocorrelation in the residuals.
-  div_el_models_nonspatial = choose_habit_elevation_models(div_metrics_all, resp_vars),
+  div_el_models_nonspatial = choose_habit_elevation_models(
+    data = div_metrics_all, 
+    resp_vars = resp_vars,
+    prefer_positive = FALSE),
   
   # - Only SLA showed spatial autocorrelation, 
   # so make a spatially-explicit model for this

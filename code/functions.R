@@ -573,7 +573,9 @@ process_raw_climate <- function (climate_raw) {
       ),
       habit = fct_relevel(habit, c("epiphytic", "terrestrial")),
       site = str_remove_all(site, "_epi|_ter"),
-      vpd = plantecophys::RHtoVPD(rh, temp)
+      # plantecophys::RHtoVPD takes RH in percent (1 to 100), temp in C,
+      # outputs VPD in kPA
+      vpd = plantecophys::RHtoVPD(RH = rh, TdegC = temp)
     )
   
   # Final checks:
@@ -1542,9 +1544,12 @@ analyze_cwm_by_habit <- function (traits, comm) {
 #' and "lat" columns.
 #' @param resp_vars Vector of response variables in data
 #' to use. Defaults to column names of data
+#' @param prefer_positive Should models within AICc of 2 that produce
+#' positive response values be preferred? (applies to models where response
+#' var should be positive).
 #'
 #' @return Dataframe.
-choose_habit_elevation_models <- function (data, resp_vars) {
+choose_habit_elevation_models <- function (data, resp_vars, prefer_positive = FALSE) {
   
   # Helper function: check if any terms of a model are non-significant
   any_nonsignif_terms <- function(model) {
@@ -1558,6 +1563,14 @@ choose_habit_elevation_models <- function (data, resp_vars) {
     broom::tidy(model) %>%
       dplyr::summarize(all(p.value > 0.05)) %>%
       dplyr::pull(1)
+  }
+  
+  # Helper function: calculate the sum of all negative fits
+  sum_neg_fits <- function(model) {
+    broom::augment(model) %>%
+      filter(.fitted < 0) %>%
+      summarize(sum(.fitted)) %>%
+      pull(1)
   }
   
   # Reformat data into nested set by response variable
@@ -1588,35 +1601,46 @@ choose_habit_elevation_models <- function (data, resp_vars) {
     data_tibble %>%
     # Construct a linear model for each variable
     mutate(
-      interaction = map(data, ~lm(value ~ el * habit, .)),
-      both = map(data, ~lm(value ~ el + habit, .)),
-      habit_only = map(data, ~lm(value ~ habit, .)),
-      el_only = map(data, ~lm(value ~ el, .)),
+      interaction = map(data, ~lm(value ~ el * habit, data = .)),
+      both = map(data, ~lm(value ~ el + habit, data = .)),
+      habit_only = map(data, ~lm(value ~ habit, data = .)),
+      el_only = map(data, ~lm(value ~ el, data = .)),
     ) %>%
     gather(model_type, model, -var, -data)
   
   # Calculate the AICc and delta AICc for each model,
-  # retain models within delta AICc 2,
-  # then select model based on fewest non-significant terms and best AICc
-  # (in that order)
+  # and retain models within delta AICc 2
   all_models <-
     all_models %>% 
     mutate(
       AICc = map_dbl(model, sme::AICc),
       any_nonsignif = map_lgl(model, any_nonsignif_terms),
-      all_nonsignif = map_lgl(model, all_nonsignif_terms)
+      all_nonsignif = map_lgl(model, all_nonsignif_terms),
+      neg_fits = map_dbl(model, sum_neg_fits)
     ) %>%
     group_by(var) %>%
     mutate(
       min_AICc = min(AICc),
       delta_AICc = AICc - min_AICc) %>%
-    filter(delta_AICc < 2) %>%
-    arrange(any_nonsignif, AICc, .by_group = TRUE) %>%
-    slice(1)
+    filter(delta_AICc < 2)
+  
+  # Select model based on fewest non-significant terms and best AICc
+  # (in that order)
+  if (prefer_positive == FALSE) {
+    selected_models <-
+      all_models %>%
+      arrange(any_nonsignif, AICc, .by_group = TRUE) %>%
+      slice(1)
+  } else if (prefer_positive == TRUE) {
+    selected_models <-
+      all_models %>%
+      arrange(desc(neg_fits), any_nonsignif, AICc, .by_group = TRUE) %>%
+      slice(1)
+  }
   
   # For each model, make a distance matrix,
   # extract the residuals, and run Moran's I
-  all_models %>%
+  selected_models %>%
     mutate(
       dist_mat = map(
         data, 
