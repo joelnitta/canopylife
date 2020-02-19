@@ -60,7 +60,8 @@ loadd(list = c(
   "phylosig_cont_traits",
   "pic_results",
   "species_list",
-  "traits_with_tree"),
+  "traits_with_tree",
+  "spatial_sla_model"),
   cache = canopy_cache)
 
 # Load captions
@@ -304,7 +305,7 @@ We calculated daily maximum, mean, minimum, and standard variation of temperatur
 We analyzed correlation between the mean values with Pearson's correlation coefficient, and retained a set with correlation coefficients less than 0.9 (a single variable was arbitrarily selected from each set of correlated variables; hereafter, 'climatic variables').
 Variables relating to VPD, which have no meaning if less than zero, and some other variables that had skewed distributions, were square-root transformed prior to fitting models.
 We tested for differences between epiphytic and terrestrial dataloggers while accounting for elevation with ANCOVA, using growth habit as the categorical variable and elevation as the covariate.
-We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone, in combination, and in combination with their interactions. We then calculated the corrected Akaike Information Criterion [AIC~c~; @Akaike1973] and selected the best model with the combination of the fewest non-significant parameters and lowest AIC~c~.
+We identified the best-fitting linear model for each climatic variable in response to growth habit and elevation by constructing a set of models including the effect of each independent variable alone, in combination, and in combination with their interactions. We then calculated the corrected Akaike Information Criterion [AIC~c~; @Akaike1973] for each model and retained models within 2 AIC~c~ of the lowest (\ie, 2 delta AIC~c~). From these selected we the model with the combination of the fewest non-significant parameters and lowest AIC~c~ (for VPD, we the selected the model producing the smallest amount of negative predicted values).
 A single outlier plot with unusually high temperature and low humidity (Mt. Rotui, 830 m plot) was excluded from ANCOVA and linear models.
 Mt. Rotui is an isolated peak with greater exposure than the other two mountains where the rest of the plots were established (J. Nitta, pers. obs.).
 
@@ -520,6 +521,18 @@ if(
   )
   both <- ""
 }
+
+# Extract model summary values for SLA
+sla_model <-
+spatial_sla_model %>%
+  pull(model) %>%
+  magrittr::extract2(1)
+
+sla_parameters <- spaMM::get_ranPars(sla_model)
+
+sla_nu <- sla_parameters[["corrPars"]][["1"]][["nu"]] %>% round(2)
+sla_rho <- sla_parameters[["corrPars"]][["1"]][["rho"]] %>% round(2)
+sla_AIC <- AIC(sla_model)[[1]] %>% round(2)
 ```
 
 In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (`r figure("heatmap")`).
@@ -528,7 +541,7 @@ Spatial autocorrelation was not detected in any of the best-fitting full-subsets
 
 Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r figure("cwm-div")`).
 Spatial autocorrelation was detected in the linear model for SLA (`r s_table("linear-fit")`), so a spatial generalized mixed model was used instead (see Methods). 
-Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities.
+Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (spatial generalized linear mixed model, nu = `r sla_nu`, rho = `r sla_rho`, AIC = `r sla_AIC`; `r s_table("spatial-sla")`).
 Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval{ }= `r get_mod_result(model_summ_print, "dissection", "p")`).
 Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (`r figure("cwm-div")`).
 

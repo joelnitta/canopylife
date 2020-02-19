@@ -41,6 +41,7 @@ loadd(list = c(
   "climate_models",
   "div_el_models",
   "div_el_model_summaries",
+  "div_el_model_parameter_summaries",
   "cwsd_scatterplot"), 
   cache = canopy_cache)
 
@@ -421,6 +422,46 @@ filename <- s_table("gam-fit") %>%
 # Write out table with metadata
 write_csv_with_meta(
   best_fit_div_models_moran_formatted, 
+  here::here("results", filename), 
+  header,
+  footer)
+```
+
+**`r s_table("spatial-sla")`** `r s_table_cap("spatial-sla")` (see separate file)
+
+Spatial autocorrelation accounted for by including a Mátern spatial correlation structure in model (see Methods).
+
+```{r spatial-sla}
+# Format table
+spatial_sla_formatted <-
+div_el_model_parameter_summaries %>%
+  filter(var == "sla") %>%
+  select(term, Coefficient = estimate, SE = std.error, t = t_value) %>%
+  mutate(term = term %>%
+           str_replace_all("habitterrestrial", "Growth habit") %>%
+           str_replace_all("el", "Elevation")) %>%
+  rename(Term = term)
+  
+# Set header and footer
+header <- c(
+  si_table_header,
+  s_table_nums("spatial-sla") %>% wrap_quotes
+)
+
+footer <- "Spatial autocorrelation accounted for by including a Mátern spatial correlation structure in model (see Methods)." %>%
+  str_wrap(width = 100) %>%
+  str_split("\\n") %>%
+  unlist %>%
+  purrr::map_chr(wrap_quotes)
+
+# Write out table with metadata
+filename <- s_table("spatial-sla") %>%
+  str_replace_all(" ", "_") %>%
+  paste0(".csv")
+
+# Write out table with metadata
+write_csv_with_meta(
+  spatial_sla_formatted, 
   here::here("results", filename), 
   header,
   footer)
