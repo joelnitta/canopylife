@@ -48,12 +48,16 @@ loadd(list = c(
 # Load captions
 source(here::here("ms/captions.R"))
 
-# Set up table headers
+# Load functions
+source(here::here("code/functions.R"))
+
+# Set up main table header
 si_table_header <- c(
   "New Phytologist Supporting Information",
   "Authors: Joel H. Nitta, James E. Watkins, Jr., and Charles C. Davis" %>% wrap_quotes,
   "Article acceptance date: 5 February 2020"
 )
+
 ```
 
 <!-- Set left justification  -->
@@ -74,71 +78,39 @@ The following Supporting Information is available for this article:
 
 **`r s_table("species-list")`** `r s_table_cap("species-list")` (see separate file)
 
-'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith (2003). 'NA' indicates not applicable.
-
 ```{r species-list}
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("species-list") %>% wrap_quotes
+species_list_footer <- "'Taxon code' is the name used for that taxon in analyses. 'Informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'Name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith (2003). The genus in 'Taxon code' may differ from the 'Genus' column for names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates not applicable." 
+
+write_si_table(
+  table_id = "species-list", 
+  main_header = si_table_header,
+  table = taxonomic_data_for_si,
+  table_footer = species_list_footer
 )
-
-# Wrap footer at ca. 100 characters per line. Each line needs to be an element of the
-# character vector.
-footer <- "'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith (2003). 'NA' indicates not applicable." %>% 
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("species-list") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-write_csv_with_meta(
-  taxonomic_data_for_si, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r species_list_footer`
 
 **`r s_table("trait-values")`** `r s_table_cap("trait-values")` (see separate file)
 
-SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. 'NA' indicates missing data.
-
 ```{r trait_data}
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("trait-values") %>% wrap_quotes
+trait_values_footer <- "SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. 'NA' indicates missing data."
+
+write_si_table(
+  table_id = "trait-values", 
+  table = trait_data_for_si,
+  main_header = si_table_header,
+  table_footer = trait_values_footer
 )
-
-footer <- "SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. 'NA' indicates missing data." %>% 
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("trait-values") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-write_csv_with_meta(
-  trait_data_for_si, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r trait_values_footer`
 
 **`r s_table("ancova")`** `r s_table_cap("ancova")` (see separate file)
 
-d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable.
-
-```{r climate-ancova}
+```{r ancova}
 # Format table
-climate_ancova_results_formatted <-
+ancova_table <-
 climate_ancova_results %>% 
   mutate(
     p.value = signif(p.value, 2) %>% format.pval(., digits = 1),
@@ -152,29 +124,19 @@ climate_ancova_results %>%
   ) %>%
   select(`Response variable` = variable, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value)
 
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("ancova") %>% wrap_quotes
+ancova_footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable."
+
+write_si_table(
+  table_id = "ancova", 
+  table = ancova_table,
+  main_header = si_table_header,
+  table_footer = ancova_footer
 )
-
-footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable." %>% wrap_quotes
-
-# Write out table with metadata
-filename <- s_table("ancova") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-write_csv_with_meta(
-  climate_ancova_results_formatted, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
 
-**`r s_table("linear-fit")`** `r s_table_cap("linear-fit")` (see separate file)
+`r ancova_footer`
 
-MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable.
+**`r s_table("linear-fit")`** `r s_table_cap("linear-fit")` (see separate file)
 
 ```{r linear-fit}
 # Combine summaries of models for diversity metrics
@@ -196,7 +158,7 @@ climate_summaries <-
   )
 
 # Combine summaries of diversity and climate metrics, reformat model names
-table <-
+combined_summaries <-
   bind_rows(div_summaries, climate_summaries) %>%
   mutate(
     model_type = model_type %>% 
@@ -229,7 +191,7 @@ tribble(
   "sla", "SLA",
   "width", "Frond width"
 ) %>%
-  left_join(table, by = "var") %>%
+  left_join(combined_summaries, by = "var") %>%
   select(
     Response,
     Model = model_type,
@@ -243,33 +205,23 @@ tribble(
     P_moran = I_pval
   )
 
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("linear-fit") %>% wrap_quotes
+linear_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable."
+
+write_si_table(
+  table_id = "linear-fit", 
+  table = linear_fit_table,
+  main_header = si_table_header,
+  table_footer = linear_fit_footer
 )
-
-footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable." %>% wrap_quotes
-
-filename <- s_table("linear-fit") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-# Write out table with metadata
-write_csv_with_meta(
-  linear_fit_table, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r linear_fit_footer`
 
 **`r s_table("phylosig-binary-strict")`** `r s_table_cap("phylosig-binary-strict")` (see separate file)
 
-P_rnd, probability of obtaining the observed value of \D under random trait evolution; P_bm, probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
-
 ```{r phylosig-binary-strict}
 # Format table
-phylosig_binary_traits_strict_formatted <-
+phylosig_binary_strict_table <-
   phylosig_binary_traits_strict %>%
   mutate(D = round_t(D, 2)) %>%
   mutate(trait = factor(
@@ -282,38 +234,23 @@ phylosig_binary_traits_strict_formatted <-
   select(Trait = trait, `Number of presences` = num_present, `Number of absences` = num_absent, D,
          P_rnd = prob_random, P_bm = prob_brownian)
 
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("phylosig-binary-strict") %>% wrap_quotes
+phylosig_binary_strict_footer <- "P_rnd, probability of obtaining the observed value of D under random trait evolution; P_bm, probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion."
+
+write_si_table(
+  table_id = "phylosig-binary-strict", 
+  table = phylosig_binary_strict_table,
+  main_header = si_table_header,
+  table_footer = phylosig_binary_strict_footer
 )
-
-footer <- "P_rnd, probability of obtaining the observed value of D under random trait evolution; P_bm, probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion." %>%
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("phylosig-binary-strict") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-# Write out table with metadata
-write_csv_with_meta(
-  phylosig_binary_traits_strict_formatted, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+P_rnd, probability of obtaining the observed value of \D under random trait evolution; P_bm, probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
 
 **`r s_table("corr-evo-strict")`** `r s_table_cap("corr-evo-strict")` (see separate file)
 
-LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit. 
-
 ```{r corr-evo-strict}
 # Format table
-correlated_evo_test_strict_formatted <-
+corr_evo_strict_table <-
   correlated_evo_test_strict %>%
   mutate(trait = factor(
     trait, 
@@ -330,38 +267,23 @@ correlated_evo_test_strict_formatted <-
     `P` = pval
   )
 
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("corr-evo-strict") %>% wrap_quotes
+corr_evo_strict_footer <- "LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit." 
+
+write_si_table(
+  table_id = "corr-evo-strict", 
+  table = corr_evo_strict_table,
+  main_header = si_table_header,
+  table_footer = corr_evo_strict_footer
 )
-
-footer <- "LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit." %>%
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("corr-evo-strict") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-# Write out table with metadata
-write_csv_with_meta(
-  correlated_evo_test_strict_formatted, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r corr_evo_strict_footer`
 
 **`r s_table("gam-fit")`** `r s_table_cap("gam-fit")` (see separate file)
 
-MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, \pval\ value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's *I*. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods.
-
 ```{r gam-fit}
 # Format table
-best_fit_div_models_moran_formatted <-
+gam_fit_table <-
 best_fit_div_models_moran %>%
   # Drop frond length and width (highly correlated with rhizome dia.)
   filter(resp_var %in% c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
@@ -402,38 +324,24 @@ best_fit_div_models_moran %>%
     `P_moran` = morans_I_pval
   )
 
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("gam-fit") %>% wrap_quotes
+gam_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods."
+
+write_si_table(
+  table_id = "gam-fit", 
+  table = gam_fit_table,
+  main_header = si_table_header,
+  table_footer = gam_fit_footer
 )
 
-footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods." %>%
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("gam-fit") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-# Write out table with metadata
-write_csv_with_meta(
-  best_fit_div_models_moran_formatted, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r gam_fit_footer`
 
 **`r s_table("spatial-sla")`** `r s_table_cap("spatial-sla")` (see separate file)
 
-Spatial autocorrelation accounted for by including a Mátern spatial correlation structure in model (see Methods).
-
 ```{r spatial-sla}
 # Format table
-spatial_sla_formatted <-
+spatial_sla_table <-
 div_el_model_parameter_summaries %>%
   filter(var == "sla") %>%
   select(term, Coefficient = estimate, SE = std.error, t = t_value) %>%
@@ -442,30 +350,18 @@ div_el_model_parameter_summaries %>%
            str_replace_all("el", "Elevation")) %>%
   rename(Term = term)
   
-# Set header and footer
-header <- c(
-  si_table_header,
-  s_table_nums("spatial-sla") %>% wrap_quotes
+spatial_sla_footer <- "A Mátern spatial correlation structure was included in the model to account for spatial autocorrelation (see Methods)."
+
+write_si_table(
+  table_id = "spatial-sla", 
+  table = spatial_sla_table,
+  main_header = si_table_header,
+  table_footer = spatial_sla_footer
 )
 
-footer <- "Spatial autocorrelation accounted for by including a Mátern spatial correlation structure in model (see Methods)." %>%
-  str_wrap(width = 100) %>%
-  str_split("\\n") %>%
-  unlist %>%
-  purrr::map_chr(wrap_quotes)
-
-# Write out table with metadata
-filename <- s_table("spatial-sla") %>%
-  str_replace_all(" ", "_") %>%
-  paste0(".csv")
-
-# Write out table with metadata
-write_csv_with_meta(
-  spatial_sla_formatted, 
-  here::here("results", filename), 
-  header,
-  footer)
 ```
+
+`r spatial_sla_footer`
 
 \clearpage
 

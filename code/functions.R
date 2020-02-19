@@ -3670,8 +3670,48 @@ lookup_taxonomy <- function (taxa_names_df) {
       name_source == "The International Plant Names Index" ~ "IPNI",
       TRUE ~ name_source
     )) %>%
-    rename_all(~str_replace(., "_", " "))
+    assert(not_na, taxon_code, genus, specific_epithet, scientific_name, name_source) %>%
+    arrange(taxon_code) %>%
+    rename_all(~str_replace(., "_", " ") %>% str_to_sentence)
   
+}
+
+#' Write out an SI table
+#'
+#' @param table_id Table ID: should match the one used for captioner (see ms/captions.R)
+#' @param table Tibble: the formatted table to write out
+#' @param main_header A vector of main header text to add to the top of each table
+#' @param table_footer A table-specific footer
+#'
+#' @return Nothing. Externally, the table is written out to "results".
+#' 
+write_si_table <- function(table_id, table, main_header, table_footer) {
+  
+  # Combine main header with the header for this table
+  header <- c(
+    main_header,
+    s_table_nums(table_id) %>% wrap_quotes
+  )
+  
+  # Wrap footer at ca. 100 characters per line. Each line needs to be an element of the
+  # character vector.
+  footer <- table_footer %>% 
+    str_wrap(width = 100) %>%
+    str_split("\\n") %>%
+    unlist %>%
+    purrr::map_chr(wrap_quotes)
+  
+  # Set filename: 'Table_S1.csv, etc
+  filename <- s_table(table_id) %>%
+    str_replace_all(" ", "_") %>%
+    paste0(".csv")
+  
+  write_csv_with_meta(
+    table, 
+    here::here("results", filename), 
+    header,
+    footer)
+ 
 }
 
 # MS rendering ----
