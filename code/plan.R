@@ -40,28 +40,31 @@ plan <- drake_plan(
   # (includes one measure per specimen,
   #  multiple specimens per species).
   # All measurements in cm, except number of pinna pairs.
-  morph_cont_raw = process_raw_cont_morph(
+  morph_cont = process_raw_cont_morph(
     file_in("data/morph_measurements.csv"),
     species_list
   ),
   
   # - Process raw qualitative trait data
   # (includes one obsevation per specimen).
-  morph_qual_raw = process_raw_qual_morph(
+  morph_qual_raw = read_csv(
     file_in("data/morph_qual_traits.csv"),
+    na = c("?", "n/a", "NA", "N/A")),
+  
+  morph_qual = process_raw_qual_morph(
+    morph_qual_raw,
     species_list
   ),
   
   # - Combine raw trait data into final trait matrix
-  fern_traits = make_trait_matrix(sla_raw, morph_cont_raw, morph_qual_raw) %>%
-    select(-source_1, -source_2),
+  fern_traits = make_trait_matrix(sla_raw, morph_cont, morph_qual) %>%
+    select(-in_strict),
   
   # - Also make "strict" trait dataset by excluding species with 
   # gameto traits only known from taxonomy
-  fern_traits_strict = make_trait_matrix(sla_raw, morph_cont_raw, morph_qual_raw) %>%
-    mutate_at(vars(source_1, source_2), ~replace_na(., "none")) %>%
-    filter(source_1 != "T", source_2 != "T") %>%
-    select(-source_1, -source_2),
+  fern_traits_strict = make_trait_matrix(sla_raw, morph_cont, morph_qual) %>%
+    filter(in_strict == TRUE) %>%
+    select(-in_strict),
   
   # - Also make trait dataset with continuous traits scaled, but not log-transformed.
   fern_traits_scaled = transform_traits(
@@ -139,7 +142,7 @@ plan <- drake_plan(
   # Format data for SI ----
   # - Traits: include SD and n for all quantitative (continuous) data
   trait_data_for_si = process_trait_data_for_si(
-    sla_raw, morph_cont_raw, morph_qual_raw
+    sla_raw, morph_cont, morph_qual, morph_qual_raw
   ),
   
   # - Species names
@@ -398,7 +401,7 @@ plan <- drake_plan(
   # - Extract table of importance of each environmental variable.
   important_div_vars = get_important_vars(fss_div_results),
   
-  # - Extract table of best-fit models.
+  # - Extract table of best-fit models (within delta AIC 3).
   best_fit_div_models = get_best_fss_mods(fss_div_results),
   
   # - Test for spatial autocorrelation in residuals with Moran's I.

@@ -94,11 +94,17 @@ write_si_table(
 **`r s_table("trait-values")`** `r s_table_cap("trait-values")` (see separate file)
 
 ```{r trait_data}
-trait_values_footer <- "SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). 'taxon code' is the name used for that taxon in analyses (see Table S1). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. 'NA' indicates missing data."
+trait_values_footer <- "SLA, specific leaf area; 'Taxon code', name used for that taxon in analysis (see Table S1); 'Growth habit', growth habit observed in the field; 'Binary growth habit', binary growth habit used in analysis (see Methods). Continuous measurements shown as mean, standard deviation (sample size). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. For frond dissection, 1 = simple, 2 = pinnatifid, 3 = one-pinnate, 4 = one-pinnate-pinnatifid, 5 = two-pinnate, 6 = two-pinnate-pinnatifid, 7 = bipinnatifid_or_tripinnatifid, 8 = three-pinnate, 9 = three-pinnate-pinnatifid. 'NA' indicates missing data."
+
+# Format table: capitalize column names
+trait_values_table <-
+trait_data_for_si %>% 
+  rename_all(str_to_sentence) %>% 
+  rename(`SLA (sq m per kg)` = `Sla (sq m per kg)`)
 
 write_si_table(
   table_id = "trait-values", 
-  table = trait_data_for_si,
+  table = trait_values_table,
   main_header = si_table_header,
   table_footer = trait_values_footer
 )
@@ -111,7 +117,16 @@ write_si_table(
 ```{r ancova}
 # Format table
 ancova_table <-
-climate_ancova_results %>% 
+  tribble(
+  ~variable, ~Response,
+  "temp_max", "Max. temp.",
+  "temp_mean", "Mean temp.",
+  "temp_sd", "SD temp.",
+  "vpd_min", "Min. VPD",
+  "vpd_mean", "Mean VPD",
+  "vpd_sd", "SD VPD",
+) %>%
+  left_join(climate_ancova_results, by = "variable") %>% 
   mutate(
     p.value = signif(p.value, 2) %>% format.pval(., digits = 1),
     meansq = round_t(meansq, 2),
@@ -122,9 +137,9 @@ climate_ancova_results %>%
       TRUE ~ term
     )
   ) %>%
-  select(`Response variable` = variable, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value)
+  select(Response, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value)
 
-ancova_footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum ('min'), maximum ('max'), and standard deviation ('sd') of temperature ('temp', °C) and vapor pressure deficit ('vpd', kPa). 'NA' indicates not applicable."
+ancova_footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum, maximum, and standard deviation of temperature ('temp', °C) and vapor pressure deficit ('VPD', kPa). Vapor pressure deficit was square-root transformed prior to analysis. 'NA' indicates not applicable."
 
 write_si_table(
   table_id = "ancova", 
@@ -174,9 +189,9 @@ tribble(
   ~var, ~Response,
   "temp_max", "Max. temp.",
   "temp_mean", "Mean temp.",
-  "vpd_mean", "Mean VPD",
-  "vpd_min", "Min. VPD",
   "temp_sd", "SD temp.",
+  "vpd_min", "Min. VPD",
+  "vpd_mean", "Mean VPD",
   "vpd_sd", "SD VPD",
   "ntaxa", "Richness",
   "mpd.obs.z.phy", "MPDphy",
@@ -200,12 +215,12 @@ tribble(
     `Adjusted R2` = adj.r.squared,
     P = p.value,
     `d.f.` = df,
-    delta_AICc,
+    `delta AICc` = delta_AICc,
     `Moran's I` = morans_I,
-    P_moran = I_pval
+    `P moran` = I_pval
   )
 
-linear_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable."
+linear_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; 'P moran', P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable."
 
 write_si_table(
   table_id = "linear-fit", 
@@ -231,10 +246,14 @@ phylosig_binary_strict_table <-
     trait,
     new_levels = c("Epiphytic growth", "Gemmae", "Glands", "Hairs", "Cordate morphotype"))) %>%
   arrange(trait) %>%
-  select(Trait = trait, `Number of presences` = num_present, `Number of absences` = num_absent, D,
-         P_rnd = prob_random, P_bm = prob_brownian)
+  select(Trait = trait, 
+         `Number of presences` = num_present, 
+         `Number of absences` = num_absent, 
+         D,
+         `P rnd` = prob_random, 
+         `P bm` = prob_brownian)
 
-phylosig_binary_strict_footer <- "P_rnd, probability of obtaining the observed value of D under random trait evolution; P_bm, probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion."
+phylosig_binary_strict_footer <- "'P rnd', probability of obtaining the observed value of D under random trait evolution; 'P bm', probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion."
 
 write_si_table(
   table_id = "phylosig-binary-strict", 
@@ -244,7 +263,7 @@ write_si_table(
 )
 ```
 
-P_rnd, probability of obtaining the observed value of \D under random trait evolution; P_bm, probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
+'P rnd', probability of obtaining the observed value of \D under random trait evolution; 'P bm', probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
 
 **`r s_table("corr-evo-strict")`** `r s_table_cap("corr-evo-strict")` (see separate file)
 
@@ -283,24 +302,29 @@ write_si_table(
 
 ```{r gam-fit}
 # Format table
+
+# First make join table for converting variable names, in order
+resp_var_table <-
+tribble(
+  ~resp_var, ~Response,
+  "ntaxa", "Richness",
+  "mpd.obs.z.phy", "MPDphy",
+  "mntd.obs.z.phy", "MNTDphy",
+  "mpd.obs.z.func", "MPDfunc",
+  "mntd.obs.z.func", "MNTDfunc",
+  "dissection", "Dissection",
+  "length", "Frond length",
+  "width", "Frond width",
+  "pinna", "Pinna no.",
+  "rhizome", "Rhizome diam.",
+  "stipe", "Stipe length",
+  "sla", "SLA"
+)
+
 gam_fit_table <-
-best_fit_div_models_moran %>%
-  # Drop frond length and width (highly correlated with rhizome dia.)
-  filter(resp_var %in% c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
-                   "mpd.obs.z.func", "mntd.obs.z.func",
-                   "dissection", "sla", "stipe", "rhizome", "pinna")) %>%
-  mutate(resp_var = factor(
-        resp_var, 
-        levels = c("ntaxa", "mpd.obs.z.phy", "mntd.obs.z.phy", 
-                   "mpd.obs.z.func", "mntd.obs.z.func",
-                   "dissection", "sla", "stipe", "rhizome", "pinna"))) %>%
-  mutate(
-    resp_var = lvls_revalue(
-        resp_var, 
-        new_levels = c("Richness", "MPDphy", "MNTDphy", 
-                       "MPDfunc", "MNTDfunc",
-                       "Dissection", "SLA", "Stipe length", "Rhizome diam.", "Pinna no.")) 
-  ) %>%
+resp_var_table %>%
+  left_join(best_fit_div_models_moran, by = "resp_var") %>%
+  mutate(resp_var = fct_relevel(resp_var, resp_var_table$resp_var)) %>%
   arrange(resp_var, delta_AICc) %>%
   mutate(
     modname = modname %>%
@@ -315,16 +339,16 @@ best_fit_div_models_moran %>%
       str_replace_all("vpd_min", "Min. VPD")
   ) %>% 
   select(
-    `Metric` = resp_var,
+    Response,
     `Model` = modname,
     AICc,
     `R2` = r2,
-    delta_AICc,
+    `delta AICc` = delta_AICc,
     `Moran's I` = morans_I,
-    `P_moran` = morans_I_pval
+    `P moran` = morans_I_pval
   )
 
-gam_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit, SD, standard deviation; AICc, corrected Akaike Information Criterion; P_moran, P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). Frond length and width were highly correlated with rhizome diameter and not shown. For details on calculations of MPD and MNTD, see Methods."
+gam_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; SLA, specific leaf area; VPD, vapor pressure deficit, AICc, corrected Akaike Information Criterion; 'P moran', P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Models within delta AICc 3 of the best-fitting model shown. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods."
 
 write_si_table(
   table_id = "gam-fit", 

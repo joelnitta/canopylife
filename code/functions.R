@@ -223,31 +223,14 @@ process_raw_cont_morph <- function (raw_morph_path, species_list) {
 
 #' Process raw morphological qualitative trait data
 #'
-#' @param raw_morph_path Data to raw data file with morphological
-#' trait observations
+#' @param raw_morph Raw data with morphological trait observations
 #' @param species_list Vector of accepted species to include
 #'
 #' @return Tibble, with one trait value per species
 #'
-process_raw_qual_morph <- function (raw_morph_path, species_list) {
+process_raw_qual_morph <- function (raw_morph, species_list) {
   
-  # Format data sources to use names instead of number codes to minimize confusion
-  # original scheme:
-  #1 = lab obs.
-  #2 = Nayar and Kauar 1971 "Gametophytes of homosporous ferns" The Botanical Review [@Nayar1971]
-  #3 = Lloyd 1980 "Reproductive biology and gametophyte morphology of New World populations of Acrostichum aureum" AFJ [@Lloyd1980]
-  #4 = field obs.
-  #5 = genus/family level character (taxonomy)
-  #6 = Zhang et al 2008 "Gametophyte Morphology and Development of Six Chinese Species of Pteris (Pteridaceae)" AFJ [@Zhang2008]
-  #7 = Bierhorst 1967 "The gametophyte of Schizaea dichotoma" AJB [@Bierhorst1967]
-  #8 = Martin et al 2006 "Efficient induction of apospory and apogamy in vitro in silver fern (Pityrogramma calomelanos L.)" Plant Cell Reports [@Martin2006]
-  #9 = Tigerschiöld 1989 "Dehiscence of antheridia in thelypteroid ferns" Nordic Journal of Botany [@Tigerschiold1989]
-  #10 = Tigerschiöld 1990 "Gametophytes of some Ceylonese species of Thelypteridaceae" Nordic Journal of Botany [@Tigerschiold1990]
-  #11 = Atkinson 1975 "The gametophyte of five Old World thelypteroid ferns" Phytomorphology [@Atkinson1975]
-  #12 = Chen et al 2014 "First insights into the evolutionary history of the Davallia repens complex" Blumea [@Chen2014a]
-  
-  # Read in raw trait data
-  read_csv(raw_morph_path, na = c("?", "n/a", "NA", "N/A")) %>%
+  raw_morph %>%
     clean_names() %>%
     select(species, habit = growth_habit, dissection, morphotype, glands, hairs, gemmae, source) %>%
     # Make sure all species on the species list are included in the data,
@@ -257,28 +240,6 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
     filter(species %in% species_list) %>%
     assert(not_na, species) %>%
     assert(is_uniq, species) %>%
-    # Reformat references
-    separate(source, c("source_1", "source_2"), ",", fill = "right") %>%
-    mutate_at(vars(source_1, source_2), ~str_remove_all(., " ") %>% as.numeric) %>%
-    mutate_at(vars(source_1, source_2), ~str_pad(., 2, "left", "0")) %>%
-    mutate_at(
-      vars(source_1, source_2),
-      list(~case_when(
-        . == "01" ~ "L", # lab observation
-        . == "02" ~ "Nayar1971",
-        . == "03" ~ "Lloyd1980",
-        . == "04" ~ "F", # field observation
-        . == "05" ~ "T", # based on taxonomy
-        . == "06" ~ "Zhang2008",
-        . == "07" ~ "Bierhorst1967",
-        . == "08" ~ "Martin2006",
-        . == "09" ~ "Tigerschiold1989",
-        . == "10" ~ "Tigerschiold1990",
-        . == "11" ~ "Atkinson1975",
-        . == "12" ~ "Chen2014a",
-        TRUE ~ as.character(.))
-      )
-    ) %>%
     # Make binary habit a factor (order = epi, ter)
     assert(not_na, habit) %>%
     assert(in_set("epiphytic", "epipetric", "terrestrial", "hemiepiphytic", "climbing"), habit) %>%
@@ -305,7 +266,15 @@ process_raw_qual_morph <- function (raw_morph_path, species_list) {
         dissection == "more_divided" ~ 10,
         TRUE ~ NaN
       )
-    )
+    ) %>%
+    # Add a flag for whether to include data in 'strict' dataset
+    mutate(
+      in_strict = case_when(
+        # Only include in 'strict' if source is NOT '5' = based on taxonomy
+        str_detect(source, "5") ~ FALSE,
+        TRUE ~ TRUE)
+    ) %>%
+    select(-source)
 }
 
 #' Combine trait data into trait matrix
@@ -366,53 +335,45 @@ make_trait_matrix <- function(sla_raw, morph_cont_raw, morph_qual_raw) {
 #'
 #' @param sla_raw Dataframe; raw measurements of specific leaf area, including 
 #' multiple measurments per specimen.
-#' @param morph_cont_raw Dataframe; raw measurements of other continuous traits (frond length
+#' @param morph_cont Dataframe; raw measurements of other continuous traits (frond length
 #' and width, rhizome diameter, etc).
 #' @param morph_qual_raw Dataframe; observations of qualitative traits
 #' 
 #' @return data frame formatted for export as CSV to be included with SI.
-process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) {
+process_trait_data_for_si <- function (sla_raw, morph_cont, morph_qual, morph_qual_raw) {
   
   ### SLA ###
   
-  # Calculate mean SLA for each individual
-  sla_mean <- 
-    sla_raw %>%
-    group_by(species, specimen) %>%
-    summarize(sla = mean(sla, na.rm = TRUE), n = n()) %>%
-    ungroup()
-  
   # Calculate grand mean for each species based on individual means
   sla_grand_mean <- 
-    sla_mean %>%
+    sla_raw %>%
+    # Calculate individual means first
+    group_by(species, specimen) %>%
+    summarize(sla = mean(sla, na.rm = TRUE), n = n()) %>%
+    ungroup() %>%
+    # Then species means
     group_by(species) %>%
     summarize(mean = mean(sla, na.rm = TRUE), sd = sd(sla, na.rm = TRUE), n = n()) %>%
     mutate(trait = "sla")
   
-  ### Other traits ###
+  ### Other continuous traits ###
   # Load raw measurements, in long format.
   # Includes only one measurment per individual but multiple individuals 
   # per species.
-  morph_long <- 
-    morph_cont_raw %>%
+  # Calculate means
+  morph_mean <- 
+    morph_cont %>%
     select (-source, -specimen) %>%
     gather(key = trait, value = measurement, -species) %>%
     mutate(trait = str_replace_all(trait, "\\.", "_")) %>%
-    na.omit()
-  
-  # Calculate means
-  morph_mean <- 
-    morph_long %>%
+    na.omit() %>%
     group_by(species, trait) %>%
     summarise(mean = mean(measurement), sd = sd(measurement), n = n()) %>%
-    ungroup()
-  
-  # Merge with SLA grand means
-  morph_mean <- bind_rows(morph_mean, sla_grand_mean)
-  
-  # Format digits for printing.
-  morph_mean <- 
-    morph_mean %>%
+    ungroup() %>%
+    # Merge with SLA grand means
+    bind_rows(sla_grand_mean) %>%
+    # Format digits for printing
+    #
     # Set number of signif digits differently for numeric vs integer measurements.
     # Numeric measurements made with normal ruler in cm, so should have to 2 digits 
     # after 0. Need to use formatC() to keep trailing zeros
@@ -439,22 +400,57 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
     select(species, trait, print) %>%
     spread(trait, print)
   
-  ### Merge into final data table ###
-  morph_table <- full_join(morph_mean, morph_qual_raw, by = "species") %>%
+  ### Qualitative traits ###
+  
+  # Format data sources to use names instead of number codes to minimize confusion
+  # original scheme:
+  #1 = lab obs.
+  #2 = Nayar and Kauar 1971 "Gametophytes of homosporous ferns" The Botanical Review [@Nayar1971]
+  #3 = Lloyd 1980 "Reproductive biology and gametophyte morphology of New World populations of Acrostichum aureum" AFJ [@Lloyd1980]
+  #4 = field obs.
+  #5 = genus/family level character (taxonomy)
+  #6 = Zhang et al 2008 "Gametophyte Morphology and Development of Six Chinese Species of Pteris (Pteridaceae)" AFJ [@Zhang2008]
+  #7 = Bierhorst 1967 "The gametophyte of Schizaea dichotoma" AJB [@Bierhorst1967]
+  #8 = Martin et al 2006 "Efficient induction of apospory and apogamy in vitro in silver fern (Pityrogramma calomelanos L.)" Plant Cell Reports [@Martin2006]
+  #9 = Tigerschiöld 1989 "Dehiscence of antheridia in thelypteroid ferns" Nordic Journal of Botany [@Tigerschiold1989]
+  #10 = Tigerschiöld 1990 "Gametophytes of some Ceylonese species of Thelypteridaceae" Nordic Journal of Botany [@Tigerschiold1990]
+  #11 = Atkinson 1975 "The gametophyte of five Old World thelypteroid ferns" Phytomorphology [@Atkinson1975]
+  #12 = Chen et al 2014 "First insights into the evolutionary history of the Davallia repens complex" Blumea [@Chen2014a]
+  
+  morph_qual_for_si <-
+    morph_qual_raw %>%
+    clean_names() %>%
+    select(species, growth_habit, source) %>%
+    # Reformat references
+    separate(source, c("source_1", "source_2"), ",", fill = "right") %>%
+    mutate_at(vars(source_1, source_2), ~str_remove_all(., " ") %>% as.numeric) %>%
+    mutate_at(vars(source_1, source_2), ~str_pad(., 2, "left", "0")) %>%
+    mutate_at(
+      vars(source_1, source_2),
+      list(~case_when(
+        . == "01" ~ "L", # lab observation
+        . == "02" ~ "Nayar and Kaur (1971)",
+        . == "03" ~ "Lloyd (1980)",
+        . == "04" ~ "F", # field observation
+        . == "05" ~ "T", # based on taxonomy
+        . == "06" ~ "Zhang et al (2008)",
+        . == "07" ~ "Bierhorst (1967)",
+        . == "08" ~ "Martin et al (2006)",
+        . == "09" ~ "Tigerschiold (1989)",
+        . == "10" ~ "Tigerschiold (1990)",
+        . == "11" ~ "Atkinson (1975)",
+        TRUE ~ as.character(.))
+      )
+    ) %>%
     mutate(gameto_source = jntools::paste3(source_1, source_2) %>%
              str_replace(" ", ", ")) %>%
-    select(-source_1, -source_2) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Lloyd1980", "Lloyd (1980)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Atkinson1975", "Atkinson (1975)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Nayar1971", "Nayar and Kaur (1971)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Tigerschiold1990", "Tigerschiold (1990)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Tigerschiold1989", "Tigerschiold (1989)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Martin2006", "Martin et al (2006)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Zhang2008", "Zhang et al (2008)")) %>%
-    mutate(gameto_source = str_replace_all(gameto_source, "Bierhorst1967", "Bierhorst (1967)"))
+    select(species, growth_habit, gameto_source) %>%
+    # Inner joining on pre-processed qualitative morph data will keep only species in
+    # species list
+    inner_join(morph_qual, by = "species")
   
   # Add in sources for measurements
-  meas_sources <- morph_cont_raw %>% 
+  sporo_sources <- morph_cont %>% 
     # Rename sources according to abbreviations
     mutate(
       source = case_when(
@@ -473,11 +469,15 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
       sporo_source = paste(unique(source), collapse = ", ")
     )
   
-  # Add measurment sources and reformat column names/order
-  left_join(morph_table, meas_sources, by = "species") %>%
+  ### Merge into final data table ###
+  morph_table <- 
+    morph_qual_for_si %>%
+    left_join(morph_mean, by = "species") %>%
+    left_join(sporo_sources, by = "species") %>%
     select(
       `taxon code` = species,
-      `growth habit` = habit,
+      `growth habit` = growth_habit,
+      `binary growth habit` = habit,
       morphotype,
       gemmae, 
       glands, 
@@ -489,9 +489,11 @@ process_trait_data_for_si <- function (sla_raw, morph_cont_raw, morph_qual_raw) 
       `frond width (cm)` = lamina_width, 
       `stipe length (cm)` = stipe_length, 
       `rhizome diam. (cm)` = rhizome_dia, 
-      `SLA (sq m per kg)` = sla, 
+      sla, 
       `sporophyte data source` = sporo_source
-    )
+    ) %>%
+    rename_all(str_to_sentence) %>% 
+    rename(`SLA (sq m per kg)` = Sla)
   
 }
 
