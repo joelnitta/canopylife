@@ -544,6 +544,9 @@ plan <- drake_plan(
   # for SI
   cwsd_scatterplot = make_cwsd_scatterplot(cwm_long, habit_colors),
   
+  # Make correlation plot of testing different sets of traits for calculating functional diversity
+  func_div_corr_plot = make_func_div_corr_plot(func_comm_struc_combined),
+  
   # Manuscript ----
   
   # First render to PDF, keeping the latex

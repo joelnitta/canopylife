@@ -3450,6 +3450,91 @@ make_cwsd_scatterplot <- function(cwm_long, habit_colors) {
   
 }
 
+# Make plot showing correlation between results of running functional structure analyses
+# using different sets of traits as input
+make_func_div_corr_plot <- function (func_comm_struc_combined) {
+  
+  # Tweak names for easier viewing
+  func_comm_struc_combined_renamed <-
+    func_comm_struc_combined %>%
+    mutate(dataset = str_remove_all(dataset, "func_comm_struc_test_fern_traits_")) %>%
+    mutate(dataset = str_remove_all(dataset, "\\.pool")) %>%
+    mutate(dataset = str_replace_all(dataset, "all_reduced", "reduced")) %>%
+    mutate(dataset = str_remove_all(dataset, "scaled_")) %>%
+    mutate(dataset = str_replace_all(dataset, "log_", "log-trans_"))
+  
+  # Don't need log-transformed sets that don't include log-transformed traits
+  func_comm_struc_combined_renamed <- 
+    func_comm_struc_combined_renamed %>%
+    filter(
+      !dataset %in% c("log-trans_gameto", "log-trans_other")
+    )
+  
+  # Convert to wide format, run corrr: MPD
+  mpd_corr <-
+    func_comm_struc_combined_renamed %>%
+    select(dataset, site, habit, mpd.obs.z) %>%
+    spread(dataset, mpd.obs.z) %>%
+    select(-site, -habit) %>%
+    correlate %>% 
+    rearrange(absolute = FALSE) # arrange so most correlated variables are closest
+  
+  # Make plot 
+  # Modified from https://github.com/tidymodels/corrr/issues/35
+  order <- mpd_corr %>% 
+    select(-rowname) %>% 
+    colnames()
+  
+  mpd_corr_plot <-
+    mpd_corr %>% 
+    stretch(na.rm = TRUE) %>%
+    mutate_at(c("x", "y"), forcats::fct_relevel, ... = order) %>% 
+    ggplot(aes(x, y, fill = r)) +
+    geom_tile() +
+    geom_text(aes(label = as.character(fashion(r))), color = "white", size = 3) +
+    scale_fill_scico(palette = "roma", breaks = c(-1, 1)) +
+    labs(x = NULL, y = NULL, subtitle = "(a)") +
+    theme_minimal() +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      plot.subtitle = element_text(face = "bold"),
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+    )
+  
+  # Convert to wide format, run corrr: MNTD
+  mntd_corr <-
+    func_comm_struc_combined_renamed %>%
+    select(dataset, site, habit, mntd.obs.z) %>%
+    spread(dataset, mntd.obs.z) %>%
+    select(-site, -habit) %>%
+    correlate %>% 
+    rearrange(absolute = FALSE)
+  
+  mntd_corr_plot <-
+    mntd_corr %>% 
+    stretch(na.rm = TRUE) %>%
+    mutate_at(c("x", "y"), forcats::fct_relevel, ... = order) %>% # Use same order as MPD
+    ggplot(aes(x, y, fill = r)) +
+    geom_tile() +
+    geom_text(aes(label = as.character(fashion(r))), color = "white", size = 3) +
+    scale_fill_scico(palette = "roma", breaks = c(-1, 1)) +
+    labs(x = NULL, y = NULL, subtitle = "(b)") +
+    theme_minimal() +
+    theme(
+      panel.grid.minor = element_blank(),
+      panel.grid.major = element_blank(),
+      plot.subtitle = element_text(face = "bold"),
+      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+    )
+  
+  final_plot <- mpd_corr_plot + mntd_corr_plot + plot_layout(nrow = 2, ncol = 1)
+  
+  final_plot + plot_annotation(theme = theme(plot.margin = margin(
+    0.2, 0.2, 0.2, 0.2, unit = "in")))
+  
+}
+
 # SI ----
 
 #' Run Pagel's test of correlated evolution on widespread gametos
