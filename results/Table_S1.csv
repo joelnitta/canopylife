@@ -2,7 +2,7 @@ New Phytologist Supporting Information
 "Authors: Joel H. Nitta, James E. Watkins, Jr., and Charles C. Davis"
 Article acceptance date: 5 February 2020
 "Table S1: List of ferns from Moorea, French Polynesia included in this study"
-taxon code,genus,specific epithet,infaspecific epithet,informal variety,scientific name,name source
+Taxon code,Genus,Specific epithet,Infraspecific epithet,Informal variety,Scientific name,Name source
 Abrodictyum_asaegrayi1,Abrodictyum,asaegrayi,NA,1,Abrodictyum asae-grayi (Bosch) Ebihara & K.Iwats.,IPNI
 Abrodictyum_asaegrayi2,Abrodictyum,asaegrayi,NA,2,Abrodictyum asae-grayi (Bosch) Ebihara & K.Iwats.,IPNI
 Abrodictyum_caudatum,Abrodictyum,caudatum,NA,NA,Abrodictyum caudatum (Brack.) Ebihara & K.Iwats.,IPNI
@@ -12,11 +12,11 @@ Adiantum_hispidulum,Adiantum,hispidulum,NA,NA,Adiantum hispidulum,IPNI
 Adiantum_raddianum,Adiantum,raddianum,NA,NA,Adiantum raddianum C. Presl,TROPICOS
 Adiantum_trapeziforme,Adiantum,trapeziforme,NA,NA,Adiantum trapeziforme,IPNI
 Alsophila_tahitensis,Alsophila,tahitensis,NA,NA,Alsophila tahitensis Brack.,IPNI
-Amphineuron_opulentum,Amphineuron,opulentum,NA,NA,Amphineuron opulentum (Kaulf.) Holttum,TROPICOS
+Amphineuron_opulentum,Amblovenatum,opulentum,NA,NA,Amblovenatum opulentum (Kaulf.) J.P.Roux,IPNI
 Angiopteris_evecta,Angiopteris,evecta,NA,NA,Angiopteris evecta (G. Forst.) Hoffm.,TROPICOS
-Antrophyum_sp1,Antrophyum,sp,NA,NA,Antrophyum Kaulf.,TROPICOS
 Antrophyum_plantagineum,Antrophyum,plantagineum,NA,NA,Antrophyum plantagineum (Cav.) Kaulf.,TROPICOS
 Antrophyum_reticulatum,Antrophyum,reticulatum,NA,NA,Antrophyum reticulatum (G. Forst.) Kaulf.,TROPICOS
+Antrophyum_sp1,Antrophyum,sp,NA,NA,Antrophyum Kaulf.,TROPICOS
 Arachniodes_aristata,Arachniodes,aristata,NA,NA,Arachniodes aristata (G. Forst.) Tindale,TROPICOS
 Archigrammitis_tahitensis,Archigrammitis,tahitensis,NA,NA,Archigrammitis tahitensis (C.Chr.) Parris,NCBI
 Arthropteris_palisotii,Arthropteris,palisotii,NA,NA,Arthropteris palisotii (Desv.) Alston,TROPICOS
@@ -27,12 +27,12 @@ Asplenium_gibberosum,Asplenium,gibberosum,NA,NA,Asplenium gibberosum (Forst.) Me
 Asplenium_nidus,Asplenium,nidus,NA,NA,Asplenium nidus,IPNI
 Asplenium_polyodon,Asplenium,polyodon,NA,NA,Asplenium polyodon G. Forst.,TROPICOS
 Asplenium_tenerum,Asplenium,tenerum,NA,NA,Asplenium tenerum G. Forst.,TROPICOS
-Belvisia_spicata,Belvisia,spicata,NA,NA,Belvisia spicata (L. f.) Mirb.,TROPICOS
-Blechnum_orientale,Blechnum,orientale,NA,NA,Blechnum orientale,IPNI
-Blechnum_pacificum,Blechnum,pacificum,NA,NA,Blechnum pacificum Lorence & A.R.Sm.,IPNI
-Blechnum_patersonii,Blechnum,patersonii,NA,NA,Blechnum patersonii,IPNI
-Blechnum_raiateense,Blechnum,raiateense,NA,NA,Blechnum raiateense J.W.Moore,IPNI
-Blechnum_vulcanicum,Blechnum,vulcanicum,NA,NA,Blechnum vulcanicum (Blume) Kuhn,IPNI
+Belvisia_spicata,Lepisorus,spicatus,NA,NA,Lepisorus spicatus (L.f.) Li Wang,IPNI
+Blechnum_orientale,Blechnopsis,orientalis,NA,NA,Blechnopsis orientalis (L.) C. Presl,TROPICOS
+Blechnum_pacificum,Parablechnum,pacificum,NA,NA,Parablechnum pacificum (Lorence & A.R.Sm.) Gasper & Salino,IPNI
+Blechnum_patersonii,Austroblechnum,patersonii,NA,NA,Austroblechnum patersonii (R.Br.) Gasper & V.A.O.Dittrich,IPNI
+Blechnum_raiateense,Austroblechnum,raiateense,NA,NA,Austroblechnum raiateense (J.W.Moore) Gasper & V.A.O.Dittrich,IPNI
+Blechnum_vulcanicum,Cranfillia,vulcanica,NA,NA,Cranfillia vulcanica (Blume) Gasper & V.A.O.Dittrich,IPNI
 Bolbitis_lonchophora,Bolbitis,lonchophora,NA,NA,Bolbitis lonchophora (Kunze) C.Chr.,IPNI
 Callistopteris_apiifolia,Callistopteris,apiifolia,NA,NA,Callistopteris apiifolia (C. Presl) Copel.,TROPICOS
 Calymmodon_orientalis,Calymmodon,orientalis,NA,NA,Calymmodon orientalis Copel.,IPNI
@@ -66,8 +66,8 @@ Elaphoglossum_savaiense,Elaphoglossum,savaiense,NA,NA,Elaphoglossum savaiense (B
 Grammitis_marginelloides,Grammitis,marginelloides,NA,NA,Grammitis marginelloides (J.W. Moore) Copel.,TROPICOS
 Haplopteris_elongata,Haplopteris,elongata,NA,NA,Haplopteris elongata (Sw.) E.H. Crane,TROPICOS
 Histiopteris_incisa,Histiopteris,incisa,NA,NA,Histiopteris incisa,IPNI
-Humata_anderssonii,Humata,anderssonii,NA,NA,Humata anderssonii (Mett.) C.Chr.,IPNI
-Humata_pectinata,Humata,pectinata,NA,NA,Humata pectinata (Sm.) Desv.,TROPICOS
+Humata_anderssonii,Davallia,anderssonii,NA,NA,Davallia anderssonii Mett.; Kuhn,IPNI
+Humata_pectinata,Davallia,pectinata,NA,NA,Davallia pectinata Sm.,TROPICOS
 Hymenophyllum_braithwaitei,Hymenophyllum,braithwaitei,NA,NA,Hymenophyllum braithwaitei Ebihara & K.Iwats.,IPNI
 Hymenophyllum_digitatum,Hymenophyllum,digitatum,NA,NA,Hymenophyllum digitatum (Sw.) Fosberg,IPNI
 Hymenophyllum_flabellatum,Hymenophyllum,flabellatum,NA,NA,Hymenophyllum flabellatum Labill.,TROPICOS
@@ -131,11 +131,13 @@ Teratophyllum_wilkesianum,Teratophyllum,wilkesianum,NA,NA,Teratophyllum wilkesia
 Tmesipteris_gracilis,Tmesipteris,gracilis,NA,NA,Tmesipteris gracilis Chinnock,IPNI
 Vaginularia_paradoxa,Vaginularia,paradoxa,NA,NA,Vaginularia paradoxa Mett. ex Miq.,TROPICOS
 Vandenboschia_maxima,Vandenboschia,maxima,NA,NA,Vandenboschia maxima (Blume) Copel.,TROPICOS
-Wibelia_denticulata,Wibelia,denticulata,NA,NA,Wibelia denticulata (Burm.f.) M.Kato & Tsutsumi,IPNI
-"'taxon code' is the name used for that taxon in analyses. 'informal variety' is a number assigned"
+Wibelia_denticulata,Davallia,denticulata,NA,NA,Davallia denticulata (Burm. f.) Mett. ex Kuhn,TROPICOS
+"'Taxon code' is the name used for that taxon in analyses. 'Informal variety' is a number assigned"
 "to infraspecific taxa that are morphologically and genetically distinct, but lack formal names"
-"distinguishing them. 'name source' indicates the source of the scientific name as follows: IPNI"
+"distinguishing them. 'Name source' indicates the source of the scientific name as follows: IPNI"
 "= International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden"
 "taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information"
 "taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith"
-"2003 = Murdock & Smith (2003). 'NA' indicates not applicable."
+"2003 = Murdock & Smith (2003). The genus in 'Taxon code' may differ from the 'Genus' column for"
+"names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates not"
+"applicable."
