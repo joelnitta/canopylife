@@ -478,7 +478,7 @@ abundances <-
 
 # Join this with trait data
 traits_with_abun <- left_join(
-  fern_traits, abundances
+  fern_traits, abundances, by = "species"
 )
 
 # Get total number of epiphytic and terrestrial species observed in all plots
