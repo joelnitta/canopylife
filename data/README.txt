@@ -1,4 +1,4 @@
-This canopylife README.txt file was generated on 2020-02-06 by Joel Nitta
+This canopylife README.txt file was generated on 2020-02-20 by Joel Nitta
 
 ------------------- GENERAL INFORMATION -----------------
 
@@ -43,12 +43,13 @@ SHARING/ACCESS INFORMATION
 Licenses/restrictions placed on the data, or limitations of reuse: CC0 1.0
 Universal (CC0 1.0)
 
-Recommended citation for the data: Nitta JH, Watkins JEW, Davis CC (2020)
+Recommended citation for the data: Nitta JH, Watkins JE, Davis CC (2020)
 Life in the canopy: community trait assessments reveal substantial functional
-diversity among fern epiphytes. Dryad Digital Repository. ADD_DOI_WHEN_AVAILABLE
+diversity among fern epiphytes. Dryad Digital Repository.
+doi:10.5061/dryad.fqz612jps
 
 Citation for and links to publications that cite or use the data: Nitta JH,
-Watkins JEW, Davis CC (2020) Life in the canopy: community trait assessments
+Watkins JE, Davis CC (2020) Life in the canopy: community trait assessments
 reveal substantial functional diversity among fern epiphytes. New
 Phytologist. ADD_DOI_WHEN_AVAILABLE
 
@@ -80,6 +81,9 @@ measurement per individual) from Moorea, French Polynesia.
 
 morph_qual_traits.csv: Observations of qualitative trait states in ferns from
 Moorea, French Polynesia.
+
+name_update.csv: Updated names to use for species whose name was replaced with
+a newer synonym since the time of data collection.
 
 ppgi_taxonomy.csv: Pteridophyte Phylogeny I working group taxonomic system
 for pteridophytes at the genus level and above.
@@ -123,24 +127,24 @@ package: The following data from Nitta et al. 2017 are already in Dryad
 METHODOLOGICAL INFORMATION
 --------------------------
 
-Description of methods used for collection/generation of data: 
+Description of methods used for collection/generation of data:
 
-Morphological traits of ferns from Moorea, French Polynesia were measured from 
-voucher specimens or obtained from literature when plant material was 
+Morphological traits of ferns from Moorea, French Polynesia were measured from
+voucher specimens or obtained from literature when plant material was
 unavailable. Sporophyte traits include: stipe length, frond length, frond
-width, rhizome diameter, frond dissection, number of pinna pairs, and specific 
-leaf area. Gametophyte traits include: morphotype and presence or absence of 
+width, rhizome diameter, frond dissection, number of pinna pairs, and specific
+leaf area. Gametophyte traits include: morphotype and presence or absence of
 gemmae, glands, and hairs.
 
-Temperature (celsius) and relative humidity (%) were measured every 15 minutes 
-(Moorea) or 60 minutes (Tahiti) with 33 dataloggers on Moorea and Tahiti, 
-French Polynesia from 2012-07-18 to 2015-02-06. On Moorea, Hobo Pro v2 data 
-loggers with the RS3 Solar Radiation Shield (Onset Corporation, Bourne, 
-Massachusetts, USA) were used. On Tahiti, RHTemp 1000 data loggers (MadgeTech, 
-Warner, New Hampshire, USA) protected with custom radiation shields made from 
+Temperature (celsius) and relative humidity (%) were measured every 15 minutes
+(Moorea) or 60 minutes (Tahiti) with 33 dataloggers on Moorea and Tahiti,
+French Polynesia from 2012-07-18 to 2015-02-06. On Moorea, Hobo Pro v2 data
+loggers with the RS3 Solar Radiation Shield (Onset Corporation, Bourne,
+Massachusetts, USA) were used. On Tahiti, RHTemp 1000 data loggers (MadgeTech,
+Warner, New Hampshire, USA) protected with custom radiation shields made from
 plastic circuit boxes were used.
 
-For additional methodological details, see Nitta, Watkins, and Davis (2020) 
+For additional methodological details, see Nitta, Watkins, and Davis (2020)
 New Phyt. ADD_DOI_WHEN_AVAILABLE.
 
 --------------------------
@@ -157,7 +161,7 @@ of leaf fragments.
 
 Number of variables: 9
 
-Number of cases/rows: 155
+Number of cases/rows: 153
 
 Variable list, defining any abbreviations, units of measure, codes or symbols
 used:
@@ -188,7 +192,7 @@ with custom radiation shields made from plastic circuit boxes were used.
 
 Number of variables: 5
 
-Number of cases/rows: 1464604
+Number of cases/rows: 1,464,604
 
 Variable list:
 	- date: Date (YYYY-MM-DD).
@@ -218,7 +222,7 @@ this datalogger only.
 
 Number of variables: 7
 
-Number of cases/rows: 587,912
+Number of cases/rows: 607,279
 
 Variable list:
   - date: Date (YYYY-MM-DD).
@@ -231,7 +235,7 @@ Variable list:
 	- temp: Temperature (celsius).
 	- rh: Relative humidity (percent).
   - vpd: Vapor-pressure deficit (kPa). Calculated from relative humidity and
-    temperature using plantecophys::RHtoVPD().
+    temperature using the 'RHtoVPD' function in the R package 'plantecophys'.
 
 Missing data codes: No missing data.
 
@@ -249,8 +253,8 @@ Number of cases/rows: 261
 
 Variable list:
   - specimen: Voucher number (J.H. Nitta collection number). If specimen is
-	"1", that means no voucher specimen was prepared when the measurement was
-	made.
+	  "1", that means no voucher specimen was prepared when the measurement was
+	  made.
   - species: Species name.
   - stipe_length: Length of stipe (petiole) (cm).
   - frond_length: Length of frond (leaf) (cm).
@@ -258,15 +262,15 @@ Variable list:
   - rhizome_dia: Diameter of rhizome at widest point (cm).
   - pinna_pairs: Number of pinnae pairs.
   - source: Source of data. "measurement" indicates data measured from
-	specimen; other values indicate name of source of data. For full references
-	see, Supporting Information in Nitta et al. (2020).
+	  specimen; other values indicate name of source of data. For full references
+	  see, Supporting Information in Nitta et al. (2020).
   - comments: Miscellaneous notes.
   - notes: Additional miscellaneous notes.
   - exclude: Should the measurement be excluded from analysis? "yes" if true,
-	otherwise missing.
+	  otherwise missing.
 
-Missing data codes: Missing data have no values (nothing entered between
-commas in the CSV file).
+Missing data codes: Missing coded as having no values (nothing entered between
+commas in the CSV file) or '?' or 'n/a'.
 
 Specialized formats or other abbreviations used: None.
 
@@ -277,17 +281,12 @@ Moorea, French Polynesia.
 
 Number of variables: 9
 
-Number of cases/rows: 143
+Number of cases/rows: 130
 
 Variable list:
   - species: Species name.
-  - dissection: Integer from one to 10 describing the degree of lamina
-    dissection as follows: 1 = simple, 2 = pinnatifid or pinnatisect, 3 =
-    1-pinnate, 4 = 1-pinnate-pinnatifid, 5 = 2-pinnate, 6 =
-    2-pinnate-pinnatifid, 7 = 3-pinnate, 8 = 3-pinnate-pinnatifid, 9 = more
-    than 3-pinnate-pinnatifid, 10 = binpinnatifid or tripinnatifid.
-  - habit_binary: Growth habit coded as terrestrial (0) or epiphytic (1);
-	  epiphytes defined by lacking a connection to the soil.
+  - growth_habit: Growth habit as observed in the field.
+	- dissection: Degree of frond dissection.
   - glands: Presence (1) or absence (0) of glands on gametophytes.
   - hairs: Presence (1) or absence (0) of hairs on gametophytes.
   - morphotype: Gametophyte morphotype sensu Farrar, et al. 2008
@@ -299,6 +298,23 @@ Variable list:
 	  Tigerschiöld 1990, 11 = Atkinson 1975, 12 = Chen 2014. For full
 		references, see Supporting Information in Nitta et al. (2020).
   - notes: Miscellaneous notes.
+
+Missing data codes: Missing data coded as "NA".
+
+Specialized formats or other abbreviations used: None.
+
+--------------------------
+
+name_update.csv: Updated names to use for species whose name was replaced with
+a newer synonym since the time of data collection.
+
+Number of variables: 2
+
+Number of cases/rows: 120
+
+Variable list:
+  - original_name: Original species name used during data collection.
+  - new_name: A more recent synonym.
 
 Missing data codes: Missing data have no values (nothing entered between
 commas in the CSV file).
@@ -339,10 +355,10 @@ instead of 4 mm when needed to avoid veins.
 
 Number of variables: 7
 
-Number of cases/rows: 1914
+Number of cases/rows: 1,896
 
 Variable list:
-  - order: Unique row number (1-1914).
+  - order: Unique row number.
   - specimen: Specimen ID number. Four-digit numbers are J.H. Nitta
     collection numbers (voucher specimen numbers). Values formatted as "SLA
     (year) sample (number)" indicate leaf samples without any corresponding
@@ -388,6 +404,11 @@ REFERENCES
 Abràmoff, M. D., P. J. Magalhães, and S. J. Ram. 2004. Image processing with
 imageJ. Biophotonics International 11:36–41.
 
+Farrar, D. R., C. L. Dassler, J. E. Watkins Jr., and C. Skelton. 2008. 
+Gametophyte ecology. Pages 222–256 in C. H. Haufler and T. A. Ranker, editors. 
+Biology and Evolution of Ferns and Lycophytes. Cambridge University Press, 
+Cambridge, UK.
+
 Nitta, J. H., J.-Y. Meyer, R. Taputuarai, and C. C. Davis. 2017. Life cycle
 matters: DNA barcoding reveals contrasting community structure between fern
 sporophytes and gametophytes. Ecological Monographs 87:278–296.
@@ -403,37 +424,67 @@ extant lycophytes and ferns. Journal of Systematics and Evolution 54:563–603.
 CHANGE LOG
 --------------------------
 
-2020-02-18
+2020-02-20
+
+name_update.csv: This file was newly added.
+
+moorea_climate.csv: The previous version incorrectly excluded some days that
+had good data. This version includes the following days that were previously
+excluded: 2013-12-16 through 2013-12-28, 2014-03-21.
 
 SLA_measurements.csv
 
-- Nitta_2740 Humata_pectinata (original row 728): change mass from 0.000109 to 0.00109 (error in data entry; original value had an extra 0) 
-- Nitta_2474 Asplenium_australasicum: change collection number to Nitta_2473 (mix-up in last digit; Nitta_2474 is actually Bolbitis_lonchophora)
-- Nitta_2819 Oreogrammitis_raiateensis: change collection number to Nitta_2818 (mix-up in last digit; Nitta_2819 is actually Christella_dentata)
-- Nitta_2413  Wibelia_denticulata: change species to Davallia_solida (original species was mis-identified)
-- Nitta_2473 Polyphlebium_endlicherianum (original rows 410-418): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is Asplenium_australasicum)
-- Nitta_2543 Ptisana_salicina (original rows 1023-1031): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is Sphaerostephanos_subpectinatus)
+- Nitta_2740 Humata_pectinata (original row 728): change mass from 0.000109 to
+  0.00109 (error in data entry; original value had an extra 0)
+- Nitta_2474 Asplenium_australasicum: change collection number to Nitta_2473
+  (mix-up in last digit; Nitta_2474 is actually Bolbitis_lonchophora)
+- Nitta_2819 Oreogrammitis_raiateensis: change collection number to Nitta_2818
+  (mix-up in last digit; Nitta_2819 is actually Christella_dentata)
+- Nitta_2413  Wibelia_denticulata: change species to Davallia_solida (original
+  species was mis-identified)
+- Nitta_2473 Polyphlebium_endlicherianum (original rows 410-418): remove (can't
+  verify voucher number; actual species with this voucher number in Nitta
+  collection data is Asplenium_australasicum)
+- Nitta_2543 Ptisana_salicina (original rows 1023-1031): remove (can't verify
+  voucher number; actual species with this voucher number in Nitta collection
+  data is Sphaerostephanos_subpectinatus)
 
 filmy_SLA.csv
 
-- Nitta_3078 Hypolepis_dicksonioides: change species to Dryopteris_dicksonioides (mix-up between genera; Nitta_3078 is actually Dryopteris)
-- Nitta_2095 Crepidomanes_bipunctatum (original rows 11-12): remove (can't verify voucher number; actual species with this voucher number in Nitta collection data is gametophyte from Costa Rica)
+- Nitta_3078 Hypolepis_dicksonioides: change species to
+  Dryopteris_dicksonioides (mix-up between genera; Nitta_3078 is actually
+  Dryopteris)
+- Nitta_2095 Crepidomanes_bipunctatum (original rows 11-12): remove (can't
+  verify voucher number; actual species with this voucher number in Nitta
+  collection data is gametophyte from Costa Rica)
 
 morph_measurements.csv
 
-- Nitta_677  Nephrolepis_hirsutula: change species to Nephrolepis_cordifolia (original species was mis-identified)
-- Nitta_0227 Ophioglossum_falcatum: change species to Ophioglossum_pendulum (original species was mis-identified)
-- Nitta_0610 Ophioglossum_pendulum: change species to Ophioglossum_pendulum (original species was mis-identified)
-- Nitta_634 Archigrammitis_tahitensis: change stipe length to from 62.478 to 0.714 (original data entered incorrectly)
+- Nitta_677  Nephrolepis_hirsutula: change species to Nephrolepis_cordifolia
+  (original species was mis-identified)
+- Nitta_0227 Ophioglossum_falcatum: change species to Ophioglossum_pendulum
+  (original species was mis-identified)
+- Nitta_0610 Ophioglossum_pendulum: change species to Ophioglossum_pendulum
+  (original species was mis-identified)
+- Nitta_634 Archigrammitis_tahitensis: change stipe length to from 62.478 to
+  0.714 (original data entered incorrectly)
 
 morph_qual_traits.csv
 
 - Change dissection from a number code to a description of each type of leaf dissection
 - Remove habit_binary column
-- Add growth_habit column, which describes growth habit as "terrestrial", "climbing", "hemiepiphytic", "epipetric", or "epiphytic"
-- Add data for Prosaptia_subnuda (missing from original data)
+- Add growth_habit column, which describes growth habit as "terrestrial",
+  "climbing", "hemiepiphytic", "epipetric", or "epiphytic"
+- Add Prosaptia_subnuda (missing from original data)
+- Removed species not included in this study: Acrophorus_raiateensis,
+Asplenium_aethiopicum, Asplenium_contiguum, Asplenium_robustum,
+Grammitis_fredericis-jacobi, Lastreopsis_pacifica, Loxogramme_parksii,
+Microsorum_sp1, Nephrolepis_exaltata, Oreogrammitis_subspathulata,
+Polystichum_paleatum, Schizaea_fistulosa, Scleroglossum_sulcatum,
+Stenogrammitis_subcoriacea
 
-When recoding growth habit, 0 was treated as terrestrial and 1 as epiphytic. The following additional changes were made:
+When recoding growth habit from the habit_binary column, 0 was treated as
+terrestrial and 1 as epiphytic. The following additional changes were made:
 - Adiantum_hispidulum: score growth habit as epipetric
 - Adiantum_raddianum: score growth habit as epipetric
 - Arthropteris_palisotii: score growth habit as hemiepiphytic
