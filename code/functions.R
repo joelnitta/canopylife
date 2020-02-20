@@ -2153,6 +2153,12 @@ make_climate_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "El
   model_type <- pull(summaries, model_type)
   
   # Plot lines only for models with a significant elevation effect
+  
+  # First make sure we can deal with the type of model passed to this function
+  assertthat::assert_that(
+    model_type %in% c("interaction", "el_only", "habit_only", "both"),
+    msg = "model_type not in valid set for plotting") 
+  
   if(str_detect(model_type, "el_only")) {
     plot <- ggplot(data, aes(x = !!xval_sym))
     if (p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
@@ -2306,7 +2312,7 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
   plot <- plot + geom_point(aes(y = !!yval_sym, color = habit))  
   
   # Set location of where to print R-squared
-  if((model_type == "el_only" | model_type == "interaction") & !is.na(p) & p < 0.05) {
+  if((model_type == "el_only" | model_type == "interaction" | model_type == "both") & !is.na(p) & p < 0.05) {
     if (isTRUE(r_upper)) {
       plot <- plot +
         annotate("text", x = Inf, y = Inf, 
@@ -2315,6 +2321,7 @@ make_div_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
                  size = 9 / .pt,
                  parse = TRUE)
     } else {
+      # bottom right
       plot <- plot +
         annotate("text", x = Inf, y = -Inf, 
                  label = glue::glue("italic(R) ^ 2 == {r2}"),

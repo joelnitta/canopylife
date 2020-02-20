@@ -522,14 +522,16 @@ plan <- drake_plan(
     scatterplots = cwm_scatterplots),
   
   # Make community diversity scatterplots
-  div_scatterplots = map(
+  div_scatterplots = map2(
     c("ntaxa", "mpd.obs.z.phy",  "mntd.obs.z.phy", 
       "mpd.obs.z.func", "mntd.obs.z.func") %>% set_names(.),
+    c(TRUE, TRUE, TRUE, FALSE, TRUE),
     ~ make_div_scatterplot(
       data = div_metrics_all,
       fits = div_el_model_fits,
       summaries = div_el_model_summaries,
-      yval = .,
+      yval = .x,
+      r_upper = .y,
       habit_colors = habit_colors)
   ),
   
