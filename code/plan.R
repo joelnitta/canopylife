@@ -24,6 +24,11 @@ plan <- drake_plan(
     file_in("data/nitta_2017/species.csv"), 
     col_types = "cccccnn") %>%
     clean_names() %>%
+    # Crepidomanes sp3 is Tahiti only
+    mutate(tahiti_only = case_when(
+      genus_sp == "Crepidomanes_minutum3" ~ 1,
+      TRUE ~ tahiti_only
+    )) %>%
     filter(include == 1, tahiti_only == 0) %>%
     # Exclude Microsorum_xmaximum (hybrid between M. grossum and M. commutatum)
     filter(genus_sp != "Microsorum_xmaximum") %>%
