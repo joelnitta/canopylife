@@ -2858,7 +2858,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi, updated_names) {
   
   # Update species names in traits
   traits <-
-  traits %>%
+    traits %>%
     left_join(updated_names, by = c(species = "original_name")) %>%
     mutate(species = case_when(
       !is.na(new_name) ~ new_name,
@@ -2868,7 +2868,7 @@ plot_traits_on_tree <- function (traits, phy, ppgi, updated_names) {
   
   # Update species names in tree
   new_tip_labs <-
-  tibble(species = phy$tip.label) %>%
+    tibble(species = phy$tip.label) %>%
     left_join(updated_names, by = c(species = "original_name")) %>%
     mutate(species = case_when(
       !is.na(new_name) ~ new_name,
@@ -3732,9 +3732,21 @@ lookup_taxonomy <- function (taxa_names_df) {
   # to either IPNI or TROPICOS databases.
   taxa_names_with_authors <- taxize::gnr_resolve(
     names = taxa_names_df$taxon, 
-    best_match_only = TRUE, 
+    best_match_only = FALSE, 
     # for data_source_ids, 167 = ipni, 165 = tropicos
     data_source_ids = c(167, 165)) %>%
+    # Sort by tropicos first, then best hit (IPNI often lacks sci name author)
+    mutate(
+      data_source_title = fct_relevel(
+        data_source_title, 
+        c("Tropicos - Missouri Botanical Garden", 
+          "The International Plant Names Index")
+      )) %>%
+    group_by(user_supplied_name) %>%
+    arrange(data_source_title, desc(score)) %>%
+    slice(1) %>%
+    ungroup %>%
+    mutate(data_source_title = as.character(data_source_title)) %>%
     select(taxon = user_supplied_name, scientific_name = matched_name, name_source = data_source_title) %>%
     right_join(taxa_names_df, by = "taxon") %>% 
     select(taxon_code, genus, specific_epithet, infraspecific_epithet, informal_variety, scientific_name, name_source) %>%
@@ -3742,10 +3754,7 @@ lookup_taxonomy <- function (taxa_names_df) {
     # for those missing from IPNI or TROPICOS
     mutate(scientific_name = case_when(
       taxon_code == "Diplazium_grantii" ~ "Diplazium grantii (Copel.) C.Chr.",
-      taxon_code == "Dryopteris_macrolepidota" ~ "Dryopteris macrolepidota Copel.",
       taxon_code == "Psilotum_nudum" ~ "Psilotum nudum (L.) P.Beauv.",
-      taxon_code == "Archigrammitis_tahitensis" ~ "Archigrammitis tahitensis (C.Chr.) Parris",
-      taxon_code == "Hymenophyllum_polyanthos" ~ "Hymenophyllum polyanthos (Sw.) Sw.",
       taxon_code == "Ctenitis_sciaphila" ~ "Ctenitis sciaphila (Maxon) Ching var. sciaphila",
       taxon_code == "Davallia_solida" ~ "Davallia solida (G. Forst.) Sw. var. solida",
       taxon_code == "Deparia_petersenii" ~ "Deparia petersenii (Kunze) M. Kato subsp. congrua (Brack.) M. Kato",
@@ -3755,10 +3764,7 @@ lookup_taxonomy <- function (taxa_names_df) {
     )) %>%
     mutate(name_source = case_when(
       taxon_code == "Diplazium_grantii" ~ "NCBI",
-      taxon_code == "Dryopteris_macrolepidota" ~ "NCBI",
       taxon_code == "Psilotum_nudum" ~ "NCBI",
-      taxon_code == "Archigrammitis_tahitensis" ~ "NCBI",
-      taxon_code == "Hymenophyllum_polyanthos" ~ "NCBI",
       taxon_code == "Ctenitis_sciaphila" ~ "Murdock and Smith 2003",
       taxon_code == "Davallia_solida" ~ "Murdock and Smith 2003",
       taxon_code == "Deparia_petersenii" ~ "Murdock and Smith 2003",
@@ -3812,7 +3818,7 @@ write_si_table <- function(table_id, table, main_header, table_footer) {
     here::here("results", filename), 
     header,
     footer)
- 
+  
 }
 
 # MS rendering ----
