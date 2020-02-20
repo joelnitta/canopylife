@@ -2592,7 +2592,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   c <-
     pca_results$species_locs %>%
     filter(analysis_type == "standard") %>%
-    left_join(select(traits, species, habit)) %>%
+    left_join(select(traits, species, habit), by = "species") %>%
     ggplot(aes(x = PC1, y = PC2, color = habit)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
@@ -2609,7 +2609,7 @@ make_pca_plot <- function (pca_results, habit_colors, traits) {
   d <-
     pca_results$species_locs %>%
     filter(analysis_type == "phylogenetic") %>%
-    left_join(select(traits, species, habit)) %>%
+    left_join(select(traits, species, habit), by = "species") %>%
     ggplot(aes(x = PC1, y = PC2, color = habit)) +
     geom_vline(xintercept = 0, linetype = "longdash", color = "dark gray") +
     geom_hline(yintercept = 0, linetype = "longdash", color = "dark gray") +
