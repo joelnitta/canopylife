@@ -133,7 +133,7 @@ ancova_table <-
     term = case_when(
       term == "habit" ~ "Growth habit",
       term == "el" ~ "Elevation",
-      term == "habit:el" ~ "Growth habit × elevation",
+      term == "habit:el" ~ "Growth habit x elevation",
       TRUE ~ term
     )
   ) %>%
@@ -253,7 +253,7 @@ phylosig_binary_strict_table <-
          `P rnd` = prob_random, 
          `P bm` = prob_brownian)
 
-phylosig_binary_strict_footer <- "'P rnd', probability of obtaining the observed value of D under random trait evolution; 'P bm', probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion."
+phylosig_binary_strict_footer <- "D, Fritz and Purvis' D (Fritz & Purvis, 2010); 'P rnd', probability of obtaining the observed value of D under random trait evolution; 'P bm', probability of obtaining the observed value of D under simulation of trait evolution by Brownian motion."
 
 write_si_table(
   table_id = "phylosig-binary-strict", 
@@ -263,7 +263,7 @@ write_si_table(
 )
 ```
 
-'P rnd', probability of obtaining the observed value of \D under random trait evolution; 'P bm', probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
+\D, Fritz and Purvis' \D (Fritz & Purvis, 2010); 'P rnd', probability of obtaining the observed value of \D under random trait evolution; 'P bm', probability of obtaining the observed value of \D under simulation of trait evolution by Brownian motion.
 
 **`r s_table("corr-evo-strict")`** `r s_table_cap("corr-evo-strict")` (see separate file)
 
@@ -286,7 +286,7 @@ corr_evo_strict_table <-
     `P` = pval
   )
 
-corr_evo_strict_footer <- "LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Lower log likelihood for the dependent model indicates correlation with growth habit." 
+corr_evo_strict_footer <- "LL, log likelihood. Each gametophyte trait was coded as a binary trait and tested for correlated evolution with growth habit (epiphytic vs. terrestrial). Higher (less negative) log likelihood for the dependent model indicates correlation with growth habit." 
 
 write_si_table(
   table_id = "corr-evo-strict", 
@@ -389,19 +389,19 @@ write_si_table(
 
 \clearpage
 
-```{r Fig-S1, fig.height = 6, fig.width = 7, fig.cap = ""}
-cwsd_scatterplot
-```
-
-**`r s_figure("cwsd")`** `r s_figure_cap("cwsd")`. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \* = \pval{ }< 0.05 **(a)**, traits related to plant size **(b)**, traits not related to plant size. Response variable abbreviations: SLA, specific leaf area.
-
-\clearpage
-
-```{r Fig-S2, fig.height = 8, fig.width = 4, fig.cap = ""}
+```{r corr-plot, fig.height = 8, fig.width = 4, fig.cap = ""}
 func_div_corr_plot
 ```
 
 **`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+
+\clearpage
+
+```{r cwsd, fig.height = 6, fig.width = 7, fig.cap = ""}
+cwsd_scatterplot
+```
+
+**`r s_figure("cwsd")`** `r s_figure_cap("cwsd")`. Epiphytic communities in green, terrestrial communities in brown. Points randomly jittered along x-axis to reduce overlap. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate significant differences in CWSD between epiphytic and terrestrial communities as determined by a two-sided \tval-test; \*\*\* = \pval{ }< 0.001. **(a)**, traits related to plant size **(b)**, traits not related to plant size. Response variable abbreviations: SLA, specific leaf area.
 
 \clearpage
 
@@ -425,6 +425,10 @@ ferns. *Phytomorphology* **25**: 38--54.
 
 **Copeland EB**. **1932**. Pteridophytes of the Society Islands.
 *Bernice P. Bishop Museum Bulletin* **93**: 1--86.
+
+**Fritz SA, Purvis A**. **2010**. Selectivity in mammalian extinction risk and 
+threat types: A new measure of phylogenetic signal strength in binary traits. 
+*Conservation Biology* **24**: 1042--1051.
 
 **Lloyd RM**. **1980**. Reproductive biology and gametophyte morphology
 of New World populations of *Acrostichum aureum*. *American Fern

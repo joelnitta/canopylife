@@ -20,8 +20,8 @@ table_nums(name = "corr-evo", caption = "Pagel's (1994) test of correlated evolu
 
 # - SI figures
 s_fig_nums <- captioner::captioner(prefix = "Fig. S", auto_space = FALSE, suffix = ": ")
-s_fig_nums(name = "cwsd", "Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia")
 s_fig_nums(name = "corr-plot", "Correlation plot comparing functional diversity of fern communities on Moorea, French Polynesia calculated using different sets of traits as input")
+s_fig_nums(name = "cwsd", "Comparison of community-weighted standard deviations (CWSD) in traits of epiphytic and terrestrial fern communities on Moorea, French Polynesia")
 
 # - SI tables
 s_table_nums <- captioner::captioner(prefix = "Table S", auto_space = FALSE, suffix = ": ")
