@@ -2698,30 +2698,31 @@ make_cwm_scatterplot <- function (yval, xval = "el", ylab = yval, xlab = "Elevat
   model_type <- pull(summaries, model_type)
   
   # Plot lines only for models with a significant elevation effect
-  if(str_detect(model_type, "el_only")) {
-    plot <- ggplot(data, aes(x = !!xval_sym))
-    if (!is.na(p) & p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
-    plot <- plot + 
-      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
-      geom_point(aes(y = cwm))
-  } else if(model_type == "interaction" | model_type == "both") {
-    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
-    if (!is.na(p) & p < 0.05) plot <- plot + geom_line(data = fits, aes(y = .fitted))
-    plot <- plot + 
-      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
-      geom_point(aes(y = cwm))
-    # spatial models don't have a p-value, so don't check
-  } else if(model_type == "interaction_spatial" | model_type == "both_spatial") {
-    plot <- ggplot(data, aes(x = !!xval_sym, color = habit)) +
-      geom_line(data = fits, aes(y = .fitted)) +
-      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
-      geom_point(aes(y = cwm))
-  } else {
-    plot <- ggplot(data, aes(x = !!xval_sym, color = habit))
-    plot <- plot +
-      geom_errorbar(aes(ymin = y_min, ymax = y_max), alpha = 0.25) +
-      geom_point(aes(y = cwm))
-  }
+  # First make sure we can deal with the type of model passed to this function
+  assertthat::assert_that(
+    model_type %in% c("interaction", "el_only", "habit_only", "both", "both_spatial"),
+    msg = "model_type not in valid set for plotting") 
+  
+  # Base plot
+  plot <- ggplot(data, aes(x = !!xval_sym))
+  
+  ### Add lines depending on model type and p-value ###
+  # - Add single line if model is elevation only
+  if(model_type == "el_only" & !is.na(p) & p < 0.05) plot <- plot + 
+    geom_line(data = fits, aes(y = .fitted))
+  
+  # - Add lines by growth habit if model has both elevation and habit
+  if((model_type == "interaction" | model_type == "both") & !is.na(p) & p < 0.05) plot <- plot + 
+    geom_line(data = fits, aes(y = .fitted, color = habit))
+  
+  # - Spatial models don't have a p-value, so don't check, and
+  # add lines by growth habit
+  if(model_type == "both_spatial") plot <- plot + 
+    geom_line(data = fits, aes(y = .fitted, color = habit))
+  
+  # Add points
+  plot <- plot + geom_errorbar(aes(ymin = y_min, ymax = y_max, color = habit), alpha = 0.25) +
+    geom_point(aes(y = cwm, color = habit))  
   
   # Print t and r2 statistics:
   # both R2 and t if model is interaction and both signif.
