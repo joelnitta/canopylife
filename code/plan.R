@@ -20,7 +20,9 @@ plan <- drake_plan(
   ### Trait data ###
   # - Read in list of accepted species to use for this study
   # i.e., ferns of Moorea (129 spp)
-  species_list = read_csv(file_in("data/nitta_2017/species.csv")) %>%
+  species_list = read_csv(
+    file_in("data/nitta_2017/species.csv"), 
+    col_types = "cccccnn") %>%
     clean_names() %>%
     filter(include == 1, tahiti_only == 0) %>%
     # Exclude Microsorum_xmaximum (hybrid between M. grossum and M. commutatum)
@@ -49,7 +51,8 @@ plan <- drake_plan(
   # (includes one obsevation per specimen).
   morph_qual_raw = read_csv(
     file_in("data/morph_qual_traits.csv"),
-    na = c("?", "n/a", "NA", "N/A")),
+    na = c("?", "n/a", "NA", "N/A"),
+    col_types = "cccnncncc"),
   
   morph_qual = process_raw_qual_morph(
     morph_qual_raw,
@@ -90,14 +93,17 @@ plan <- drake_plan(
   
   ### Site data with elevation ###
   moorea_sites = read_csv(
-    file_in("data/nitta_2017/sites.csv")) %>%
+    file_in("data/nitta_2017/sites.csv"),
+    col_types = "cnnn") %>%
     filter(str_detect(site, "Aorai", negate = TRUE)),
   
   ### Climate data ###
   
   # - Read in raw climate data (rel. humidity and temperature) from all dataloggers 
   # on Moorea and Tahiti from 2012-07-18 to 2015-02-06.
-  climate_raw = read_csv(file_in("data/hobo_moorea_aorai_2-24-15.csv")),
+  climate_raw = read_csv(
+    file_in("data/hobo_moorea_aorai_2-24-15.csv"),
+    col_types = "Dtnnc"),
   
   # - Process raw climate data: 
   # subset to only Moorea and days without missing data,
@@ -134,10 +140,14 @@ plan <- drake_plan(
   ### Taxonomy ###
   
   # - Pteridophyte Phylogeny Group 2016 taxonomic system
-  ppgi = read_csv(file_in("data/ppgi_taxonomy.csv")),
+  ppgi = read_csv(
+    file_in("data/ppgi_taxonomy.csv"),
+    col_types = "ccccnccc"),
   
   # - Updated synonymy for some species
-  updated_names = read_csv(file_in("data/name_update.csv")),
+  updated_names = read_csv(
+    file_in("data/name_update.csv"),
+    col_types = "cc"),
   
   # Format data for SI ----
   # - Traits: include SD and n for all quantitative (continuous) data

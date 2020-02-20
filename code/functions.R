@@ -75,7 +75,9 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
   # (these are species that were too small to take leaf punches)
   # Mostly filmy ferns, also includes some other random non-filmy ferns.
   # Note this data includes SLA already calculated for each specimen.
-  sla_filmy <- read_csv(sla_filmy_data_path)  %>%
+  sla_filmy <- read_csv(
+    sla_filmy_data_path,
+    col_types = "ccnnnnccc")  %>%
     clean_names
   
   #### Subset data
@@ -199,10 +201,13 @@ combine_raw_sla <- function (sla_punch_data_path, sla_filmy_data_path, species_l
 #'
 process_raw_cont_morph <- function (raw_morph_path, species_list) {
   read_csv(raw_morph_path, 
-           na = c("?", "n/a", "NA", "N/A")) %>%
+           na = c("?", "n/a", "NA", "N/A", ""),
+           col_types = "ccnnnnncccc") %>%
     clean_names() %>%
     # Get rid of species not in accepted list
     filter(species %in% species_list) %>%
+    # Make sure nothing is flagged to be excluded
+    verify(all(is.na(exclude))) %>%
     select(-comments, -notes, -exclude) %>%
     mutate(
       # Standardize formatting of sources.
@@ -216,6 +221,7 @@ process_raw_cont_morph <- function (raw_morph_path, species_list) {
       specimen = case_when(
         specimen == "1" ~ NA_character_,
         specimen == "MISSING_COLL_NUM" ~ NA_character_,
+        is.na(specimen) ~ NA_character_,
         TRUE ~ specimen
       )
     )
