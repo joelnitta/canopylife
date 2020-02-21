@@ -39,6 +39,7 @@ loadd(list = c(
   "func_div_corr_plot",
   "climate_model_summaries",
   "climate_models",
+  "spatial_sla_model",
   "div_el_models",
   "div_el_model_summaries",
   "div_el_model_parameter_summaries",
@@ -79,7 +80,7 @@ The following Supporting Information is available for this article:
 **`r s_table("species-list")`** `r s_table_cap("species-list")` (see separate file)
 
 ```{r species-list}
-species_list_footer <- "'Taxon code' is the name used for that taxon in analyses. 'Informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'Name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith 2003 = Murdock & Smith (2003). The genus in 'Taxon code' may differ from the 'Genus' column for names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates not applicable." 
+species_list_footer <- "'Taxon code' is the name used for that taxon in analyses. 'Informal variety' is a number assigned to infraspecific taxa that are morphologically and genetically distinct, but lack formal names distinguishing them. 'Name source' indicates the source of the scientific name as follows: IPNI = International Plant Names Index (https://www.ipni.org/), Murdock and Smith 2003 = Murdock & Smith (2003), NCBI = National Center for Biotechnology Information taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), TROPICOS = Missouri Botanical Garden taxonomic database (https://www.tropicos.org/). The genus in 'Taxon code' may differ from the 'Genus' column for names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates not applicable." 
 
 write_si_table(
   table_id = "species-list", 
@@ -94,7 +95,7 @@ write_si_table(
 **`r s_table("trait-values")`** `r s_table_cap("trait-values")` (see separate file)
 
 ```{r trait_data}
-trait_values_footer <- "SLA, specific leaf area; 'Taxon code', name used for that taxon in analysis (see Table S1); 'Growth habit', growth habit observed in the field; 'Binary growth habit', binary growth habit used in analysis (see Methods). Continuous measurements shown as mean, standard deviation (sample size). For data source, L = lab observation of gametophyte cultured from spore, F = field observation of gametophyte subsequently identified using DNA barcoding, T = morphology inferred based on taxonomy, M = measurement of a field-collected specimen; cited references provided at end of SI. For frond dissection, 1 = simple, 2 = pinnatifid, 3 = one-pinnate, 4 = one-pinnate-pinnatifid, 5 = two-pinnate, 6 = two-pinnate-pinnatifid, 7 = bipinnatifid_or_tripinnatifid, 8 = three-pinnate, 9 = three-pinnate-pinnatifid. 'NA' indicates missing data."
+trait_values_footer <- "'Taxon code', name used for that taxon in analysis (see Table S1); 'Growth habit', growth habit observed in the field; 'Binary growth habit', binary growth habit used in analysis (see Methods); SLA, specific leaf area. Continuous measurements shown as mean, standard deviation (sample size). For data source, F = field observation of gametophyte subsequently identified using DNA barcoding, L = lab observation of gametophyte cultured from spore, M = measurement of a field-collected specimen, T = morphology inferred based on taxonomy; cited references provided at end of SI. For frond dissection, 1 = simple, 2 = pinnatifid, 3 = one-pinnate, 4 = one-pinnate-pinnatifid, 5 = two-pinnate, 6 = two-pinnate-pinnatifid, 7 = bipinnatifid or tripinnatifid, 8 = three-pinnate, 9 = three-pinnate-pinnatifid. 'NA' indicates missing data."
 
 # Format table: capitalize column names
 trait_values_table <-
@@ -139,7 +140,7 @@ ancova_table <-
   ) %>%
   select(Response, `Source of variation` = term, `d.f.` = df, MS = meansq, P = p.value)
 
-ancova_footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum, maximum, and standard deviation of temperature ('temp', °C) and vapor pressure deficit ('VPD', kPa). Vapor pressure deficit was square-root transformed prior to analysis. 'NA' indicates not applicable."
+ancova_footer <- "d.f., degrees of freedom; MS, mean squares. Response variables include mean, minimum, maximum, and standard deviation of temperature ('temp', °C) and vapor pressure deficit ('VPD', kPa). Vapor pressure deficit was square-root transformed prior to analysis. Highly correlated response variables (Pearson's correlation coefficient > 0.9) not shown. 'NA' indicates not applicable."
 
 write_si_table(
   table_id = "ancova", 
@@ -172,16 +173,29 @@ climate_summaries <-
     by = c("var", "model_type")
   )
 
+# Add AIC for SLA model
+sla_model <-
+  spatial_sla_model %>%
+  pull(model) %>%
+  magrittr::extract2(1)
+
 # Combine summaries of diversity and climate metrics, reformat model names
 combined_summaries <-
   bind_rows(div_summaries, climate_summaries) %>%
   mutate(
     model_type = model_type %>% 
-      str_replace_all("el_only", "Elevation") %>%
+      str_replace_all("both_spatial", "Elevation + Growth habit") %>%
       str_replace_all("both", "Elevation + Growth habit") %>%
+      str_replace_all("el_only", "Elevation") %>%
       str_replace_all("habit_only", "Growth habit") %>%
       str_replace_all("interaction", "Elevation + Growth habit + Elevation x Growth habit")
+    ) %>%
+  mutate(
+    AIC = case_when(
+      var == "sla" ~ AIC(sla_model)[[1]],
+      TRUE ~ AIC
     )
+  )
 
 # Reformat variable names and put in preferred order by joining
 linear_fit_table <-
@@ -200,16 +214,17 @@ tribble(
   "mntd.obs.z.func", "MNTDfunc",
   "dissection", "Dissection",
   "length", "Frond length",
+  "width", "Frond width",
   "pinna", "Pinna no.",
   "rhizome", "Rhizome diam.",
-  "stipe", "Stipe length",
   "sla", "SLA",
-  "width", "Frond width"
+  "stipe", "Stipe length"
 ) %>%
   left_join(combined_summaries, by = "var") %>%
   select(
     Response,
     Model = model_type,
+    AIC,
     AICc,
     f = statistic,
     `Adjusted R2` = adj.r.squared,
@@ -220,7 +235,7 @@ tribble(
     `P moran` = I_pval
   )
 
-linear_fit_footer <- "MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; VPD, vapor pressure deficit; SLA, specific leaf area; AICc, corrected Akaike Information Criterion; d.f., degrees of freedom; 'P moran', P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable."
+linear_fit_footer <- "VPD, vapor pressure deficit; MPDphy, standard effect size of mean phylogenetic distance; MNTDphy, standard effect size of mean nearest taxon distance; MPDfunc, standard effect size of mean functional distance; MNTDfunc, standard effect size of mean nearest functional distance; SLA, specific leaf area; AIC, Akaike Information Criterion; AICc, corrected AIC; d.f., degrees of freedom; 'P moran', P value for the null hypothesis that there is spatial autocorrelation in the residuals as measured with Moran's I. Trait names refer to community-weighted mean values (see Methods). Specific leaf area fit with a generalized linear mixed model including a Mátern spatial correlation structure; all others fit with linear models (see Methods). For details on calculations of MPD and MNTD, see Methods. 'NA' indicates not applicable."
 
 write_si_table(
   table_id = "linear-fit", 
@@ -317,8 +332,8 @@ tribble(
   "width", "Frond width",
   "pinna", "Pinna no.",
   "rhizome", "Rhizome diam.",
-  "stipe", "Stipe length",
-  "sla", "SLA"
+  "sla", "SLA",
+  "stipe", "Stipe length"
 )
 
 gam_fit_table <-
@@ -374,7 +389,7 @@ div_el_model_parameter_summaries %>%
            str_replace_all("el", "Elevation")) %>%
   rename(Term = term)
   
-spatial_sla_footer <- "A Mátern spatial correlation structure was included in the model to account for spatial autocorrelation (see Methods)."
+spatial_sla_footer <- "The effect of growth habit is relative to epiphytic growth. A Mátern spatial correlation structure was included in the model to account for spatial autocorrelation (see Methods)."
 
 write_si_table(
   table_id = "spatial-sla", 
@@ -393,7 +408,7 @@ write_si_table(
 func_div_corr_plot
 ```
 
-**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr'. All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), both log-transformed and untransformed sets were included. The log-transformed 'reduced' dataset was used for the main results.
+**`r s_figure("corr-plot")`** `r s_figure_cap("corr-plot")`. **(a)**, standard effect size of mean phylogenetic distance (MPD~func~) **(b)**, standard effect size of mean nearest taxon distance (MNTD~func~). For details on calculations of MPD~func~ and MNTD~func~, see Methods. Correlations between functional diversity as measured with different sets of traits (values in each tile) calculated with Pearson's correlation coefficient using the R package 'corrr' (Kuhn *et al.*, 2019). All trait sets were scaled to standard deviation of each trait. The following trait sets were used: 'all' (all traits), 'size' (sporophyte traits related to size; frond length and width, stipe length, rhizome width), 'other' (sporophyte traits not related to size; pinna number, SLA, degree of lamina dissection), 'gameto' (gametophyte traits; gametophyte morphotype, presence or absence of glands, hairs, and gemmae), 'reduced' (all traits except for frond length and width, which were highly correlated with stipe length and rhizome diameter). For trait sets that included traits with skewed distributions in their raw values (frond length and width, stipe length, and rhizome width), log-transformed sets ('log-trans_all' and 'log-trans_reduced') were also included. The log-transformed 'reduced' dataset was used for the main results.
 
 \clearpage
 
@@ -429,6 +444,10 @@ ferns. *Phytomorphology* **25**: 38--54.
 **Fritz SA, Purvis A**. **2010**. Selectivity in mammalian extinction risk and 
 threat types: A new measure of phylogenetic signal strength in binary traits. 
 *Conservation Biology* **24**: 1042--1051.
+
+**Kuhn M, Jackson S, Cimentada J**. **2019**. *Corrr: Correlations in r*. R package 
+version 0.4.0 [WWW document] URL http://CRAN.R-project.org/package=corrr. 
+[accessed 1 January 2020].
 
 **Lloyd RM**. **1980**. Reproductive biology and gametophyte morphology
 of New World populations of *Acrostichum aureum*. *American Fern
@@ -470,5 +489,5 @@ ferns. *Nordic Journal of Botany* **9**: 407--412.
 Thelypteridaceae. *Nordic Journal of Botany* **9**: 657--664.
 
 **Zhang K, Shi L, Zhang X, Jiang C, Tim-Chun W**. **2008**. Gametophyte
-morphology and development of six chinese species of *Pteris*
+morphology and development of six Chinese species of *Pteris*
 (Pteridaceae). *American Fern Journal* **98**: 33--41.
