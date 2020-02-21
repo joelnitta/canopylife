@@ -12,7 +12,7 @@ output:
     toc: no
     number_sections: no
     fig_caption: yes
-    keep_tex: no
+    keep_tex: yes
     latex_engine: xelatex
     pandoc_args: [ "--csl", "new-phytologist.csl"]
     includes:

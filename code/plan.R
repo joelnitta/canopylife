@@ -579,6 +579,13 @@ plan <- drake_plan(
     tracked_output = file_out(here::here("results/manuscript.tex"))
   ),
   
+  si_pdf = render_tracked(
+    knitr_in("ms/SI.Rmd"),
+    quiet = TRUE,
+    output_dir = here::here("results"),
+    tracked_output = file_out(here::here("results/SI.tex"))
+  ),
+  
   # Next use the latex to convert to docx with pandoc
   ms_docx = latex2docx(
     latex = file_in(here::here("results/manuscript.tex")),
@@ -587,11 +594,11 @@ plan <- drake_plan(
     wd = here::here("results")
   ),
   
-  # SI ----
-  si_pdf = rmarkdown::render(
-    knitr_in("ms/SI.Rmd"),
-    quiet = TRUE,
-    output_dir = here::here("results")
+  si_docx = latex2docx(
+    latex = file_in(here::here("results/SI.tex")),
+    docx = file_out(here::here("results/SI.docx")),
+    template = file_in(here::here("ms/new-phytologist.docx")),
+    wd = here::here("results")
   )
   
 )
