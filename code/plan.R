@@ -453,6 +453,8 @@ plan <- drake_plan(
   
   # - Replace SLA model in model list with the spatial version
   div_el_models = div_el_models_nonspatial %>%
+    # Verify that Moran's I is significant for SLA in non-spatial model before swapping
+    verify(filter(., var == "sla") %>% pull(I_pval) < 0.05) %>%
     filter(var != "sla") %>%
     bind_rows(spatial_sla_model),
   
