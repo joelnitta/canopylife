@@ -116,11 +116,11 @@ Charles C. Davis: \textnormal{https://orcid.org/0000-0001-8747-1101}
 ```{r word-count table}
 tibble(
   words = c(
-    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6601",
+    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6603",
     "Summary:_199",
     "Introduction:_881",
     "Materials and Methods:_2491",
-    "Results:_822",
+    "Results:_824",
     "Discussion:_2407",
     "Acknowledgements:_170"),
   figs_tabs = c(
@@ -542,7 +542,7 @@ In the full-subsets analysis including all climate variables and diversity metri
 Most of the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (`r s_table("gam-fit")`).
 Spatial autocorrelation was not detected in any of the best-fitting general additive models (`r s_table("gam-fit")`).
 
-Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r figure("cwm-div")`).
+Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter), frond dissection, and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r figure("cwm-div")`).
 Spatial autocorrelation was detected in the linear model for SLA, so a spatial generalized mixed model was used instead (see Methods).
 Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (spatial generalized linear mixed model, nu = `r sla_nu`, rho = `r sla_rho`, AIC = `r sla_AIC`; `r s_table("spatial-sla")`).
 Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval{ }`r get_mod_result(model_summ_print, "dissection", "p")`).
