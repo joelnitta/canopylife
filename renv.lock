@@ -746,6 +746,13 @@
       "Repository": "CRAN",
       "Hash": "beb8ca96406a2828f25e49ab17001c39"
     },
+    "gmp": {
+      "Package": "gmp",
+      "Version": "0.5-13.6",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "075f9ab9ae230afb55e11a6a2dc38aed"
+    },
     "gplots": {
       "Package": "gplots",
       "Version": "3.0.1.1",
@@ -1132,6 +1139,13 @@
       "RemoteSha": "012fb8bb7ba07d3ba4717536e43471828dca61fb",
       "Hash": "8926b2b0f38d19890ed4121ad1d25330"
     },
+    "pbapply": {
+      "Package": "pbapply",
+      "Version": "1.4-2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "ee90507ce37987b22470fae76325f370"
+    },
     "pbkrtest": {
       "Package": "pbkrtest",
       "Version": "0.4-7",
@@ -1229,6 +1243,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "14dc9f7a3c91ebb14ec5bb9208a07061"
+    },
+    "proxy": {
+      "Package": "proxy",
+      "Version": "0.4-23",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "152a2bd0a0d37edaeeecb52b68643f34"
     },
     "pryr": {
       "Package": "pryr",
@@ -1521,6 +1542,13 @@
       "Source": "Repository",
       "Repository": "CRAN",
       "Hash": "4af959b11f293b7e77f96280c3dc8491"
+    },
+    "spaMM": {
+      "Package": "spaMM",
+      "Version": "3.1.2",
+      "Source": "Repository",
+      "Repository": "CRAN",
+      "Hash": "a95b67544b93f89ec75795174fae2ae8"
     },
     "spatial": {
       "Package": "spatial",

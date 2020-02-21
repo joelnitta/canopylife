@@ -76,6 +76,7 @@ cran_packages <- c(
   "scico",
   "sme",
   "sp",
+  "spaMM"
   "spdep",
   "taxize",
   "tictoc",
