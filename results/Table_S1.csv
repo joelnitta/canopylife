@@ -7,10 +7,10 @@ Abrodictyum_asaegrayi1,Abrodictyum,asaegrayi,NA,1,Abrodictyum asae-grayi (Bosch)
 Abrodictyum_asaegrayi2,Abrodictyum,asaegrayi,NA,2,Abrodictyum asae-grayi (Bosch) Ebihara & K.Iwats.,IPNI
 Abrodictyum_caudatum,Abrodictyum,caudatum,NA,NA,Abrodictyum caudatum (Brack.) Ebihara & K.Iwats.,IPNI
 Abrodictyum_dentatum,Abrodictyum,dentatum,NA,NA,Abrodictyum dentatum (Bosch) Ebihara & K.Iwats.,IPNI
-Acrostichum_aureum,Acrostichum,aureum,NA,NA,Acrostichum aureum,IPNI
-Adiantum_hispidulum,Adiantum,hispidulum,NA,NA,Adiantum hispidulum,IPNI
+Acrostichum_aureum,Acrostichum,aureum,NA,NA,Acrostichum aureum L.,TROPICOS
+Adiantum_hispidulum,Adiantum,hispidulum,NA,NA,Adiantum hispidulum Sw.,TROPICOS
 Adiantum_raddianum,Adiantum,raddianum,NA,NA,Adiantum raddianum C. Presl,TROPICOS
-Adiantum_trapeziforme,Adiantum,trapeziforme,NA,NA,Adiantum trapeziforme,IPNI
+Adiantum_trapeziforme,Adiantum,trapeziforme,NA,NA,Adiantum trapeziforme L.,TROPICOS
 Alsophila_tahitensis,Alsophila,tahitensis,NA,NA,Alsophila tahitensis Brack.,IPNI
 Amphineuron_opulentum,Amblovenatum,opulentum,NA,NA,Amblovenatum opulentum (Kaulf.) J.P.Roux,IPNI
 Angiopteris_evecta,Angiopteris,evecta,NA,NA,Angiopteris evecta (G. Forst.) Hoffm.,TROPICOS
@@ -18,13 +18,13 @@ Antrophyum_plantagineum,Antrophyum,plantagineum,NA,NA,Antrophyum plantagineum (C
 Antrophyum_reticulatum,Antrophyum,reticulatum,NA,NA,Antrophyum reticulatum (G. Forst.) Kaulf.,TROPICOS
 Antrophyum_sp1,Antrophyum,sp,NA,NA,Antrophyum Kaulf.,TROPICOS
 Arachniodes_aristata,Arachniodes,aristata,NA,NA,Arachniodes aristata (G. Forst.) Tindale,TROPICOS
-Archigrammitis_tahitensis,Archigrammitis,tahitensis,NA,NA,Archigrammitis tahitensis (C.Chr.) Parris,NCBI
+Archigrammitis_tahitensis,Archigrammitis,tahitensis,NA,NA,Archigrammitis tahitensis (C.Chr.) Parris,IPNI
 Arthropteris_palisotii,Arthropteris,palisotii,NA,NA,Arthropteris palisotii (Desv.) Alston,TROPICOS
 Asplenium_affine,Asplenium,affine,NA,NA,Asplenium affine Sw.,TROPICOS
-Asplenium_australasicum,Asplenium,australasicum,NA,NA,Asplenium australasicum,IPNI
+Asplenium_australasicum,Asplenium,australasicum,NA,NA,Asplenium australasicum (J. Sm.) Hook.,TROPICOS
 Asplenium_caudatum,Asplenium,caudatum,NA,NA,Asplenium caudatum G. Forst.,TROPICOS
 Asplenium_gibberosum,Asplenium,gibberosum,NA,NA,Asplenium gibberosum (Forst.) Mett.,IPNI
-Asplenium_nidus,Asplenium,nidus,NA,NA,Asplenium nidus,IPNI
+Asplenium_nidus,Asplenium,nidus,NA,NA,Asplenium nidus L.,TROPICOS
 Asplenium_polyodon,Asplenium,polyodon,NA,NA,Asplenium polyodon G. Forst.,TROPICOS
 Asplenium_tenerum,Asplenium,tenerum,NA,NA,Asplenium tenerum G. Forst.,TROPICOS
 Belvisia_spicata,Lepisorus,spicatus,NA,NA,Lepisorus spicatus (L.f.) Li Wang,IPNI
@@ -38,14 +38,13 @@ Callistopteris_apiifolia,Callistopteris,apiifolia,NA,NA,Callistopteris apiifolia
 Calymmodon_orientalis,Calymmodon,orientalis,NA,NA,Calymmodon orientalis Copel.,IPNI
 Cheilanthes_nudiuscula,Cheilanthes,nudiuscula,NA,NA,Cheilanthes nudiuscula (R. Br.) T. Moore,TROPICOS
 Chingia_longissima,Chingia,longissima,NA,NA,Chingia longissima (Brack.) Holttum,IPNI
-Christella_dentata,Christella,dentata,NA,NA,Christella dentata,IPNI
+Christella_dentata,Christella,dentata,NA,NA,Christella dentata (Forssk.) Brownsey & Jermy,TROPICOS
 Coryphopteris_sp1,Coryphopteris,sp,NA,NA,Coryphopteris Holttum,TROPICOS
-Crepidomanes_bipunctatum,Crepidomanes,bipunctatum,NA,NA,Crepidomanes bipunctatum,IPNI
+Crepidomanes_bipunctatum,Crepidomanes,bipunctatum,NA,NA,Crepidomanes bipunctatum (Poir.) Copel.,TROPICOS
 Crepidomanes_humile,Crepidomanes,humile,NA,NA,Crepidomanes humile (Forst.) K.Iwats.,IPNI
 Crepidomanes_kurzii,Crepidomanes,kurzii,NA,NA,Crepidomanes kurzii (Bedd.) Tagawa & K. Iwats.,TROPICOS
 Crepidomanes_minutum1,Crepidomanes,minutum,NA,1,Crepidomanes minutum (Blume) K. Iwats.,TROPICOS
 Crepidomanes_minutum2,Crepidomanes,minutum,NA,2,Crepidomanes minutum (Blume) K. Iwats.,TROPICOS
-Crepidomanes_minutum3,Crepidomanes,minutum,NA,3,Crepidomanes minutum (Blume) K. Iwats.,TROPICOS
 Ctenitis_sciaphila,Ctenitis,sciaphila,sciaphila,NA,Ctenitis sciaphila (Maxon) Ching var. sciaphila,Murdock and Smith 2003
 Ctenopterella_blechnoides,Ctenopterella,blechnoides,NA,NA,Ctenopterella blechnoides (Grev.) Parris,TROPICOS
 Cyathea_epaleata,Cyathea,epaleata,NA,NA,Cyathea epaleata (Holttum) Holttum,IPNI
@@ -58,14 +57,14 @@ Diplazium_ellipticum,Diplazium,ellipticum,NA,NA,Diplazium ellipticum (Copel.) C.
 Diplazium_grantii,Diplazium,grantii,NA,NA,Diplazium grantii (Copel.) C.Chr.,NCBI
 Diplazium_harpeodes,Diplazium,harpeodes,NA,NA,Diplazium harpeodes T.Moore,IPNI
 Diplopterygium_longissimum,Diplopterygium,longissimum,NA,NA,Diplopterygium longissimum (Blume) Nakai,TROPICOS
-Doryopteris_concolor,Doryopteris,concolor,NA,NA,Doryopteris concolor,IPNI
+Doryopteris_concolor,Doryopteris,concolor,NA,NA,Doryopteris concolor (Langsd. & Fisch.) Kuhn,TROPICOS
 Dryopteris_dicksonioides,Dryopteris,dicksonioides,NA,NA,Dryopteris dicksonioides (Mett.) Copel.,IPNI
-Dryopteris_macrolepidota,Dryopteris,macrolepidota,NA,NA,Dryopteris macrolepidota Copel.,NCBI
+Dryopteris_macrolepidota,Dryopteris,macrolepidota,NA,NA,Dryopteris macrolepidota Copel.,IPNI
 Elaphoglossum_samoense,Elaphoglossum,samoense,NA,NA,Elaphoglossum samoense Brack.,IPNI
 Elaphoglossum_savaiense,Elaphoglossum,savaiense,NA,NA,Elaphoglossum savaiense (Baker) Diels,IPNI
 Grammitis_marginelloides,Grammitis,marginelloides,NA,NA,Grammitis marginelloides (J.W. Moore) Copel.,TROPICOS
 Haplopteris_elongata,Haplopteris,elongata,NA,NA,Haplopteris elongata (Sw.) E.H. Crane,TROPICOS
-Histiopteris_incisa,Histiopteris,incisa,NA,NA,Histiopteris incisa,IPNI
+Histiopteris_incisa,Histiopteris,incisa,NA,NA,Histiopteris incisa (Thunb.) J. Sm.,TROPICOS
 Humata_anderssonii,Davallia,anderssonii,NA,NA,Davallia anderssonii Mett.; Kuhn,IPNI
 Humata_pectinata,Davallia,pectinata,NA,NA,Davallia pectinata Sm.,TROPICOS
 Hymenophyllum_braithwaitei,Hymenophyllum,braithwaitei,NA,NA,Hymenophyllum braithwaitei Ebihara & K.Iwats.,IPNI
@@ -74,10 +73,10 @@ Hymenophyllum_flabellatum,Hymenophyllum,flabellatum,NA,NA,Hymenophyllum flabella
 Hymenophyllum_javanicum,Hymenophyllum,javanicum,NA,NA,Hymenophyllum javanicum Spreng.,TROPICOS
 Hymenophyllum_multifidum,Hymenophyllum,multifidum,NA,NA,Hymenophyllum multifidum (G.Forst.) Sw.,IPNI
 Hymenophyllum_pallidum,Hymenophyllum,pallidum,NA,NA,Hymenophyllum pallidum (Blume) Ebihara & K.Iwats.,IPNI
-Hymenophyllum_polyanthos,Hymenophyllum,polyanthos,NA,NA,Hymenophyllum polyanthos (Sw.) Sw.,NCBI
+Hymenophyllum_polyanthos,Hymenophyllum,polyanthos,NA,NA,Hymenophyllum polyanthos Sw.,TROPICOS
 Hypolepis_dicksonioides,Hypolepis,dicksonioides,NA,NA,Hypolepis dicksonioides (Endl.) Hook.,IPNI
 Hypolepis_sp1,Hypolepis,sp,NA,NA,Hypolepis Bernh.,TROPICOS
-Hypolepis_tenuifolia,Hypolepis,tenuifolia,NA,NA,Hypolepis tenuifolia,IPNI
+Hypolepis_tenuifolia,Hypolepis,tenuifolia,NA,NA,Hypolepis tenuifolia (G. Forst.) Bernh.,TROPICOS
 Leucostegia_pallida,Leucostegia,pallida,NA,NA,Leucostegia pallida (Mett.) Copel.,IPNI
 Lindsaea_propinqua,Lindsaea,propinqua,NA,NA,Lindsaea propinqua Hook.,TROPICOS
 Lindsaea_repens,Lindsaea,repens,marquesensis,NA,Lindsaea repens (Bory) Thwaites var. marquesensis E. D. Br.,Murdock and Smith 2003
@@ -92,16 +91,16 @@ Microsorum_commutatum,Microsorum,commutatum,NA,NA,Microsorum commutatum Copel.,T
 Microsorum_grossum,Microsorum,grossum,NA,NA,Microsorum grossum (Langsd. & Fisch.) S.B.Andrews,IPNI
 Microsorum_membranifolium,Microsorum,membranifolium,NA,NA,Microsorum membranifolium (R. Br.) Ching,TROPICOS
 Microsorum_powellii,Microsorum,powellii,NA,NA,Microsorum powellii (Baker) Copel.,IPNI
-Microsorum_punctatum,Microsorum,punctatum,NA,NA,Microsorum punctatum,IPNI
-Nephrolepis_biserrata,Nephrolepis,biserrata,NA,NA,Nephrolepis biserrata,IPNI
-Nephrolepis_cordifolia,Nephrolepis,cordifolia,NA,NA,Nephrolepis cordifolia,IPNI
-Nephrolepis_hirsutula,Nephrolepis,hirsutula,NA,NA,Nephrolepis hirsutula,IPNI
+Microsorum_punctatum,Microsorum,punctatum,NA,NA,Microsorum punctatum (L.) Copel.,TROPICOS
+Nephrolepis_biserrata,Nephrolepis,biserrata,NA,NA,Nephrolepis biserrata (Sw.) Schott,TROPICOS
+Nephrolepis_cordifolia,Nephrolepis,cordifolia,NA,NA,Nephrolepis cordifolia (L.) C. Presl,TROPICOS
+Nephrolepis_hirsutula,Nephrolepis,hirsutula,NA,NA,Nephrolepis hirsutula (G. Forst.) C. Presl,TROPICOS
 Oleandra_sibbaldii,Oleandra,sibbaldii,NA,NA,Oleandra sibbaldii Grev.,IPNI
 Ophioglossum_falcatum,Ophioglossum,falcatum,NA,NA,Ophioglossum falcatum (Presl) Fowler,IPNI
-Ophioglossum_pendulum,Ophioglossum,pendulum,NA,NA,Ophioglossum pendulum,IPNI
+Ophioglossum_pendulum,Ophioglossum,pendulum,NA,NA,Ophioglossum pendulum L.,TROPICOS
 Oreogrammitis_raiateensis,Oreogrammitis,raiateensis,NA,NA,Oreogrammitis raiateensis (J.W.Moore) Parris,IPNI
 Paesia_divaricatissima,Paesia,divaricatissima,NA,NA,Paesia divaricatissima (Dryand.) Copel.,IPNI
-Pityrogramma_calomelanos,Pityrogramma,calomelanos,NA,NA,Pityrogramma calomelanos,IPNI
+Pityrogramma_calomelanos,Pityrogramma,calomelanos,NA,NA,Pityrogramma calomelanos (L.) Link,TROPICOS
 Plesioneuron_attenuatum,Plesioneuron,attenuatum,NA,NA,Plesioneuron attenuatum (Brack.) Holttum,IPNI
 Plesioneuron_sp1,Plesioneuron,sp,NA,NA,Plesioneuron (Holttum) Holttum,TROPICOS
 Pneumatopteris_mesocarpa,Pneumatopteris,mesocarpa,NA,NA,Pneumatopteris mesocarpa (Copel.) Holttum,IPNI
@@ -109,15 +108,15 @@ Polyphlebium_borbonicum,Polyphlebium,borbonicum,NA,NA,Polyphlebium borbonicum (B
 Polyphlebium_endlicherianum,Polyphlebium,endlicherianum,NA,NA,Polyphlebium endlicherianum (C.Presl) Ebihara & K.Iwats.,IPNI
 Prosaptia_contigua,Prosaptia,contigua,NA,NA,Prosaptia contigua (G. Forst.) C. Presl,TROPICOS
 Prosaptia_subnuda,Prosaptia,subnuda,NA,NA,Prosaptia subnuda (Mett. ex Kuhn) Copel.,IPNI
-Psilotum_complanatum,Psilotum,complanatum,NA,NA,Psilotum complanatum,IPNI
+Psilotum_complanatum,Psilotum,complanatum,NA,NA,Psilotum complanatum Sw.,TROPICOS
 Psilotum_nudum,Psilotum,nudum,NA,NA,Psilotum nudum (L.) P.Beauv.,NCBI
-Pteris_comans,Pteris,comans,NA,NA,Pteris comans,IPNI
+Pteris_comans,Pteris,comans,NA,NA,Pteris comans G. Forst.,TROPICOS
 Pteris_ensiformis,Pteris,ensiformis,NA,NA,Pteris ensiformis Burm. f.,TROPICOS
 Pteris_mertensioides,Pteris,mertensioides,NA,NA,Pteris mertensioides Willd.,TROPICOS
-Pteris_tripartita,Pteris,tripartita,NA,NA,Pteris tripartita,IPNI
+Pteris_tripartita,Pteris,tripartita,NA,NA,Pteris tripartita Sw.,TROPICOS
 Ptisana_salicina,Ptisana,salicina,NA,NA,Ptisana salicina (Sm.) Murdock,TROPICOS
 Pyrrosia_serpens,Pyrrosia,serpens,NA,NA,Pyrrosia serpens (G.Forst.) Ching,IPNI
-Schizaea_dichotoma,Schizaea,dichotoma,NA,NA,Schizaea dichotoma,IPNI
+Schizaea_dichotoma,Schizaea,dichotoma,NA,NA,Schizaea dichotoma (L.) J. Sm.,TROPICOS
 Selliguea_plantaginea,Selliguea,plantaginea,NA,NA,Selliguea plantaginea Brack.,TROPICOS
 Sphaeropteris_medullaris,Sphaeropteris,medullaris,NA,NA,Sphaeropteris medullaris (G. Forst.) Bernh.,TROPICOS
 Sphaerostephanos_invisus,Sphaerostephanos,invisus,NA,NA,Sphaerostephanos invisus (G.Forst.) Holttum,IPNI
@@ -135,9 +134,9 @@ Wibelia_denticulata,Davallia,denticulata,NA,NA,Davallia denticulata (Burm. f.) M
 "'Taxon code' is the name used for that taxon in analyses. 'Informal variety' is a number assigned"
 "to infraspecific taxa that are morphologically and genetically distinct, but lack formal names"
 "distinguishing them. 'Name source' indicates the source of the scientific name as follows: IPNI"
-"= International Plant Names Index (https://www.ipni.org/), TROPICOS = Missouri Botanical Garden"
-"taxonomic database (https://www.tropicos.org/), NCBI = National Center for Biotechnology Information"
-"taxonomic database (https://www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), Murdock and Smith"
-"2003 = Murdock & Smith (2003). The genus in 'Taxon code' may differ from the 'Genus' column for"
-"names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates not"
-"applicable."
+"= International Plant Names Index (https://www.ipni.org/), Murdock and Smith 2003 = Murdock &"
+"Smith (2003), NCBI = National Center for Biotechnology Information taxonomic database (https://"
+"www.ncbi.nlm.nih.gov/Taxonomy/Browser/wwwtax.cgi), TROPICOS = Missouri Botanical Garden taxonomic"
+"database (https://www.tropicos.org/). The genus in 'Taxon code' may differ from the 'Genus' column"
+"for names whose preferred synonymy has changed since data were originally recorded. 'NA' indicates"
+"not applicable."
