@@ -31,7 +31,7 @@ s_table_nums(name = "ancova", "Analysis of covariance (ANCOVA) for differences b
 s_table_nums(name = "linear-fit", "Best-fitting linear models explaining climate and community diversity metrics of ferns on Moorea, French Polynesia by elevation and growth habit")
 s_table_nums(name = "phylosig-binary-strict", "Phylogenetic signal in binary traits of ferns on Moorea, French Polynesia, strict dataset excluding any species whose traits were scored based on taxonomy")
 s_table_nums(name = "corr-evo-strict", "Pagel's (1994) test of correlated evolution between binary traits of ferns on Moorea, French Polynesia, strict dataset excluding any species whose traits were scored based on taxonomy")
-s_table_nums(name = "gam-fit", "Best-fitting models explaining community diversity metrics of ferns on Moorea, French Polynesia by climate and growth habit")
+s_table_nums(name = "gam-fit", "Best-fitting general additive models explaining community diversity metrics of ferns on Moorea, French Polynesia by climate and growth habit selected using full-subsets analysis")
 s_table_nums(name = "spatial-sla", "Output of spatial generalized linear mixed model for community-weighted mean specific leaf area of ferns on Moorea, French Polynesia predicted by elevation and growth habit")
 
 # Make short versions of citation functions

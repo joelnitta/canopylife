@@ -116,17 +116,17 @@ Charles C. Davis: \textnormal{https://orcid.org/0000-0001-8747-1101}
 ```{r word-count table}
 tibble(
   words = c(
-    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6499",
+    "Total word count (Introduction, Materials and Methods, Results, Discussion):_6601",
     "Summary:_199",
     "Introduction:_881",
-    "Materials and Methods:_2410",
-    "Results:_798",
-    "Discussion:_2410",
+    "Materials and Methods:_2491",
+    "Results:_822",
+    "Discussion:_2407",
     "Acknowledgements:_170"),
   figs_tabs = c(
     "No. of figures:_7 (all in color)",
     "No. of tables:_5",
-    "No. of supporting information files:_8 (Figs. S1-S2; Tables S1-S6)", "", "", "", "")
+    "No. of supporting information files:_10 (Figs. S1-S2; Tables S1-S8)", "", "", "", "")
 ) %>%
   separate(words, c("words", "word_count"), sep = "_") %>%
   separate(figs_tabs, c("figs", "fig_count"), sep = "_", fill = "right") %>%
@@ -414,19 +414,23 @@ Loadings in the phylogenetic PCA are similar, but size-related traits are approx
 
 ### Phylogenetic signal
 
-```{r physig-numbers}
+```{r physig-numbers, include=FALSE}
+# Extract D-values
 habit_d <- phylosig_binary_traits %>% filter(trait == "habit") %>% pull(D) %>% round_t(2)
 hairs_d <- phylosig_binary_traits %>% filter(trait == "hairs") %>% pull(D) %>% round_t(2)
 gemmae_d <- phylosig_binary_traits %>% filter(trait == "gemmae") %>% pull(D) %>% round_t(2)
 glands_d <- phylosig_binary_traits %>% filter(trait == "glands") %>% pull(D) %>% round_t(2)
 morphotype_d <- phylosig_binary_traits %>% filter(trait == "morphotype") %>% pull(D) %>% round_t(2)
+
+# Verify D is negative for all binary traits
+assert(phylosig_binary_traits, within_bounds(-Inf, 0), D, success_fun = success_logical)
 ```
 
 Most measured traits showed some degree of phylogenetic signal, but the strength varied across traits (\tabs{ }`r table_nums("phylosig-cont", display = "n")`, `r table_nums("phylosig-binary", display = "n")`, `r figure("tree")`), and for quantitative traits, different results were obtained for \plam and \K.
 When measured with \plam, most sporophyte traits show phylogenetic signal (as expected under a BM model), with values of \plam close to 1; only number of pinnae pairs had \plam close to zero (`r table("phylosig-cont")`).
 However, when measured with \K, only frond width and rhizome diameter showed strong phylogenetic signal (more than expected under BM); other traits had values of \K{ }< 1 (`r table("phylosig-cont")`).
-All binary gametophyte traits showed significant phylogenetic signal, either similar to (hairs, \D{ }= `r hairs_d`) or more conserved (gemmae, \D{ }= `r gemmae_d`; glands, \D{ }= `r glands_d`; morphotype, \D{ }= `r morphotype_d`) than expected under BM (`r table("phylosig-binary")`).
-Growth habit showed phylogenetic signal nearly identical to that expected under BM (\D{ }= `r habit_d`; `r table("phylosig-binary")`).
+All binary gametophyte traits showed phylogenetic signal more conserved than expected under BM (`r table("phylosig-binary")`).
+Growth habit showed phylogenetic signal similar to that expected under BM (\D{ }= `r habit_d`; `r table("phylosig-binary")`).
 Similar results were obtained using the 'strict' dataset (`r s_table("phylosig-binary-strict")`).
 
 ### Correlation of traits with growth habit
@@ -536,13 +540,13 @@ sla_AIC <- AIC(sla_model)[[1]] %>% round(2)
 
 In the full-subsets analysis including all climate variables and diversity metrics, growth habit and temperature emerged as the most important variables (`r figure("heatmap")`).
 Most of the best-fitting models included growth habit or the interaction of growth habit and a temperature-related variable (`r s_table("gam-fit")`).
-Spatial autocorrelation was not detected in any of the best-fitting full-subsets models (`r s_table("gam-fit")`).
+Spatial autocorrelation was not detected in any of the best-fitting general additive models (`r s_table("gam-fit")`).
 
 Community-weighted mean values (CWMs) were smaller for epiphytic than terrestrial ferns for size-related traits (frond length, frond width, stipe length, and rhizome diameter) and number of pinnae pairs (\tval-test, all \pval{ }< 0.05; `r figure("cwm-div")`).
-Spatial autocorrelation was detected in the linear model for SLA (`r s_table("linear-fit")`), so a spatial generalized mixed model was used instead (see Methods). 
+Spatial autocorrelation was detected in the linear model for SLA, so a spatial generalized mixed model was used instead (see Methods).
 Specific leaf area decreased with elevation, and was slightly lower for epiphytic relative to terrestrial communities (spatial generalized linear mixed model, nu = `r sla_nu`, rho = `r sla_rho`, AIC = `r sla_AIC`; `r s_table("spatial-sla")`).
 Degree of lamina dissection decreased with elevation in epiphytes, but increased in terrestrial communities (linear model, \rval^2^ = `r get_mod_result(model_summ_print, "dissection", "r")`, \pval{ }`r get_mod_result(model_summ_print, "dissection", "p")`).
-Frond length and width and rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (`r figure("cwm-div")`).
+Rhizome diameter decreased slightly with elevation for terrestrial communities, while increasing slightly for epiphytic communities (`r figure("cwm-div")`).
 
 We observed a total of `r abundances %>% filter(abundance > 0) %>% pull(species) %>% n_distinct` \species across all plots, including `r n_epi` epiphytic and `r n_ter` terrestrial spp.
 Mean species richness was `r mean_rich %>% filter(habit == "epiphytic") %>% pull(stat)` \species per plot for epiphytes and `r mean_rich %>% filter(habit == "terrestrial") %>% pull(stat)` \species per plot for terrestrial species (not significantly different; two-sided \tval-test, \pval{ }= `r get_mod_result(t_test_print, "ntaxa", "p")`; `r figure("comm-div")`).
@@ -609,7 +613,7 @@ Gemmae can also function sexually by producing antheridia in the presence of ant
 As with our results summarized above, it is possible that the diversity of gemmae and non-gemmae producing epiphytic species reflects undetected niche variation in the canopy.
 Interestingly, when we classified gametophytes as 'independent' if they occurred beyond the elevational range of conspecific sporophytes using the data of @Nitta2017, we found that gemmae production is correlated with independent growth (log likelihood dependent model = `r correlated_evo_test_gemmae$dependent.logL %>% round(1) %>% as.numeric`, log likelihood independent model = `r correlated_evo_test_gemmae$independent.logL %>% round(1) %>% as.numeric`, \pval{ }= `r correlated_evo_test_gemmae$P %>% round(3) %>% as.numeric`, Pagel's test of correlated evolution), echoing a pattern observed in Japan of non-cordate gametophytes frequently occurring independently of their conspecific sporophytes [@Ebihara2013].
 
-Finally, the presence of hairs and glands in gametophytes also exhibit very high phylogenetic signal (\ie, much greater than expected under Brownian motion; `r table("phylosig-binary")`), and these traits are concentrated in certain taxonomic groups [\eg, hairs, grammitid ferns (Grammitidoideae); glands, Thelypteridaceae; @Stokey1951; @Nayar1971].
+Finally, the presence of hairs and glands in gametophytes also exhibit high phylogenetic signal (\ie, greater than expected under Brownian motion; `r table("phylosig-binary")`), and these traits are concentrated in certain taxonomic groups [\eg, hairs, grammitid ferns (Grammitidoideae); glands, Thelypteridaceae; @Stokey1951; @Nayar1971].
 Although hairs have been hypothesized to reduce rates of drying and increase water uptake after desiccation [@Kappen2007], and glands may affect rates of osmosis by modifying lipid concentrations [@Crow2011], we did not detect a correlation between hair or gland production and epiphytic growth.
 Given their high phylogenetic signal, it is possible that these traits are unrelated to environment but rather reflect phylogenetically conserved developmental pathways [@Johnson2012].
 Alternatively, the possibility remains that some epiphytic species rely on hairs or glands to prevent or slow drying depending on their niche within the canopy (\eg, hair-bearing grammitid gametophytes at mid to high elevation).
@@ -709,7 +713,7 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 **`r figure("traits-used-image")`** Examples of fern traits used in this study. **(a)** Sporophyte traits. All sporophyte traits were quantitative, including frond length and width, stipe length, rhizome dia., number of pinnae pairs (in this example, nine) and degree of lamina dissection (in this example, once-pinnate). Specific leaf area (ratio of area to mass of leaf lamina) not depicted. **(b)** Gametophyte traits. Morphotype was defined as a binary trait, either cordate or non-cordate. Examples of non-cordate morphotypes include ribbon (thallus elongate and two-dimensional) and filamentous (thallus single lines of cells). Other gametophyte traits (gemmae, hairs, and glands) were scored as present or absent. Arrows point out instances of each binary trait. Scalebars \SI{1}{\milli\meter} except for glands, which is \SI{.1}{\milli\meter}. Photographs by J. H. Nitta.
 
-**`r figure("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}{\meter} on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fitted using linear models with an interaction between growth habit and elevation (see Methods); all trendlines significant at \pval{ }< 0.05. Asterisks indicate statistical significance of linear model; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01. Partially transparent colors indicate outliers excluded from the models (see Methods).
+**`r figure("climate")`** Selected microclimatic variables of study plots along an elevational gradient from \SI{200}{\meter} to \SI{1200}{\meter} on Moorea, French Polynesia. Relative humidity (RH) and temperature were recorded every \SI{15}{\minute} with dataloggers from `r final_climate_survey$start` to `r final_climate_survey$end`. Vapor pressure deficit (VPD) was calculated from relative humidity and temperature as described in the methods, and overall means calculated for daily mean, minimum, maximum, and standard deviation (SD). 'Epiphytic' dataloggers were placed at \circa{ }\SI{2}{\meter} on trees, and 'terrestrial' dataloggers placed at ground level. Color indicates growth habit: epiphytic dataloggers in green, terrestrial dataloggers in brown. Trendlines fit using linear models (see Methods); all trendlines significant at \pval{ }< 0.05. Asterisks indicate statistical significance of linear model; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01. Partially transparent colors indicate outliers excluded from the models (see Methods).
 
 **`r figure("pca")`** Principal components analysis (PCA) of traits related to epiphytic growth in ferns from Moorea, French Polynesia. **(a, b)** PC loadings. **(c, d)** species scores. **(a)** and **(c)** are standard PCA, **(b)** and **(d)** are phylogenetic PCA. Epiphytes in green, terrestrial species in brown. Quantitative traits only, including only species with no missing observations for any traits (\n{ }= `r pca_results[["species_locs"]] %>% pull(species) %>% n_distinct` \species). Trait abbreviations as follows: dissection, degree of frond dissection; length, frond length; width, frond width; pinna, number of pinnae pairs; rhizome, rhizome diameter; stipe, stipe length; SLA, specific leaf area.
 
@@ -717,9 +721,9 @@ Additional Supporting Information may be found online in the Supporting Informat
 
 **`r figure("heatmap")`** Variable importance scores from a full-subsets analysis using general additive models exploring the effect of climate and growth habit (terrestrial vs. epiphytic growth) on community diversity of ferns on Moorea, French Polynesia. Predictor variable abbreviations: VPD, vapor pressure deficit; SD, standard deviation. Response variable abbreviations: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance; SLA, specific leaf area. All trait names refer to community-weighted mean values. Community-weighted means of frond length, frond width, stipe length, and rhizome diameter were correlated (Pearson's correlation coefficient > 0.9), so of these we only show stipe length.
 
-**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Response variable abbreviations: SLA, specific leaf area. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships with elevation or the interaction of elevation and growth habit as determined by a linear model at \pval{ }< 0.05 (\rval^2^ not shown for SLA, which was fit with a spatial generalized linear mixed model; see Methods). \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001. Results for frond width were very similar to frond length and not shown.
+**`r figure("cwm-div")`** Change in community-weighted mean (CWM) values of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Response variable abbreviations: SLA, specific leaf area. Epiphytic communities in green, terrestrial communities in brown. Error bars are each one standard deviation (values below zero not shown). Trendlines and \rval^2^ shown for significant relationships as determined by a linear model at \pval{ }< 0.05 (\rval^2^ not shown for SLA, which was fit with a spatial generalized linear mixed model; see Methods). \tval shown for significant differences between means of CWMs by growth habit as determined by a two-sided \tval-test at \pval{ }< 0.05; \*\*\* = \pval{ }< 0.001. Results for frond width were very similar to frond length and not shown.
 
-**`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines indicate significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01.
+**`r figure("comm-div")`** Functional and phylogenetic diversity of epiphytic and terrestrial fern communities along an elevational gradient on Moorea, French Polynesia. Epiphytic communities in green, terrestrial communities in brown. Response variable abbreviations as follows: MPD~phy~, standard effect size (SES) of mean phylogenetic distance; MNTD~phy~, SES of mean nearest taxon distance; MPD~func~, SES of mean functional distance; MNTD~func~, SES of mean nearest functional distance. Trendlines and \rval^2^ shown for significant relationships as determined by a linear model at \pval{ }< 0.05. Boxplots show median values (bold lines) by growth habit. Lower and upper hinges correspond to first and third quartiles, and whiskers extend to values within 1.5 × the interquartile range. Asterisks indicate statistical significance of two-sided \tval-test; \*\*\* = \pval{ }< 0.001; \*\* = \pval{ }< 0.01.
 
 \clearpage
 
