@@ -4,7 +4,7 @@ plan <- drake_plan(
   # Data processing ----
   
   ### Pre-processed data ###
-  # Download and unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
+  # Unzip data from Nitta et al. 2017 Ecol. Monographs from Dryad
   # The dataset must be downloaded first by going to
   # https://datadryad.org/stash/dataset/doi:10.5061/dryad.df59g, clicking on
   # "Download dataset", and saving to the "data" folder in this project.
@@ -16,6 +16,24 @@ plan <- drake_plan(
     out2 = file_out("data/nitta_2017/treepl_Moorea_Tahiti.tre"),
     out3 = file_out("data/nitta_2017/all_plots.csv"),
     out4 = file_out("data/nitta_2017/species.csv")),
+  
+  # Unzip data from Dryad for this project
+  # The dataset must be downloaded first by going to
+  # https://datadryad.org/stash/dataset/doi:10.5061/dryad.fqz612jps, clicking on
+  # "Download dataset", and saving to the "data" folder in this project.
+  dryad_data = unzip_dryad(
+    zipped_path = file_in("data/doi_10.5061_dryad.fqz612jps__v2.zip"),
+    unzip_path = "data/",
+    # Track data files used as input in analyses
+    out1 = file_out("data/filmy_SLA.csv"),
+    out2 = file_out("data/hobo_moorea_aorai_2-24-15.csv"),
+    out3 = file_out("data/morph_measurements.csv"),
+    out4 = file_out("data/morph_qual_traits.csv"),
+    out5 = file_out("data/name_update.csv"),
+    out6 = file_out("data/ppgi_taxonomy.csv"),
+    out7 = file_out("data/SLA_measurements.csv"),
+    out8 = file_out("data/table_1.csv"),
+    ),
   
   ### Trait data ###
   # - Read in list of accepted species to use for this study

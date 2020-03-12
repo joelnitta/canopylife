@@ -14,12 +14,13 @@
 #' contents (will be created if needed).
 #' @param ... Extra arguments; not used by this function, but
 #' meant for tracking with drake.
-#' @return Three unzipped data files:
+#' @return Four unzipped data files:
 #' - all_plots.csv: Community matrix for ferns of Moorea and Tahiti
 #' including sporophytes (plot names with "_S") and gametophytes
 #' (plot names with "_G").
 #' - treepl_Moorea_Tahiti.tre: Dated tree for pteridophytes of Moorea and Tahiti
 #' - sites.csv: Site metadata including name, latitude, longitude, and elevation (m)
+#' - species.csv: List of species included in the Nitta et al. 2017 study
 #'
 unzip_nitta_2017 <- function (zipped_path, unzip_path, ...) {
   
@@ -39,6 +40,36 @@ unzip_nitta_2017 <- function (zipped_path, unzip_path, ...) {
   
   # Cleanup
   fs::file_delete(temp_zip)
+  
+}
+
+#' Unzip data files downloaded
+#' from Dryad (https://datadryad.org/stash/dataset/doi:10.5061/dryad.fqz612jps)
+#' 
+#' @param zipped_path Name of downloaded zip file.
+#' @param unzip_path Path to directory to put the unzipped
+#' contents (will be created if needed).
+#' @param ... Extra arguments; not used by this function, but
+#' meant for tracking with drake.
+#' @return A data frame  a data frame with columns Name (character) Length 
+#' (the size of the uncompressed file, numeric) and Date.
+#' Externally, the data files will be unzipped to unzip_path.
+#'
+unzip_dryad <- function (zipped_path, unzip_path, ...) {
+  
+  # Make vector of files to unzip
+  files_to_unzip <- c("filmy_SLA.csv", "hobo_moorea_aorai_2-24-15.csv",
+                      "morph_measurements.csv", "morph_qual_traits.csv", 
+                      "name_update.csv", "ppgi_taxonomy.csv",
+                      "SLA_measurements.csv", "table_1.csv")
+  
+  # Unzip the files
+  unzip(zipped_path, 
+        files = files_to_unzip,
+        exdir = unzip_path, overwrite = TRUE)
+  
+  # Return a list of the unzipped files
+  unzip(zipped_path, files = files_to_unzip, list = TRUE)
   
 }
 
