@@ -1,6 +1,6 @@
 # canopylife
 
-Code repository to run analyses and generate figures and manuscript for Nitta *et al.* "Life in the canopy: Community trait assessments reveal substantial functional diversity among fern epiphytes". FIXME: ADD COMPLETE CITATION WHEN AVAILABLE
+Code repository to run analyses and generate figures and manuscript for Nitta *et al.* 2020 "Life in the canopy: Community trait assessments reveal substantial functional diversity among fern epiphytes". *New Phytologist* https://doi.org/10.1111/nph.16607
 
 All code is in [R](https://cran.r-project.org/). The [drake package](https://ropensci.github.io/drake/) is used to manage the workflow. To run all analyses and generate the manuscript, [clone this repository](https://git-scm.com/book/en/v2/Git-Basics-Getting-a-Git-Repository), download the [data](#data), and run `make.R`.
 
